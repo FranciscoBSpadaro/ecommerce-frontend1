@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api'; // Importe o arquivo de configuração da API
+import api from '../../api';
+import '../../App.css';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -18,12 +19,18 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <h1>Produtos</h1>
       <ul>
-        {products.map((product) => (
-          <li key={product.id}>
-            {product.name} - R$ {product.price}
+        {products.map((product, index) => (  // Adicionando um índice como a chave única
+          <li key={index}> 
+            <div>
+              <p>Nome: {product.productName}</p>
+              <p>Preço: R$ {product.price}</p>
+              {product.image_url && ( // Verificando se a URL da imagem está presente
+                <img src={product.image_url} alt={`Imagem de ${product.productName}`} style={{ width: '200px', height: '200px' }} />  // image_url definido no modelo Product.js no backend
+              )}
+            </div>
           </li>
         ))}
       </ul>

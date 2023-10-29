@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import '../../App.css';
 
 const Signup = () => {
   const [username, setName] = useState('');
@@ -7,9 +8,14 @@ const Signup = () => {
   const [password, setPassword] = useState('');
 
   const handleNameChange = (e) => {
-    // Limitando o número de caracteres do username
-    if (e.target.value.length <= 25) {
+    if (e.target.value.length <= 25) {  // limitar username a 25 caracteres
       setName(e.target.value);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    if (e.target.value.length <= 50) {  // limitar email a 50 caracteres
+      setEmail(e.target.value);
     }
   };
 
@@ -41,13 +47,13 @@ const Signup = () => {
           type="text"
           placeholder="Crie um Login de Usuário"
           value={username}
-          onChange={handleNameChange} // Atribui a função handleNameChange para lidar com a mudança de valor
+          onChange={handleNameChange}  // Adiciona a função handleNameChange para limitar a quantidade de Caracteres
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange} // Adiciona a função handleEmailChange para limitar a quantidade de Caracteres
         />
         <input
           type="password"

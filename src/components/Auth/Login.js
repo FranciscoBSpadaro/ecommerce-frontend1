@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import '../../App.css'; // Importa o arquivo de estilos
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -16,32 +17,27 @@ const Login = () => {
         password,
       });
 
-      // Lógica para lidar com a resposta do backend, como armazenar o token, etc.
       const { token } = response.data;
 
       if (token) {
-        // Armazenar o token na sessionStorage
         sessionStorage.setItem('token', token);
-
-        // Mostrar mensagem de login bem-sucedido
         setLoginError('Login bem-sucedido! Redirecionando para a página inicial.');
-        setIsSuccess(true); // Indica que a mensagem é um sucesso
+        setIsSuccess(true);
 
-        // Redirecionar o usuário para a página Home após o login (após um pequeno atraso para exibir a mensagem)
         setTimeout(() => {
-          window.location.replace('/'); // home
-        }, 3000); // Tempo de espera em milissegundos antes do redirecionamento
+          window.location.replace('/');
+        }, 3000);
       }
     } catch (error) {
       setLoginError('Erro ao fazer login. Por favor, verifique seu usuário e senha.');
-      setIsSuccess(false); // Indica que a mensagem é um erro
+      setIsSuccess(false);
       console.error('Erro ao fazer login:', error);
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="login-form"> {/* Aplica a classe para adicionar os estilos */}
+      <h1 className="h1">🛒Acessar🤩</h1>
       {loginError && <p style={{ color: isSuccess ? 'green' : 'red' }}>{loginError}</p>}
       <form onSubmit={handleSubmit}>
         <input
@@ -58,6 +54,9 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
+      <p style={{ textAlign: 'center' }}>
+        Não possui cadastro? <a href="/signup">Clique aqui para se cadastrar</a>.
+      </p>
     </div>
   );
 };
