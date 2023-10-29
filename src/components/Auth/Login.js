@@ -37,7 +37,7 @@ const Login = () => {
 
   return (
     <div className="login-form"> {/* Aplica a classe para adicionar os estilos */}
-      <h1 className="h1">🛒Acessar🤩</h1>
+      <h2 className="h1">🛒Acessar🤩</h2>
       {loginError && <p style={{ color: isSuccess ? 'green' : 'red' }}>{loginError}</p>}
       <form onSubmit={handleSubmit}>
         <input

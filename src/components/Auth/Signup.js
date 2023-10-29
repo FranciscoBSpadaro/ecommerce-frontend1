@@ -8,13 +8,21 @@ const Signup = () => {
   const [password, setPassword] = useState('');
 
   const handleNameChange = (e) => {
-    if (e.target.value.length <= 25) {  // limitar username a 25 caracteres
-      setName(e.target.value);
+    // Impedir espaços no nome de usuário
+    if (!e.target.value.includes(' ')) {
+      if (e.target.value.length <= 25) {  // limita em 25 caracteres
+        setName(e.target.value);
+      } else {
+        // Limitar o tamanho do nome do usuário
+        setName(e.target.value.slice(0, 25));
+      }
+    } else {
+      alert('O Apelido de usuário não pode conter espaços!');
     }
   };
 
   const handleEmailChange = (e) => {
-    if (e.target.value.length <= 50) {  // limitar email a 50 caracteres
+    if (e.target.value.length <= 50) {
       setEmail(e.target.value);
     }
   };
@@ -40,20 +48,20 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <h1>Cadastro</h1>
+    <div className="login-form">
+      <h2 className="h1">📝 Cadastro ✨</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Crie um Login de Usuário"
+          placeholder="Usuário"
           value={username}
-          onChange={handleNameChange}  // Adiciona a função handleNameChange para limitar a quantidade de Caracteres
+          onChange={handleNameChange}
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={handleEmailChange} // Adiciona a função handleEmailChange para limitar a quantidade de Caracteres
+          onChange={handleEmailChange}
         />
         <input
           type="password"
