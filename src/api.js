@@ -21,8 +21,8 @@ api.interceptors.response.use(
       // Deslogar usuário automaticamente em caso de erro 401
       sessionStorage.removeItem('token');
 
-      // Redirecionar para a página de login
-      window.location.replace('/login');
+      // Redirecionar para a página inicial
+      window.location.replace('/');
     }
 
     return Promise.reject(error);
