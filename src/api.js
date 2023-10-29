@@ -5,10 +5,10 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // Recupera o token de onde estiver armazenado
+  const token = sessionStorage.getItem('token');
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`; // Define o token no header da requisição
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
@@ -16,12 +16,16 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response && error.response.status === 401) {
-      // Lidar com erro de não autorizado (por exemplo, redirecionar para a página de login)
-    } else {
-      return Promise.reject(error);
+      // Deslogar usuário automaticamente em caso de erro 401
+      sessionStorage.removeItem('token');
+
+      // Redirecionar para a página de login
+      window.location.replace('/login');
     }
+
+    return Promise.reject(error);
   }
 );
 
