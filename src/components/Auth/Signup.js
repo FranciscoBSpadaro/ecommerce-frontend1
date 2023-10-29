@@ -6,6 +6,13 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleNameChange = (e) => {
+    // Limitando o número de caracteres do username
+    if (e.target.value.length <= 25) {
+      setName(e.target.value);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -16,14 +23,13 @@ const Signup = () => {
         password,
       });
 
-      console.log('Cadastro bem-sucedido:', response.data);
-      // Lógica para lidar com a resposta do backend após o cadastro ser bem-sucedido
+      alert(response.data.message); // Exibir a mensagem do backend
 
-      // Redirecionar o usuário para a página de login, por exemplo
+      // Redirecionar o usuário para a página de login
       window.location.replace('/login');
     } catch (error) {
+      alert(error.response.data.message); // Exibir a mensagem de erro recebida do backend
       console.error('Erro ao cadastrar:', error);
-      // Lógica para lidar com erros, como exibir mensagens para o usuário
     }
   };
 
@@ -35,7 +41,7 @@ const Signup = () => {
           type="text"
           placeholder="Crie um Login de Usuário"
           value={username}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleNameChange} // Atribui a função handleNameChange para lidar com a mudança de valor
         />
         <input
           type="email"
