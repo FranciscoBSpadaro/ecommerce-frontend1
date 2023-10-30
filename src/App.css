@@ -32,6 +32,10 @@ body {
   margin-right: 10px;
 }
 
+.navbar li {
+  list-style: none; /* Remover marcadores de lista */
+}
+
 .navbar a:hover {
   color: rgb(32, 216, 109);
 }
@@ -90,4 +94,36 @@ body {
   text-align: center;
   padding: 0px 0;
 
+}
+
+.submenu {
+  position: relative;
+  display: inline-block;
+}
+
+.submenu-content {
+  display: none;
+  position: absolute;
+  background-color: #ac2727;
+  min-width: 160px;
+  z-index: 1;
+  list-style: none;
+  padding: 0;
+}
+
+.submenu-content li {
+  border-bottom: 1px solid #0c0c0c;
+}
+
+.submenu-content li:last-child {
+  border-bottom: none;
+}
+
+.submenu:hover .submenu-content {
+  display: block;
+}
+
+.center-menu {
+  display: flex;
+  justify-content: center;
 }
