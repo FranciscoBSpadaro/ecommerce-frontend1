@@ -1,10 +1,9 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-
 import Home from './components/Ecommerce/Home';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
-// Importe outros componentes conforme necessário...
+import VerifyEmail from './components/Auth/VerifyEmail';
 
 const AppRoutes = () => {
   return (
@@ -12,6 +11,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/verifyemail" element={<VerifyEmail />} />
       {/* Defina outras rotas aqui */}
     </Routes>
   );

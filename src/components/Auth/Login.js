@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import '../../App.css'; // Importa o arquivo de estilos
+import api from '../../api'; // Importa o arquivo de configuração do Axios
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -12,7 +11,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/users/login', {
+      const response = await api.post('/users/login', {
         username,
         password,
       });
@@ -20,6 +19,7 @@ const Login = () => {
       const { token } = response.data;
 
       if (token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Configura o cabeçalho Authorization globalmente
         sessionStorage.setItem('token', token);
         setLoginError('Login bem-sucedido! Redirecionando para a página inicial.');
         setIsSuccess(true);

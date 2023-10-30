@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import '../../App.css';
 
 const Signup = () => {
@@ -31,7 +31,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/users/signup', {
+      const response = await api.post('/users/signup', {
         username,
         email,
         password,

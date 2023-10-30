@@ -1,26 +1,26 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Navbar from './components/Common/Navbar';
 import Footer from './components/Common/Footer';
-import Home from './components/Ecommerce/Home';
-import Login from './components/Auth/Login';
-import Signup from './components/Auth/Signup';
+import AppRoutes from './Routes'; // Importando o componente AppRoutes de Routes.js
 import './App.css';
 
 function App() {
-  // Defina o estado de autenticação aqui ou use um gerenciador de estado
-  const isAuthenticated = false; // Defina com base no estado de autenticação do usuário
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Verificar se o token está presente no sessionStorage
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true); // Se houver um token, definir isAuthenticated como verdadeiro
+    }
+  }, []);
 
   return (
     <Router>
       <div>
         <Navbar isAuthenticated={isAuthenticated} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          {/* Outras rotas e componentes aqui */}
-        </Routes>
+        <AppRoutes /> {/* Utilizando as rotas definidas em AppRoutes */}
         <Footer />
       </div>
     </Router>
