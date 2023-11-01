@@ -11,6 +11,8 @@ import AdminDashboard from './components/Admin/AdminDashboard'
 import EditProducts from './components/Admin/EditProducts'
 import EditCategories from './components/Admin/EditCategories'
 import EditUsers from './components/Admin/EditUsers'
+import Password from './components/Auth/Password'
+import Profile from './components/Ecommerce/Profile'
 
 
 const AppRoutes = () => {
@@ -27,6 +29,8 @@ const AppRoutes = () => {
       <Route path="/admin/EditProducts" element={<EditProducts />} />
       <Route path="/admin/EditCategories" element={<EditCategories />} />
       <Route path="/admin/EditUsers" element={<EditUsers />} />
+      <Route path="/password" element={<Password />} />
+      <Route path="/profile" element={<Profile />} />
       {/* Defina outras rotas aqui */}
     </Routes>
   );
