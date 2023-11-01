@@ -22,13 +22,17 @@ const Home = () => {
     <div className="container">
       <h1>Produtos</h1>
       <ul>
-        {products.map((product, index) => (  // Adicionando um índice como a chave única
-          <li key={index}> 
+        {products.map((product, index) => (
+          <li key={index}>
             <div>
               <p>Nome: {product.productName}</p>
               <p>Preço: R$ {product.price}</p>
-              {product.image_url && ( // Verificando se a URL da imagem está presente
-                <img src={product.image_url} alt={`Imagem de ${product.productName}`} style={{ width: '200px', height: '200px' }} />  // image_url definido no modelo Product.js no backend
+              {product.image_key && (
+                <img
+                  src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_key}`}
+                  alt={`Imagem de ${product.productName}`}
+                  style={{ width: '200px', height: '200px' }}
+                />
               )}
             </div>
           </li>

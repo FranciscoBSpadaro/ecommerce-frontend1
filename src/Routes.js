@@ -5,6 +5,13 @@ import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import VerifyEmail from './components/Auth/VerifyEmail';
 import Logoff from './components/Auth/Logoff';
+import CreateProduct from './components/Ecommerce/CreateProduct'
+import CreateCategory from './components/Ecommerce/CreateCategory'
+import AdminDashboard from './components/Admin/AdminDashboard'
+import EditProducts from './components/Admin/EditProducts'
+import EditCategories from './components/Admin/EditCategories'
+import EditUsers from './components/Admin/EditUsers'
+
 
 const AppRoutes = () => {
   return (
@@ -14,6 +21,12 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/logoff" element={<Logoff />} />
       <Route path="/verifyemail" element={<VerifyEmail />} />
+      <Route path="/createproduct" element={<CreateProduct />} />
+      <Route path="/createcategory" element={<CreateCategory />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/EditProducts" element={<EditProducts />} />
+      <Route path="/admin/EditCategories" element={<EditCategories />} />
+      <Route path="/admin/EditUsers" element={<EditUsers />} />
       {/* Defina outras rotas aqui */}
     </Routes>
   );
