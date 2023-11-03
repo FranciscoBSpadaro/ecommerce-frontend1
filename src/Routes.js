@@ -13,6 +13,7 @@ import EditCategories from './components/Admin/EditCategories'
 import EditUsers from './components/Admin/EditUsers'
 import Password from './components/Auth/Password'
 import Profile from './components/Ecommerce/Profile'
+import ForgotPassword from './components/Auth/ForgotPassword'
 
 
 const AppRoutes = () => {
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route path="/admin/EditUsers" element={<EditUsers />} />
       <Route path="/password" element={<Password />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
       {/* Defina outras rotas aqui */}
     </Routes>
   );

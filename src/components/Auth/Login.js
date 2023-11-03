@@ -55,7 +55,13 @@ const Login = () => {
         <button type="submit">Login</button>
       </form>
       <p style={{ textAlign: 'center' }}>
-        Não possui cadastro? <a href="/signup">Clique aqui para se cadastrar</a>.
+         <a href="/signup">Não possui Cadastro?</a>.
+      </p>
+      <p style={{ textAlign: 'center' }}>
+        <a href="/forgotpassword">Esqueceu sua Senha?</a>
+      </p>
+      <p style={{ textAlign: 'center' }}>
+        <a href="/forgotusername">Esqueceu seu Usuário?</a>
       </p>
     </div>
   );

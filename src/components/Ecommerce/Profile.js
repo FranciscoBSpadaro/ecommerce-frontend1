@@ -41,7 +41,7 @@ const Profile = () => {
     const handleFormChange = (e) => {
         const { name, value } = e.target;
     
-        // Verifica se os campos telefone e celular contêm apenas números e os demais se possuem letras
+        // Verifica se os campos telefone e celular contêm apenas números e os demais se possuem letras , mas o campo de celular está bugado , é possivel solicitar o envio do formulario sem preencher celular.
         if ((name === 'telefone' || name === 'celular') && !/^\d*$/.test(value)) {  // A expressão regular ^\d*$ garante que a string pode ter zero ou mais dígitos numéricos, o que permitirá a exclusão do primeiro dígito
             setCreationErrorMessage('Por favor, preencha os campos de telefone e celular com números apenas.');
         } else if ((name === 'nome' || name === 'nomeMeio' || name === 'ultimoNome') && !/^[a-zA-Z\s]*$/.test(value)) {
