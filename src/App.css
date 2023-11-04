@@ -8,7 +8,7 @@ body {
   min-height: 100vh; /* Faz com que o conteúdo ocupe pelo menos a altura da tela */
 }
 
-.h1 {
+.txtcenter {
   text-align: center;
 }
 
@@ -139,6 +139,20 @@ body {
 
 .loading-animation:before {
   content: '';
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #333;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader {
   border: 3px solid rgba(0, 0, 0, 0.1);
   border-top: 3px solid #333;
   border-radius: 50%;

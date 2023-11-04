@@ -1,55 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
 
 const Signup = () => {
-  const [username, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setErrorMessage('');
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorMessage]);
 
   const handleNameChange = (e) => {
-    // Impedir espaços no nome de usuário
     if (!e.target.value.includes(' ')) {
-      if (e.target.value.length <= 25) {  // limita em 25 caracteres
-        setName(e.target.value);
+      if (e.target.value.length <= 25) {
+        setUsername(e.target.value);
       } else {
-        // Limitar o tamanho do nome do usuário
-        setName(e.target.value.slice(0, 25));
+        setUsername(e.target.value.slice(0, 25));
       }
     } else {
-      alert('O Apelido de usuário não pode conter espaços!');
+      setErrorMessage('O Apelido de usuário não pode conter espaços!');
     }
   };
 
-  const handleEmailChange = (e) => {
-    if (e.target.value.length <= 50) {
-      setEmail(e.target.value);
+  const handleEmailBlur = (e) => {
+    const value = e.target.value;
+    if (value.length > 50) {
+      setErrorMessage('O Email deve ter no máximo 50 caracteres.');
+    } else if (!value.includes('@') || value.includes(' ')) {
+      setErrorMessage('O Email não pode conter espaços e precisa ter um "@"');
+    } else {
+      setErrorMessage('');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const response = await api.post('/users/signup', {
-        username,
-        email,
-        password,
-      });
+      if (username && email && password) {
+        setSuccessMessage('Cadastrando...');
+        const response = await api.post('/users/signup', {
+          username,
+          email,
+          password,
+        });
 
-      alert(response.data.message); // Exibir a mensagem do backend
-
-      // Redirecionar o usuário para a página de login
-      window.location.replace('/login');
+        setSuccessMessage(response.data.message);
+        setErrorMessage('');
+        setUsername('');
+        setEmail('');
+        setPassword('');
+        setTimeout(() => {
+          setSuccessMessage('');
+          setIsLoading(false);
+          window.location.replace('/login');
+        }, 5000);
+      } else {
+        setErrorMessage('Por favor, preencha todos os campos corretamente.');
+        setIsLoading(false);
+      }
     } catch (error) {
-      alert(error.response.data.message); // Exibir a mensagem de erro recebida do backend
+      setErrorMessage(error.response.data.message);
+      setIsLoading(false);
       console.error('Erro ao cadastrar:', error);
     }
   };
 
+  useEffect(() => {
+    setIsButtonDisabled(!(username && email && password));
+  }, [username, email, password]);
+
   return (
     <div className="login-form">
       <h2 className="h1">📝 Cadastro ✨</h2>
+      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -61,7 +98,8 @@ const Signup = () => {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={handleEmailChange}
+          onChange={(e) => setEmail(e.target.value)}
+          onBlur={handleEmailBlur}
         />
         <input
           type="password"
@@ -69,7 +107,10 @@ const Signup = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Cadastrar</button>
+        <button type="submit" disabled={isButtonDisabled}>
+          Cadastrar
+        </button>
+        {isLoading && <div className="loading-animation"><p>Cadastrando...</p></div>}
       </form>
     </div>
   );

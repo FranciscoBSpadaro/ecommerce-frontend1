@@ -8,8 +8,7 @@ const Logoff = () => {
     // Redireciona o usuário para a página de login após o logoff
     window.location.replace('/login');
 
-    // Exibe um alerta confirmando o logoff
-    alert('Você saiu da sua conta');
+
   
 
   return null; // Não é necessário renderizar nada para este componente

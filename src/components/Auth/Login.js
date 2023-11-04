@@ -2,49 +2,64 @@ import React, { useState } from 'react';
 import api from '../../api'; // Importa o arquivo de configuração do Axios
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Armazena email ou username
   const [password, setPassword] = useState('');
-  const [loginError, setLoginError] = useState(null);
+  const [loginResponse, setloginResponse] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await api.post('/users/login', {
-        username,
-        password,
-      });
+      // Construção do objeto de envio considerando a possibilidade de email ou username
+      const payload = {   // strings vazias por padrão
+        username: '',
+        email: '',
+        password
+      };
 
-      const { token } = response.data;
+      if (identifier.includes('@')) {
+        payload.email = identifier; // Define email se o 'identifier' incluir '@'
+      } else {
+        payload.username = identifier; // Define username caso contrário
+      }
 
-      if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Configura o cabeçalho Authorization globalmente
+      const response = await api.post('/users/login', payload);
+
+      const { token } = response.data;   // armazena o token se resposta ok do backend
+
+      if (token) { // se recebeu token armazena no sessionStorage no formato token Bearer
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         sessionStorage.setItem('token', token);
-        setLoginError('Login bem-sucedido! Redirecionando para a página inicial.');
-        setIsSuccess(true);
+        setloginResponse('Login bem-sucedido! Redirecionando para a página inicial.');
+        setIsSuccess(true);  // setIsSuccess true ou falso vai definer a cor da mensagem na linha 56
 
-        setTimeout(() => {
+        setTimeout(() => {  // redireciona para home page apos 3 segundos 
           window.location.replace('/');
         }, 3000);
       }
     } catch (error) {
-      setLoginError('Erro ao fazer login. Por favor, verifique seu usuário e senha.');
+      const errorMessage = error.response?.data?.message;   // retorna mensagens que o backend responde
+      setloginResponse(errorMessage);
       setIsSuccess(false);
-      console.error('Erro ao fazer login:', error);
+      console.error('Erro ao fazer login Usuario ou senha invalidos:', error);
+
+      setTimeout(() => {
+        setloginResponse(null);
+      }, 5000);
     }
   };
 
   return (
-    <div className="login-form"> {/* Aplica a classe para adicionar os estilos */}
-      <h2 className="h1">🛒Acessar🤩</h2>
-      {loginError && <p style={{ color: isSuccess ? 'green' : 'red' }}>{loginError}</p>}
+    <div className="login-form">
+      <h2 className="txtcenter">🛒Acessar🤩</h2>
+      {loginResponse && <p style={{ color: isSuccess ? 'green' : 'red' }}>{loginResponse}</p>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Usuário"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Usuário ou E-mail"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
         />
         <input
           type="password"
@@ -55,7 +70,7 @@ const Login = () => {
         <button type="submit">Login</button>
       </form>
       <p style={{ textAlign: 'center' }}>
-         <a href="/signup">Não possui Cadastro?</a>.
+        <a href="/signup">Não possui Cadastro?</a>.
       </p>
       <p style={{ textAlign: 'center' }}>
         <a href="/forgotpassword">Esqueceu sua Senha?</a>

@@ -98,7 +98,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="h1">
+        <div className="txtcenter">
             <h1>Perfil</h1>
             {currentUserProfile ? (
                 <div>
