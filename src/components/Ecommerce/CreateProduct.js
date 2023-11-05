@@ -3,6 +3,7 @@ import api from '../../api';
 import '../../App.css';
 
 const CreateProduct = () => {
+  // Define o estado para os dados do formulário
   const [formData, setFormData] = useState({
     productName: '',
     price: '',
@@ -11,8 +12,10 @@ const CreateProduct = () => {
     categoryId: '',
   });
 
+  // Define o estado para armazenar as categorias
   const [categories, setCategories] = useState([]);
 
+  // Busca as categorias disponíveis ao carregar a página
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -26,15 +29,18 @@ const CreateProduct = () => {
     fetchCategories();
   }, []);
 
+  // Atualiza o estado dos campos do formulário ao serem preenchidos
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
+    // Se o campo alterado for o de imagem, atualiza o estado com o arquivo selecionado
     if (name === 'image') {
       setFormData({
         ...formData,
         image: files[0],
       });
     } else {
+      // Atualiza o estado com os outros campos do formulário
       setFormData({
         ...formData,
         [name]: value,
@@ -42,9 +48,11 @@ const CreateProduct = () => {
     }
   };
 
+  // Envia os dados do formulário para criar um novo produto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Cria um objeto FormData para armazenar os dados do formulário
     const productData = new FormData();
     productData.append('productName', formData.productName);
     productData.append('price', formData.price);
@@ -53,13 +61,14 @@ const CreateProduct = () => {
     productData.append('image', formData.image);
 
     try {
+      // Faz uma requisição para criar um novo produto enviando o FormData
       const response = await api.post('/admin/products', productData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       console.log('Produto cadastrado com sucesso:', response.data);
-      // Redirecionar o usuário para a página de produtos ou fazer outra ação desejada
+      // Aqui seria possível redirecionar o usuário ou executar outra ação desejada
     } catch (error) {
       console.error('Erro ao cadastrar o produto:', error);
     }
