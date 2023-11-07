@@ -6,29 +6,26 @@ import AppRoutes from './Routes';
 import './App.css';
 import { jwtDecode } from 'jwt-decode';
 
-
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState({isAuthenticated: false, isAdmin: false});
 
   useEffect(() => {
-    // Verificar se o token está presente no sessionStorage
+    checkToken();
+  }, []);
+
+  const checkToken = () => {
     const token = sessionStorage.getItem('token');
     if (token) {
       const decodedToken = jwtDecode(token);
-      setIsAuthenticated(true);
-      console.log(decodedToken); // Se houver um token, definir isAuthenticated como verdadeiro para usuario padrão
-      if (decodedToken.isAdmin === true) {
-        setIsAdmin(true); // Definir isAdmin como verdadeiro se o usuário for um administrador
-      }
+      setUser({isAuthenticated: true, isAdmin: decodedToken.isAdmin || false});
     }
-  }, []);
+  };
 
   return (
     <Router>
       <div>
-        <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
-        <AppRoutes />
+        <Navbar isAuthenticated={user.isAuthenticated} isAdmin={user.isAuthenticated && user.isAdmin} />
+        <AppRoutes isAdmin={user.isAuthenticated && user.isAdmin} />
         <Footer />
       </div>
     </Router>

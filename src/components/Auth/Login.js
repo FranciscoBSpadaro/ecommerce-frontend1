@@ -31,18 +31,18 @@ const Login = () => {
       if (token) { // se recebeu token armazena no sessionStorage no formato token Bearer
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         sessionStorage.setItem('token', token);
-        setloginResponse('Login bem-sucedido! Redirecionando para a página inicial.');
+        setloginResponse('Login bem-sucedido!');
         setIsSuccess(true);  // setIsSuccess true ou falso vai definer a cor da mensagem na linha 56
 
         setTimeout(() => {  // redireciona para home page apos 3 segundos 
           window.location.replace('/');
-        }, 3000);
+        }, 2000);
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message;   // retorna mensagens que o backend responde
+      const errorMessage = ('Usuário ou Senha Invalidos');   // retorna mensagens que o backend responde
       setloginResponse(errorMessage);
       setIsSuccess(false);
-      console.error('Erro ao fazer login Usuario ou senha invalidos:', error);
+      console.error(error.response?.data?.message);
 
       setTimeout(() => {
         setloginResponse(null);

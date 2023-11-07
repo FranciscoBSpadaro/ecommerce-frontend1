@@ -23,10 +23,10 @@ const Signup = () => {
 
   const handleNameChange = (e) => {
     if (!e.target.value.includes(' ')) {
-      if (e.target.value.length <= 25) {
+      if (e.target.value.length <= 20) {
         setUsername(e.target.value);
       } else {
-        setUsername(e.target.value.slice(0, 25));
+        setUsername(e.target.value.slice(0, 20));
       }
     } else {
       setErrorMessage('O Apelido de usuário não pode conter espaços!');

@@ -17,10 +17,10 @@ const AdminDashboard = () => {
             <Link to="/admin/editProducts">Listar Produtos</Link>
           </li>
           <li>
-            <Link to="/CreateProduct">Adicionar Novo Produto</Link>
+            <Link to="/admin/CreateProduct">Adicionar Novo Produto</Link>
           </li>
           <li>
-            <Link to="/CreateCategory">Adicionar Nova Categoria</Link>
+            <Link to="/admin/CreateCategory">Adicionar Nova Categoria</Link>
           </li>
         </ul>
       </nav>
