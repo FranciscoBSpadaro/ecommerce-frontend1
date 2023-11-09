@@ -6,16 +6,13 @@ const Profile = () => {
     const [creationSuccessMessage, setCreationSuccessMessage] = useState('');
     const [creationErrorMessage, setCreationErrorMessage] = useState('');
     const [form, setForm] = useState({
-        nome: '',
-        nomeMeio: '',
-        ultimoNome: '',
+        nomeCompleto: '',
         telefone: '',
         celular: '',
     });
-    const [isUpdating, setIsUpdating] = useState(false); // Adiciona estado para controlar a atualização
+    const [isUpdating, setIsUpdating] = useState(false);
 
     useEffect(() => {
-        // Busca o perfil do usuário quando o componente é montado
         const token = sessionStorage.getItem('token');
         const fetchProfile = async () => {
             try {
@@ -27,9 +24,9 @@ const Profile = () => {
                 setCurrentUserProfile(response.data);
             } catch (error) {
                 if (error.response && error.response.status === 404) {
-                    setCurrentUserProfile(null); // Define o perfil como nulo se não for encontrado
+                    setCurrentUserProfile(null);
                 } else {
-                    setCurrentUserProfile(null); // Outros erros - Reinicia o perfil
+                    setCurrentUserProfile(null);
                     setCreationErrorMessage('Erro ao carregar o perfil.');
                 }
             }
@@ -40,39 +37,46 @@ const Profile = () => {
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
-    
-        // Verifica se os campos telefone e celular contêm apenas números e os demais se possuem letras , mas o campo de celular está bugado , é possivel solicitar o envio do formulario sem preencher celular.
-        if ((name === 'telefone' || name === 'celular') && !/^\d*$/.test(value)) {  // A expressão regular ^\d*$ garante que a string pode ter zero ou mais dígitos numéricos, o que permitirá a exclusão do primeiro dígito
-            setCreationErrorMessage('Por favor, preencha os campos de telefone e celular com números apenas.');
-        } else if ((name === 'nome' || name === 'nomeMeio' || name === 'ultimoNome') && !/^[a-zA-Z\s]*$/.test(value)) {
-            setCreationErrorMessage('Por favor, preencha os campos de nome apenas com letras.');
+
+        if ((name === 'telefone' || name === 'celular') && !/^\d*$/.test(value)) {
+            setCreationErrorMessage('Por favor, preencha os campos de telefone e celular com números.');
+        } else if (name === 'nomeCompleto' && !/^[a-zA-Z\s]*$/.test(value)) {
+            setCreationErrorMessage('Por favor, preencha o campo de nome completo apenas com letras.');
+        } else if (name === 'nomeCompleto' && value.replace(/\s/g, '').length > 60) {
+            setCreationErrorMessage('O campo "Nome Completo" deve ter no máximo 60 caracteres no total.');
+        } else if (name === 'nomeCompleto' && value.split(' ').some(part => part.length > 20)) {
+            setCreationErrorMessage('Formato do Nome inválido, Máximo 20 letras para cada parte do seu nome, Adicione um Espaço.');
         } else {
             setForm({
                 ...form,
                 [name]: value,
             });
-            setCreationErrorMessage(''); // Limpa a mensagem de erro se os campos estiverem corretos
+            setCreationErrorMessage('');
         }
     };
 
     const createProfile = async () => {
-        // Cria um novo perfil
         const token = sessionStorage.getItem('token');
-        if (!form.nome || !form.ultimoNome || !form.telefone) {
+        if (!form.nomeCompleto || !form.telefone) {
             setCreationErrorMessage('Por favor preencha os campos obrigatórios.');
             return;
         }
         try {
-            const response = await api.post('/profiles', form, {
+            const { nomeCompleto, telefone, celular } = form;
+            const fullName = nomeCompleto.split(' ');
+            const nome = fullName.shift();
+            const ultimoNome = fullName.pop() || '❌';
+            const nomeMeio = fullName.join(' ') || '❌';
+            const response = await api.post('/profiles', { nome, nomeMeio, ultimoNome, telefone, celular }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             setCurrentUserProfile(response.data);
-            setCreationSuccessMessage('Perfil criado com sucesso.');
+            setCreationSuccessMessage('Perfil Criado com Sucesso. 💚');
             setCreationErrorMessage('');
             setTimeout(() => {
-                window.location.reload(); // Recarrega a página após 3 segundos
+                window.location.reload();
             }, 3000);
         } catch (error) {
             setCreationErrorMessage(error.response.data.message || 'Erro ao criar o perfil.');
@@ -81,31 +85,50 @@ const Profile = () => {
     };
 
     const updateProfile = async () => {
-        // Atualiza o perfil existente
         const token = sessionStorage.getItem('token');
         try {
-            const response = await api.put('/profiles', form, {
+            const { nomeCompleto, telefone, celular } = form;
+            const fullName = nomeCompleto.split(' ');
+            const nome = fullName.shift();
+            const ultimoNome = fullName.pop() || '❌';
+            const nomeMeio = fullName.join(' ') || '❌';
+            const response = await api.put('/profiles', { nome, nomeMeio, ultimoNome, telefone, celular }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             setCurrentUserProfile(response.data);
-            setIsUpdating(false); // Atualização realizada com sucesso, agora não estamos mais atualizando
+            setIsUpdating(false);
+            setCreationSuccessMessage('Perfil Atualizado com Sucesso. 💚');
+            setTimeout(() => {
+                setCreationSuccessMessage('');
+            }, 5000);
         } catch (error) {
             setCreationErrorMessage(error.response.data.message || 'Erro ao atualizar o perfil.');
             setCreationSuccessMessage('');
         }
     };
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCreationErrorMessage('');
+            setCreationSuccessMessage('');
+        }, 5000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [creationErrorMessage, creationSuccessMessage]);
+
     return (
-        <div className="txtcenter">
-            <h1>Perfil</h1>
+        <div className="center-container">
             {currentUserProfile ? (
-                <div>
+                <div className="main-content">
+                    <h1 className="center-title">Perfil</h1>
                     <p>Nome completo: {currentUserProfile.nome} {currentUserProfile.nomeMeio} {currentUserProfile.ultimoNome}</p>
                     <p>Telefone: {currentUserProfile.telefone}</p>
                     <p>Celular: {currentUserProfile.celular}</p>
-                    {!isUpdating ? ( // Mostra o botão para atualizar somente se não estiver atualizando
+                    {!isUpdating ? (
                         <button type="button" onClick={() => setIsUpdating(true)}>
                             Atualizar Perfil
                         </button>
@@ -113,29 +136,12 @@ const Profile = () => {
                         <form>
                             <input
                                 type="text"
-                                name="nome"
-                                value={form.nome}
+                                name="nomeCompleto"
+                                value={form.nomeCompleto}
                                 onChange={handleFormChange}
-                                placeholder="Nome"
+                                placeholder="Nome Completo"
                                 required
-                                maxLength={30}
-                            />
-                            <input
-                                type="text"
-                                name="nomeMeio"
-                                value={form.nomeMeio}
-                                onChange={handleFormChange}
-                                placeholder="Nome do meio"
-                                maxLength={30}
-                            />
-                            <input
-                                type="text"
-                                name="ultimoNome"
-                                value={form.ultimoNome}
-                                onChange={handleFormChange}
-                                placeholder="Sobrenome"
-                                required
-                                maxLength={30}
+                                maxLength={90}
                             />
                             <input
                                 type="tel"
@@ -161,35 +167,18 @@ const Profile = () => {
                     )}
                 </div>
             ) : (
-                <div className="h1">
+                <div className="center-title">
                     <p>Você ainda não possui um perfil.</p>
                     <p>📝Crie um agora!😉</p>
                     <form>
                         <input
                             type="text"
-                            name="nome"
-                            value={form.nome}
+                            name="nomeCompleto"
+                            value={form.nomeCompleto}
                             onChange={handleFormChange}
-                            placeholder="Nome"
+                            placeholder="Nome Completo"
                             required
-                            maxLength={30}
-                        />
-                        <input
-                            type="text"
-                            name="nomeMeio"
-                            value={form.nomeMeio}
-                            onChange={handleFormChange}
-                            placeholder="Nome do meio"
-                            maxLength={30}
-                        />
-                        <input
-                            type="text"
-                            name="ultimoNome"
-                            value={form.ultimoNome}
-                            onChange={handleFormChange}
-                            placeholder="Sobrenome"
-                            required
-                            maxLength={30}
+                            maxLength={90}
                         />
                         <input
                             type="tel"
@@ -210,14 +199,19 @@ const Profile = () => {
                             pattern="[0-9]{8,}"
                             maxLength={11}
                         />
-                        <button type="button" onClick={createProfile}>Criar Perfil</button>
                     </form>
+                    <button type="button" onClick={createProfile}>Criar Perfil</button>
                 </div>
             )}
-            {creationSuccessMessage && <p style={{ color: 'green' }}>{creationSuccessMessage}</p>}
-            {creationErrorMessage && <p style={{ color: 'red' }}>{creationErrorMessage}</p>}
+            <div className="error-messages">
+                {creationErrorMessage && <div >{creationErrorMessage}</div>}
+            </div>
+            <div className="success-messages">
+                {creationSuccessMessage && <div >{creationSuccessMessage}</div>}
+            </div>
         </div>
     );
 };
+
 
 export default Profile;

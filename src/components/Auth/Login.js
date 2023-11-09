@@ -6,9 +6,13 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginResponse, setloginResponse] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    
 
     try {
       // Construção do objeto de envio considerando a possibilidade de email ou username
@@ -33,6 +37,7 @@ const Login = () => {
         sessionStorage.setItem('token', token);
         setloginResponse('Login bem-sucedido!');
         setIsSuccess(true);  // setIsSuccess true ou falso vai definer a cor da mensagem na linha 56
+        setIsLoading(true);
 
         setTimeout(() => {  // redireciona para home page apos 3 segundos 
           window.location.replace('/');
@@ -42,6 +47,7 @@ const Login = () => {
       const errorMessage = ('Usuário ou Senha Invalidos');   // retorna mensagens que o backend responde
       setloginResponse(errorMessage);
       setIsSuccess(false);
+      setIsLoading(false);
       console.error(error.response?.data?.message);
 
       setTimeout(() => {
@@ -51,10 +57,10 @@ const Login = () => {
   };
 
   return (
-    <div className="login-form">
-      <h2 className="txtcenter">🛒Acessar🤩</h2>
+    <div className="center-container-login">
+      <h2>🛒Acessar🤩</h2>
       {loginResponse && <p style={{ color: isSuccess ? 'green' : 'red' }}>{loginResponse}</p>}
-      <form onSubmit={handleSubmit}>
+      <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Usuário ou E-mail"
@@ -68,6 +74,7 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button type="submit">Login</button>
+        {isLoading && <div className="loading-animation"><p>Entrando na loja...</p></div>}
       </form>
       <p style={{ textAlign: 'center' }}>
         <a href="/signup">Não possui Cadastro?</a>.

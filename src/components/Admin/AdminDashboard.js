@@ -1,7 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
+
+  useEffect(() => {
+    // Busca o perfil do usuário quando o componente é montado
+    const token = sessionStorage.getItem('token');
+
+    const authenticateUser = async () => {
+      try {
+        const checkToken = await fetch('/admin', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!checkToken.isAdmin) {
+          throw new Error();
+        }
+
+      } catch (error) {
+        if (error.status === 401) {
+          // apresentar um erro 404 se o usuário não for um admin
+          console.log("O usuário não é um admin!");
+        }
+      }
+    }
+
+    authenticateUser();
+  }, []);
+
   return (
     <div>
       <h1>Admin Dashboard</h1>
@@ -10,18 +38,7 @@ const AdminDashboard = () => {
           <li>
             <Link to="/admin/editUsers">Listar Usuários</Link>
           </li>
-          <li>
-            <Link to="/admin/editCategories">Listar Categorias</Link>
-          </li>
-          <li>
-            <Link to="/admin/editProducts">Listar Produtos</Link>
-          </li>
-          <li>
-            <Link to="/admin/CreateProduct">Adicionar Novo Produto</Link>
-          </li>
-          <li>
-            <Link to="/admin/CreateCategory">Adicionar Nova Categoria</Link>
-          </li>
+          <Link to="/admin/CreateProduct">Adicionar Novo Produto</Link>
         </ul>
       </nav>
     </div>

@@ -8,81 +8,124 @@ body {
   min-height: 100vh; /* Faz com que o conteúdo ocupe pelo menos a altura da tela */
 }
 
-.txtcenter {
-  text-align: center;
-}
-
-.header {
+header {
   background-color: #333;
   color: white;
   padding: 20px;
   text-align: center;
 }
 
-.navbar {
+nav {
   display: flex;
   justify-content: space-between;
   background-color: #555;
-  padding: 0px;
+  padding: 0;
 }
 
-.navbar a {
+nav a {
   color: white;
   text-decoration: none;
   margin-right: 10px;
 }
 
-.navbar li {
+nav li {
   list-style: none; /* Remover marcadores de lista */
 }
 
-.navbar a:hover {
+nav a:hover {
   color: rgb(32, 216, 109);
 }
 
 .container {
-  flex: 1; /* Faz o conteúdo ocupar o espaço restante */
+  display: flex;
+  justify-content: space-between;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 20px auto;
+}
+.center-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Centraliza verticalmente na tela */
+}
+
+.center-container-login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 40vh;
+  background-color: #fff;
+  padding: 140px;
+  border: 1px solid #ddd;
+  border-radius: 5%;
+  margin: 40px;
+}
+
+.center-container-edit {
+  display: grid;
+  height: 25vh;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+}
+
+.center-title {
+  text-align: center;
+}
+
+.side-menu,
+.main-content,
+.right-menu {
+  width: 30%; /* Ajuste o valor conforme necessário */
+}
+
+.side-menu,
+.right-menu {
+  background-color: #f8f8f8;
   padding: 20px;
+  border: 1px solid #ddd;
 }
 
-.login-form {
-  width: 220px;
-  margin: 0 auto;
-  padding: 320px;
-  background-color: white;
-  border: 1px solid hsl(0, 25%, 78%);
-  border-radius: 15px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-.login-form form {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centraliza os campos de entrada */
+.main-content {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
 }
 
-.login-form form button {
-  margin-top: 10px; /* Adiciona margem superior para separar o botão dos campos de entrada */
+.form-group {
+  margin-bottom: 20px;
+  display: grid
 }
 
-.verification-form {
-  width: 220px;
-  margin: 0 auto;
-  padding: 320px;
-  background-color: white;
-  border: 1px solid hsl(154, 25%, 78%);
-  border-radius: 15px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-.verification-form form {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centraliza os campos de entrada */
+form button {
+  margin-top: 10px;
 }
 
-.verification-form form button {
-  margin-top: 10px; /* Adiciona margem superior para separar o botão dos campos de entrada */
+textarea,
+input[type='text'],
+select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+ul {
+  padding: 0;
+}
+
+ul > li {
+  list-style-type: none;
+  margin-bottom: 10px;
+}
+
+ul > li > button {
+  margin-right: 10px;
 }
 
 .footer {
@@ -92,8 +135,7 @@ body {
   background-color: #333;
   color: white;
   text-align: center;
-  padding: 0px 0;
-
+  padding: 0;
 }
 
 .submenu {
@@ -128,31 +170,41 @@ body {
   justify-content: center;
 }
 
+.error-messages,
+.success-messages {
+  padding: 10px;
+  border-radius: 5px;
+  justify-content: center;
+  display: flex;
+}
+
+.error-messages {
+  color: red;
+  font-style: normal;
+  font-size: large;
+  margin: 0;
+}
+
+.success-messages {
+  color: green;
+  font-style: normal;
+  font-size: large;
+  margin: 0;
+}
+
 /* Animações */
 
-.loading-animation {
+.loading-animation,
+.loader {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 200px; /* Defina a altura desejada */
 }
 
-.loading-animation:before {
-  content: '';
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top: 3px solid #333;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
+.loading-animation:before,
 .loader {
+  content: '';
   border: 3px solid rgba(0, 0, 0, 0.1);
   border-top: 3px solid #333;
   border-radius: 50%;

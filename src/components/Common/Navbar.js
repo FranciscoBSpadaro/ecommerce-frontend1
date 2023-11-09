@@ -13,7 +13,7 @@ const Navbar = ({ isAuthenticated, isAdmin }) => {
           <li><a href="/order">Compras</a></li>
         </ul>
       )}
-      <ul className="right-menu">
+      <ul className="right-menu-navbar">
         {isAuthenticated ? (
           <>
             {isAdmin && (
