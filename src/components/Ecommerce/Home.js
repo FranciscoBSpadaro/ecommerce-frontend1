@@ -27,12 +27,30 @@ const Home = () => {
             <div>
               <p>Nome: {product.productName}</p>
               <p>Preço: R$ {product.price}</p>
-              {product.image_key && (
-                <img
-                  src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_key}`}
-                  alt={`Imagem de ${product.productName}`}
-                  style={{ width: '200px', height: '200px' }}
-                />
+              {product.image_keys && product.image_keys.length > 0 && (
+                <div>
+                  <img
+                    src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+                    alt={`Imagem de ${product.productName}`}
+                    style={{ width: '200px', height: '200px' }}
+                  />
+                  {product.image_keys.length > 1 && (
+                    <div>
+                      <p>Outras Imagens:</p>
+                      <ul>
+                        {product.image_keys.slice(1).map((image, imageIndex) => (
+                          <li key={imageIndex}>
+                            <img
+                              src={`${process.env.REACT_APP_AWS_S3_URL}${image}`}
+                              alt={`Imagem de ${product.productName}`}
+                              style={{ width: '100px', height: '100px' }}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </li>

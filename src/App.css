@@ -38,9 +38,7 @@ nav a:hover {
 
 .container {
   display: flex;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 20px auto;
+  flex-direction: row-reverse;
 }
 .center-container {
   display: flex;
@@ -96,7 +94,9 @@ nav a:hover {
 
 .form-group {
   margin-bottom: 20px;
-  display: grid
+  display: grid;
+  justify-content: space-around;
+  justify-items: center;
 }
 
 form button {
@@ -192,6 +192,12 @@ ul > li > button {
   margin: 0;
 }
 
+.image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 10px;
+}
+
 /* Animações */
 
 .loading-animation,
@@ -217,3 +223,4 @@ ul > li > button {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+

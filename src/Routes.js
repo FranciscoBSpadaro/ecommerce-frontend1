@@ -8,6 +8,7 @@ import Logoff from './components/Auth/Logoff';
 import CreateProduct from './components/Admin/CreateProduct';
 import CreateCategory from './components/Admin/CreateCategory';
 import AdminDashboard from './components/Admin/AdminDashboard';
+import UploadImages from './components/Admin/UploadImages';
 import EditProducts from './components/Admin/EditProducts';
 import EditCategories from './components/Admin/EditCategories';
 import EditUsers from './components/Admin/EditUsers';
@@ -29,11 +30,12 @@ function AppRoutes({ isAdmin }) {
       {isAdmin ? (
         <>
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/EditProducts" element={<EditProducts />} />
-          <Route path="/admin/EditCategories" element={<EditCategories />} />
-          <Route path="/admin/EditUsers" element={<EditUsers />} />
+          <Route path="/admin/editProducts" element={<EditProducts />} />
+          <Route path="/admin/editCategories" element={<EditCategories />} />
+          <Route path="/admin/editUsers" element={<EditUsers />} />
           <Route path="/admin/createproduct" element={<CreateProduct />} />
           <Route path="/admin/createcategory" element={<CreateCategory />} />
+          <Route path="/admin/uploads" element={<UploadImages />} />
         </>
       ) : (
         <Route path="/" element={<Navigate replace to="/login" />} />

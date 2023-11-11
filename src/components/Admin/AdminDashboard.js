@@ -37,8 +37,9 @@ const AdminDashboard = () => {
         <ul>
           <li>
             <Link to="/admin/editUsers">Listar Usuários</Link>
+            <Link to="/admin/createProduct">Adicionar Novo Produto</Link>
+            <Link to="/admin/uploads">Imagens De Produtos</Link>
           </li>
-          <Link to="/admin/CreateProduct">Adicionar Novo Produto</Link>
         </ul>
       </nav>
     </div>
