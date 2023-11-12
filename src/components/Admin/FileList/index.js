@@ -37,6 +37,16 @@ function FileList({ files, onDelete }) {
                   value={file.progress}
                 />
               )}
+            {file.deleteProgress && (
+              <CircularProgressbar
+                styles={{
+                  root: { width: 30 },
+                  path: { stroke: 'red' }
+                }}
+                strokeWidth={10}
+                value={file.deleteProgress}
+              />
+            )}
 
             {file.url && (
               <a href={file.url} target="_blank" rel="noopener noreferrer">

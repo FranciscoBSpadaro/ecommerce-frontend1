@@ -6,11 +6,24 @@ import Upload from "./Uploads";
 import FileList from "./FileList";
 
 class UploadImages extends Component {
-  state = {
-    uploadedFiles: []
+  constructor(props) {
+    super(props);
+    this.state = {
+      uploadedFiles: [],
+      message: null,
+      messageType: null // 'success' or 'error'
+    };
+  }
+
+  showMessage = (message, messageType) => {
+    this.setState({ message, messageType });
+
+    // Clear the message after 5 seconds
+    setTimeout(() => {
+      this.setState({ message: null, messageType: null });
+    }, 5000);
   };
 
-  // Fetch the uploaded files from the API on component mount
   componentDidMount() {
     this.fetchUploadedFiles();
   }
@@ -29,11 +42,9 @@ class UploadImages extends Component {
       this.setState({ uploadedFiles });
     } catch (error) {
       console.error(error);
-      // show error message to the user
     }
   };
 
-  // Handle file upload
   handleUpload = files => {
     const uploadedFiles = files.map(file => ({
       file,
@@ -47,72 +58,113 @@ class UploadImages extends Component {
       url: null
     }));
 
-    this.setState({
-      uploadedFiles: [...this.state.uploadedFiles, ...uploadedFiles]
-    });
-
     uploadedFiles.forEach(this.processUpload);
+    
+    this.setState(prevState => ({
+      uploadedFiles: [...prevState.uploadedFiles, ...uploadedFiles]
+    }));
   };
 
-  // Process file upload for the given uploaded file
   processUpload = async uploadedFile => {
     const data = new FormData();
     data.append("file", uploadedFile.file, uploadedFile.name);
-
-    try {
-      const response = await api.post("admin/uploads", data, {
-        onUploadProgress: e => {
-          const progress = parseInt(Math.round((e.loaded * 100) / e.total));
-          this.updateFile(uploadedFile.id, { progress });
-        }
+  
+    // Inicialize o progresso com 0
+    this.updateFile(uploadedFile.id, { progress: 0 });
+  
+    // Simule o progresso do upload
+    const uploadProgressInterval = setInterval(() => {
+      this.setState(prevState => {
+        const uploadedFiles = [...prevState.uploadedFiles];
+        const file = uploadedFiles.find(file => file.id === uploadedFile.id);
+  
+        // Aumente o progresso em 5 a cada segundo
+        file.progress = Math.min(file.progress + 5, 100);
+  
+        return { uploadedFiles };
       });
-
+    }, 1000);
+  
+    try {
+      const response = await api.post("admin/uploads", data);
+  
+      // Pare a simulação do progresso quando o upload for concluído
+      clearInterval(uploadProgressInterval);
+  
       this.updateFile(uploadedFile.id, {
         uploaded: true,
         id: response.data.id,
         url: response.data.url
       });
+      this.showMessage('Upload de Imagem Concluído', 'success');
     } catch (error) {
-      console.error(error);
+      // Pare a simulação do progresso se ocorrer um erro
+      clearInterval(uploadProgressInterval);
+  
+      this.showMessage('Erro no upload da imagem', 'error');
       this.updateFile(uploadedFile.id, { error: true });
-      // show error message to the user
     }
   };
 
-  // Update the file with the given ID with the new data
   updateFile = (id, data) => {
-    this.setState({
-      uploadedFiles: this.state.uploadedFiles.map(file =>
+    this.setState(prevState => ({
+      uploadedFiles: prevState.uploadedFiles.map(file =>
         file.id === id ? { ...file, ...data } : file
       )
-    });
+    }));
   };
 
-  // Delete the uploaded file with the given ID
   handleDelete = async id => {
+    // Inicialize o progresso de exclusão com 0
+    this.updateFile(id, { deleteProgress: 0 });
+  
+    // Simule o progresso da exclusão
+    const deleteProgressInterval = setInterval(() => {
+      this.setState(prevState => {
+        const uploadedFiles = [...prevState.uploadedFiles];
+        const file = uploadedFiles.find(file => file.id === id);
+  
+        // Aumente o progresso em 20 a cada segundo
+        file.deleteProgress = Math.min(file.deleteProgress + 20, 100);
+  
+        return { uploadedFiles };
+      });
+    }, 1000);
+  
     try {
       await api.delete(`admin/uploads/${id}`);
+  
+      // Pare a simulação do progresso quando a exclusão for concluída
+      clearInterval(deleteProgressInterval);
+  
       this.setState({
         uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id)
       });
+      this.showMessage('Imagem Excluída', 'success');
     } catch (error) {
-      console.error(error);
-      // show error message to the user
+      // Pare a simulação do progresso se ocorrer um erro
+      clearInterval(deleteProgressInterval);
+  
+      this.showMessage('Erro ao excluir a imagem', 'error');
     }
   };
 
-  // Revoke the object URL for the preview image on component unmount
   componentWillUnmount() {
     this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
   }
 
   render() {
-    const { uploadedFiles } = this.state;
+    const { uploadedFiles, message, messageType } = this.state;
 
     return (
       <div className="container-upload">
         <h1>Upload de Imagens</h1>
         <Upload onUpload={this.handleUpload} />
+        {message && (
+          <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
+            {message}
+          </p>
+        )}
         {uploadedFiles.length > 0 && (
           <FileList files={uploadedFiles} onDelete={this.handleDelete} />
         )}
