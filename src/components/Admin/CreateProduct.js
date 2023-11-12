@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
+import Modal from 'react-modal';
 
 const CreateProduct = () => {
   const [formData, setFormData] = useState({
@@ -33,69 +34,57 @@ const CreateProduct = () => {
   useEffect(() => {
     const fetchAvailableImages = async () => {
       try {
-        const response = await api.get('/admin/uploads', {
-          params: { limit: 20, page: currentPage, search: searchQuery },
-        });
+        const response = await api.get('/admin/uploads');
         setAvailableImages(response.data);
       } catch (error) {
-        console.error('Erro ao buscar imagens:', error);
+        console.error('Erro ao buscar as imagens disponíveis:', error);
       }
     };
 
     fetchAvailableImages();
-  }, [currentPage, searchQuery]);
-
-  const handleChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
   }, []);
 
-  const handleImageSelection = useCallback(
-    (image) => {
-      if (selectedImages.length < 5 && !selectedImages.includes(image.key)) {
-        setSelectedImages((prevSelectedImages) => [
-          ...prevSelectedImages,
-          image,
-        ]);
-      }
-    },
-    [selectedImages]
-  );
-
-  const handleRemoveImage = useCallback(
-    (imageKey) => {
-      setSelectedImages((prevSelectedImages) =>
-        prevSelectedImages.filter((image) => image.key !== imageKey)
-      );
-    },
-    []
-  );
-
-  const handleImageModalToggle = () => {
-    setIsImageModalOpen(!isImageModalOpen);
+  const handleChange = e => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset page when the search query changes
+  const handleOpenModal = () => {
+    setIsImageModalOpen(true);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handleCloseModal = () => {
+    setIsImageModalOpen(false);
+  };
+
+  const handleNext = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
+  const handlePrev = () => {
+    setCurrentPage(currentPage - 1);
+  };
+
+  const handleSearch = event => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleRemoveImage = key => {
+    setSelectedImages(selectedImages.filter(image => image.key !== key));
+  };
+
+  const handleImageSelection = (image) => {
+    setSelectedImages([...selectedImages, image]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Mapeie apenas as chaves das imagens
-    const imageKeys = selectedImages.map((image) => image);
-  
     const productData = {
       ...formData,
-      image_keys: imageKeys,
+      image_keys: selectedImages.map(image => image.key),
     };
   
     try {
@@ -105,13 +94,12 @@ const CreateProduct = () => {
       console.error('Erro ao cadastrar o produto:', error);
     }
   };
-  
 
   return (
-    <div>
+    <div className="container">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-        <h1>Cadastrar Produto</h1>
+          <h1>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
           <input
             type="text"
@@ -145,7 +133,7 @@ const CreateProduct = () => {
             onChange={handleChange}
           >
             <option value="">Selecione uma categoria</option>
-            {categories.map((category) => (
+            {categories.map(category => (
               <option key={category.id} value={category.id}>
                 {category.categoryName}
               </option>
@@ -154,72 +142,48 @@ const CreateProduct = () => {
         </div>
         <div className="form-group">
           <label htmlFor="images">Imagens do Produto</label>
-          <button type="button" onClick={handleImageModalToggle}>
+          <button type="button" onClick={handleOpenModal}>
             Incluir Imagens
           </button>
           <button type="submit">Cadastrar Produto</button>
-          {!!selectedImages.length && (
-            <div>
-              <p>Imagens selecionadas:</p>
-              <ul>
-                {selectedImages.map((image) => (
-                  <li key={image}>
-                    {image}{' '}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(image)}
-                    >
-                      Remover
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </form>
 
-      {isImageModalOpen && (
-        <div className="container">
-          <div>
-            <label htmlFor="search">Buscar Imagens: </label>
-            <input
-              type="text"
-              id="search"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-          </div>
-          <div className="image-list">
-            {availableImages.map((image) => (
-              <div key={image.key}>
-                <img
-                  src={image.url}
-                  alt={`Imagem ${image.key}`}
-                  onClick={() => handleImageSelection(image.key)}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="pagination">
-            <button
-              type="button"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Anterior
-            </button>
-            <span>{currentPage}</span>
-            <button
-              type="button"
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
-              Próxima
-            </button>
-          </div>
-          <button type="button" onClick={handleImageModalToggle}>
-            Fechar
-          </button>
+      <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
+        <button onClick={handlePrev}>Anterior</button>
+        <button onClick={handleNext}>Próximo</button>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Buscar imagens..."
+        />
+        {availableImages.map(image => (
+          <img
+            className="image-in-modal"
+            src={image.url}
+            alt={image.name}
+            key={image.key}
+            onClick={() => handleImageSelection(image)}
+          />
+        ))}
+        <button onClick={handleCloseModal}>Fechar</button>
+      </Modal>
+
+      {!!selectedImages.length && (
+        <div className="product-images">
+          <h2>Imagens selecionadas:</h2>
+          {selectedImages.map(image => (
+            <div key={image.key}>
+              <img
+               className="selected-image"
+               src={image.url}
+               alt={image.key} />
+              <button onClick={() => handleRemoveImage(image.key)}>
+                Remover
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

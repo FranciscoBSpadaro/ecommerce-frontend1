@@ -5,7 +5,8 @@ body {
   background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Faz com que o conteúdo ocupe pelo menos a altura da tela */
+  min-height: 100vh;
+  /* Faz com que o conteúdo ocupe pelo menos a altura da tela */
 }
 
 header {
@@ -29,7 +30,8 @@ nav a {
 }
 
 nav li {
-  list-style: none; /* Remover marcadores de lista */
+  list-style: none;
+  /* Remover marcadores de lista */
 }
 
 nav a:hover {
@@ -38,19 +40,46 @@ nav a:hover {
 
 .container {
   display: flex;
-  flex-direction: row-reverse;
+  align-items: flex-end;
+  justify-content: space-evenly;
 }
 
 .container-upload {
   display: grid;
   justify-content: center;
 }
+
+.uploaded-images {
+  display: flex;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.product-images {
+   display: grid;
+   justify-content: end
+}
+
+.image-in-modal {
+  width: 150px; /* ajuste conforme necessário */
+  height: 150px; /* ajuste conforme necessário */
+  object-fit: cover;
+}
+
+.selected-image {
+  width: 100px; /* ajuste conforme necessário */
+  height: 100px; /* ajuste conforme necessário */
+  object-fit: cover;
+}
+
 .center-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Centraliza verticalmente na tela */
+  height: 50vh;
+  /* Centraliza verticalmente na tela */
 }
 
 .center-container-login {
@@ -81,7 +110,8 @@ nav a:hover {
 .side-menu,
 .main-content,
 .right-menu {
-  width: 30%; /* Ajuste o valor conforme necessário */
+  width: 30%;
+  /* Ajuste o valor conforme necessário */
 }
 
 .side-menu,
@@ -124,12 +154,12 @@ ul {
   padding: 0;
 }
 
-ul > li {
+ul>li {
   list-style-type: none;
   margin-bottom: 10px;
 }
 
-ul > li > button {
+ul>li>button {
   margin-right: 10px;
 }
 
@@ -210,7 +240,8 @@ ul > li > button {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px; /* Defina a altura desejada */
+  height: 200px;
+  /* Defina a altura desejada */
 }
 
 .loading-animation:before,
@@ -225,7 +256,11 @@ ul > li > button {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  0% {
+    transform: rotate(0deg);
+  }
 
+  100% {
+    transform: rotate(360deg);
+  }
+}
