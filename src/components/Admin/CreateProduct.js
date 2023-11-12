@@ -17,6 +17,9 @@ const CreateProduct = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -76,28 +79,54 @@ const CreateProduct = () => {
   };
 
   const handleImageSelection = (image) => {
-    setSelectedImages([...selectedImages, image]);
+    if (selectedImages.map(img => img.key).includes(image.key)) {
+      setSelectedImages(selectedImages.filter(img => img.key !== image.key));
+    } else {
+      if (selectedImages.length >= 5) {
+        setErrorMessage('O máximo de imagens por produto é 5.');
+        setTimeout(() => {
+          setErrorMessage('');
+        }, 5000);
+        return;
+      }
+      setSelectedImages([...selectedImages, image]);
+    }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-  
+    setIsLoading(true);
+
     const productData = {
       ...formData,
       image_keys: selectedImages.map(image => image.key),
     };
-  
+
     try {
-      const response = await api.post('/admin/products', productData);
-      console.log('Produto cadastrado com sucesso:', response.data);
+      const response = await api.post('/admin/products', productData, {});
+
+      if (response.status === 201) {
+        setSuccessMessage('Produto cadastrado com sucesso');
+        setTimeout(() => {
+          setSuccessMessage('');
+          window.location.reload();
+        }, 5000);
+      }
     } catch (error) {
-      console.error('Erro ao cadastrar o produto:', error);
+      setErrorMessage(error.response.data.message);
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 5000);
     }
+
+    setIsLoading(false);
   };
 
   return (
     <div className="container">
       <form onSubmit={handleSubmit}>
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <div className="form-group">
           <h1>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
@@ -145,29 +174,45 @@ const CreateProduct = () => {
           <button type="button" onClick={handleOpenModal}>
             Incluir Imagens
           </button>
-          <button type="submit">Cadastrar Produto</button>
+          <button
+            type="submit"
+            disabled={
+              isLoading && (
+                <div className="loading-animation">
+                  <p>Cadastrando...</p>
+                </div>
+              )
+            }
+          >
+            {' '}
+            {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}{' '}
+          </button>
         </div>
       </form>
 
       <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
         <button onClick={handlePrev}>Anterior</button>
         <button onClick={handleNext}>Próximo</button>
+        <button className="modal-close" onClick={handleCloseModal}>
+          Fechar
+        </button>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Buscar imagens..."
         />
+        <p>Imagens selecionadas: {selectedImages.length}</p>
         {availableImages.map(image => (
-          <img
-            className="image-in-modal"
-            src={image.url}
-            alt={image.name}
-            key={image.key}
-            onClick={() => handleImageSelection(image)}
-          />
-        ))}
-        <button onClick={handleCloseModal}>Fechar</button>
+  <img
+    className={`image-in-modal ${selectedImages.map(img => img.key).includes(image.key) ? 'selected-image-modal' : ''}`}
+    src={image.url}
+    alt={image.name}
+    key={image.key}
+    onClick={() => handleImageSelection(image)}
+  />
+))}
       </Modal>
 
       {!!selectedImages.length && (
@@ -175,10 +220,7 @@ const CreateProduct = () => {
           <h2>Imagens selecionadas:</h2>
           {selectedImages.map(image => (
             <div key={image.key}>
-              <img
-               className="selected-image"
-               src={image.url}
-               alt={image.key} />
+              <img className="selected-image" src={image.url} alt={image.key} />
               <button onClick={() => handleRemoveImage(image.key)}>
                 Remover
               </button>

@@ -61,11 +61,20 @@ nav a:hover {
    justify-content: end
 }
 
+.modal-close {
+  float: right;
+}
+
 .image-in-modal {
   width: 150px; /* ajuste conforme necessário */
   height: 150px; /* ajuste conforme necessário */
   object-fit: cover;
 }
+
+.selected-image-modal {
+  border: 2px solid blue; /* ajuste conforme necessário */
+}
+
 
 .selected-image {
   width: 100px; /* ajuste conforme necessário */
