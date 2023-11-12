@@ -49,3 +49,22 @@ export const Preview = styled.div`
   background-position: 50% 50%;
   margin-right: 10px;
 `;
+
+export const DeleteButton = styled.button`
+  background-color: #e57878;
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #ca6161;
+    color: white;
+  }
+
+  &:active {
+    background-color: #a14343;
+  }
+`;

@@ -40,6 +40,11 @@ nav a:hover {
   display: flex;
   flex-direction: row-reverse;
 }
+
+.container-upload {
+  display: grid;
+  justify-content: center;
+}
 .center-container {
   display: flex;
   flex-direction: column;

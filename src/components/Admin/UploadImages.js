@@ -5,127 +5,120 @@ import api from "../../api";
 import Upload from "./Uploads";
 import FileList from "./FileList";
 
+class UploadImages extends Component {
+  state = {
+    uploadedFiles: []
+  };
 
-class Uploads extends Component {
-    state = {
-        uploadedFiles: []
-    };
+  // Fetch the uploaded files from the API on component mount
+  componentDidMount() {
+    this.fetchUploadedFiles();
+  }
 
-    async componentDidMount() {
-        try {
-            console.log('componentDidMount called');
-            const response = await api.get("admin/uploads");
-            console.log('API response:', response);
-    
-            // Verifique se os dados retornados pela API são diferentes dos dados atuais no estado
-            if (JSON.stringify(this.state.uploadedFiles) !== JSON.stringify(response.data)) {
-                this.setState({
-                    uploadedFiles: response.data.map(file => ({
-                        id: file._id,
-                        name: file.name,
-                        readableSize: filesize(file.size),
-                        preview: file.url,
-                        uploaded: true,
-                        url: file.url
-                    }))
-                }, () => console.log('State updated:', this.state));
-            }
-        } catch (error) {
-            console.error('API call failed:', error);
+  fetchUploadedFiles = async () => {
+    try {
+      const response = await api.get("admin/uploads");
+      const uploadedFiles = response.data.map(file => ({
+        id: file.id,
+        name: file.name,
+        readableSize: filesize(file.size),
+        preview: file.url,
+        uploaded: true,
+        url: file.url
+      }));
+      this.setState({ uploadedFiles });
+    } catch (error) {
+      console.error(error);
+      // show error message to the user
+    }
+  };
+
+  // Handle file upload
+  handleUpload = files => {
+    const uploadedFiles = files.map(file => ({
+      file,
+      id: uniqueId(),
+      name: file.name,
+      readableSize: filesize(file.size),
+      preview: URL.createObjectURL(file),
+      progress: 0,
+      uploaded: false,
+      error: false,
+      url: null
+    }));
+
+    this.setState({
+      uploadedFiles: [...this.state.uploadedFiles, ...uploadedFiles]
+    });
+
+    uploadedFiles.forEach(this.processUpload);
+  };
+
+  // Process file upload for the given uploaded file
+  processUpload = async uploadedFile => {
+    const data = new FormData();
+    data.append("file", uploadedFile.file, uploadedFile.name);
+
+    try {
+      const response = await api.post("admin/uploads", data, {
+        onUploadProgress: e => {
+          const progress = parseInt(Math.round((e.loaded * 100) / e.total));
+          this.updateFile(uploadedFile.id, { progress });
         }
+      });
+
+      this.updateFile(uploadedFile.id, {
+        uploaded: true,
+        id: response.data.id,
+        url: response.data.url
+      });
+    } catch (error) {
+      console.error(error);
+      this.updateFile(uploadedFile.id, { error: true });
+      // show error message to the user
     }
+  };
 
-    handleUpload = files => {
-        const uploadedFiles = files.map(file => ({
-            file,
-            id: uniqueId(),
-            name: file.name,
-            readableSize: filesize(file.size),
-            preview: URL.createObjectURL(file),
-            progress: 0,
-            uploaded: false,
-            error: false,
-            url: null
-        }));
+  // Update the file with the given ID with the new data
+  updateFile = (id, data) => {
+    this.setState({
+      uploadedFiles: this.state.uploadedFiles.map(file =>
+        file.id === id ? { ...file, ...data } : file
+      )
+    });
+  };
 
-        this.setState({
-            uploadedFiles: this.state.uploadedFiles.concat(uploadedFiles)
-        });
-
-        uploadedFiles.forEach(this.processUpload);
-    };
-
-    updateFile = (id, data) => {
-        this.setState({
-            uploadedFiles: this.state.uploadedFiles.map(uploadedFile => {
-                return id === uploadedFile.id
-                    ? { ...uploadedFile, ...data }
-                    : uploadedFile;
-            })
-        });
-    };
-
-    processUpload = uploadedFile => {
-        const data = new FormData();
-
-        data.append("file", uploadedFile.file, uploadedFile.name);
-
-        api
-            .post("admin/uploads", data, {
-                onUploadProgress: e => {
-                    const progress = parseInt(Math.round((e.loaded * 100) / e.total));
-
-                    this.updateFile(uploadedFile.id, {
-                        progress
-                    });
-                }
-            })
-            .then(response => {
-                this.updateFile(uploadedFile.id, {
-                    uploaded: true,
-                    id: response.data._id,
-                    url: response.data.url
-                });
-            })
-            .catch(() => {
-                this.updateFile(uploadedFile.id, {
-                    error: true
-                });
-            });
-    };
-
-    handleDelete = async id => {
-        await api.delete(`admin/uploads/${id}`);
-
-        this.setState({
-            uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id)
-        });
-    };
-
-    componentWillUnmount() {
-        this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
+  // Delete the uploaded file with the given ID
+  handleDelete = async id => {
+    try {
+      await api.delete(`admin/uploads/${id}`);
+      this.setState({
+        uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id)
+      });
+    } catch (error) {
+      console.error(error);
+      // show error message to the user
     }
+  };
 
-    render() {
-        const { uploadedFiles } = this.state;
+  // Revoke the object URL for the preview image on component unmount
+  componentWillUnmount() {
+    this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
+  }
 
-        return (
-            <div className="container">
-                <header>
-                    <h1>Upload de Imagens</h1>
-                </header>
+  render() {
+    const { uploadedFiles } = this.state;
 
-                <main>
-                    <Upload onUpload={this.handleUpload} />
-
-                    {!!uploadedFiles.length && (
-                        <FileList files={uploadedFiles} onDelete={this.handleDelete} />
-                    )}
-                </main>
-            </div>
-        );
-    }
+    return (
+      <div className="container-upload">
+        <h1>Upload de Imagens</h1>
+        <Upload onUpload={this.handleUpload} />
+        {uploadedFiles.length > 0 && (
+          <FileList files={uploadedFiles} onDelete={this.handleDelete} />
+        )}
+      </div>
+    );
+  }
 }
 
-
-export default Uploads;
+export default UploadImages;
