@@ -50,8 +50,8 @@ export const FileInfo = styled.div`
 `;
 
 export const Preview = styled.div`
-  width: 46px;
-  height: 46px;
+  width: 56px;    /* Ajuste conforme necessário o tamanho das imagens */
+  height: 56px;
   border-radius: 5px;
   background-image: url(${props => props.src});
   background-repeat: no-repeat;

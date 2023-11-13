@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
-import { CircularProgressbar } from 'react-circular-progressbar';
-import { MdCheckCircle, MdError, MdLink } from 'react-icons/md';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useCallback } from "react";
+import { CircularProgressbar } from "react-circular-progressbar";
+import { MdCheckCircle, MdError, MdLink } from "react-icons/md";
+import PropTypes from "prop-types";
 
-import { Container, FileInfo, Preview, DeleteButton } from './styles';
+import { Container, FileInfo, Preview, DeleteButton } from "./styles";
 
 function FileList({ files, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const filesPerPage = 40;
-
-  const indexOfLastFile = currentPage * filesPerPage;
-  const indexOfFirstFile = indexOfLastFile - filesPerPage;
-  const currentFiles = files.slice(indexOfFirstFile, indexOfLastFile);
+  const filesPerPage = 45;
 
   const totalPages = Math.ceil(files.length / filesPerPage);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage(prevPage => prevPage + 1);
     }
-  };
+  }, [currentPage, totalPages]);
 
-  const handlePreviousPage = () => {
+  const handlePreviousPage = useCallback(() => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(prevPage => prevPage - 1);
     }
-  };
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (files.length % filesPerPage === 0 && files.length !== 0) {
+      handleNextPage();
+    }
+  }, [files.length, filesPerPage, handleNextPage]);
+
+  useEffect(() => {
+    setCurrentPage(totalPages);
+  }, [totalPages]);
+
+  const currentFiles = files.slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage);
+
 
   return (
     <Container className="uploaded-images">
@@ -79,12 +88,14 @@ function FileList({ files, onDelete }) {
           </div>
         </li>
       ))}
+      <div className="uploaded-images">
       <button onClick={handlePreviousPage} disabled={currentPage === 1}>
         Voltar
       </button>
       <button onClick={handleNextPage} disabled={currentPage === totalPages}>
         Avançar
       </button>
+      </div>
     </Container>
   );
 }
@@ -100,7 +111,7 @@ FileList.propTypes = {
       uploaded: PropTypes.bool,
       error: PropTypes.bool,
       url: PropTypes.string,
-    }),
+    })
   ).isRequired,
   onDelete: PropTypes.func.isRequired,
 };
