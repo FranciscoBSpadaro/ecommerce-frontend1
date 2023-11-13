@@ -78,7 +78,7 @@ const Home = () => {
         responsive={responsiveSettings}
         arrows
         showDots={true} // exibir os pontos de navegação
-        infinite={true} // rolagem infinita
+        infinite={false} // rolagem infinita
         slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
         renderArrowPrev={(onClickHandler, hasPrev) =>
           renderArrow('left', onClickHandler, !hasPrev)
@@ -96,6 +96,8 @@ const Home = () => {
             <Card.Body>
               <Card.Title>{product.productName}</Card.Title>
               <Card.Text>Preço: R$ {product.price.toFixed(2)}</Card.Text>
+              <Card.Text>Descrição: {product.description}</Card.Text>
+              <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
             </Card.Body>
           </Card>
         ))}
