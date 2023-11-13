@@ -20,6 +20,7 @@ const CreateProduct = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [apiError, setApiError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -71,11 +72,26 @@ const CreateProduct = () => {
     setCurrentPage(currentPage - 1);
   };
 
-// Função para lidar com a pesquisa
-const handleSearch = (event) => {
-  const query = event.target.value;
-  setAvailableImages(setSearchQuery.filter(image => image.name.includes(query)));
-};
+  const handleSearchChange = event => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleSearchSubmit = async event => {
+    if (event.key === 'Enter') {
+      // precionar enter e realiza a busca
+      event.preventDefault();
+      try {
+        const response = await api.get(
+          `/admin/uploads/images?name=${searchQuery}`,
+        );
+        setAvailableImages(response.data);
+        setApiError(null); // Limpar o erro anterior
+      } catch (error) {
+        console.error('Erro ao buscar as imagens:', error);
+        setApiError('Imagen não localizada , verifique o nome digitado.');
+      }
+    }
+  };
 
   const handleRemoveImage = key => {
     setSelectedImages(selectedImages.filter(image => image.key !== key));
@@ -96,15 +112,12 @@ const handleSearch = (event) => {
     }
   };
 
-  
-
   // Função para lidar com a mudança no campo de preço
-const handlePriceChange = (event) => {
-  let value = event.target.value;
-  value = value.replace(',', '.'); // Substitua vírgulas por pontos
-  setFormData({ ...formData, price: value });
-};
-
+  const handlePriceChange = event => {
+    let value = event.target.value;
+    value = value.replace(',', '.'); // Substitua vírgulas por pontos
+    setFormData({ ...formData, price: value });
+  };
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -139,19 +152,21 @@ const handlePriceChange = (event) => {
 
   return (
     <div className="container">
-    <form onSubmit={handleSubmit}>
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <div className="form-group">
-        <h1>Cadastrar Produto</h1>
-        <label htmlFor="productName">Nome do Produto</label>
-        <input
-          type="text"
-          id="productName"
-          value={formData.productName}
-          onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-          required // Torne o preenchimento obrigatório
-        />
+      <form onSubmit={handleSubmit}>
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <div className="form-group">
+          <h1>Cadastrar Produto</h1>
+          <label htmlFor="productName">Nome do Produto</label>
+          <input
+            type="text"
+            id="productName"
+            value={formData.productName}
+            onChange={e =>
+              setFormData({ ...formData, productName: e.target.value })
+            }
+            required // Torne o preenchimento obrigatório
+          />
           <label htmlFor="quantity">Quantidade</label>
           <input
             type="number"
@@ -162,14 +177,14 @@ const handlePriceChange = (event) => {
           />
         </div>
         <div className="form-group">
-        <label htmlFor="price">Preço</label>
-        <input
-          type="number" // Altere o tipo para number
-          id="price"
-          value={formData.price}
-          onChange={handlePriceChange} // Use a função handlePriceChange
-          required // Torne o preenchimento obrigatório
-        />
+          <label htmlFor="price">Preço</label>
+          <input
+            type="number" // Altere o tipo para number
+            id="price"
+            value={formData.price}
+            onChange={handlePriceChange} // Use a função handlePriceChange
+            required // Torne o preenchimento obrigatório
+          />
         </div>
         <div className="form-group">
           <label htmlFor="description">Descrição</label>
@@ -223,26 +238,32 @@ const handlePriceChange = (event) => {
           Fechar
         </button>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        {apiError && <p style={{ color: 'red' }}>{apiError}</p>}
         <input
           type="text"
           value={searchQuery}
-          onChange={handleSearch} // Use a função handleSearch
-          placeholder="Buscar imagens..."
+          onChange={handleSearchChange}
+          onKeyDown={handleSearchSubmit}
+          placeholder="Buscar imagens: Digite o nome da imagem e precione enter... 🔍"
         />
         <p>Imagens selecionadas: {selectedImages.length}</p>
-        {availableImages.slice(0, 44).map(image => ( // Use slice para pegar as primeiras 44 imagens
-          <img
-            className={`image-in-modal ${
-              selectedImages.map(img => img.key).includes(image.key)
-                ? 'selected-image-modal'
-                : ''
-            }`}
-            key={image.key}
-            src={image.url}
-            alt={image.name}
-            onClick={() => handleImageSelection(image)}
-          />
-        ))}
+        {availableImages.slice(0, 44).map(
+          (
+            image, // Use slice para pegar as primeiras 44 imagens
+          ) => (
+            <img
+              className={`image-in-modal ${
+                selectedImages.map(img => img.key).includes(image.key)
+                  ? 'selected-image-modal'
+                  : ''
+              }`}
+              key={image.key}
+              src={image.url}
+              alt={image.name}
+              onClick={() => handleImageSelection(image)}
+            />
+          ),
+        )}
       </Modal>
 
       {!!selectedImages.length && (
