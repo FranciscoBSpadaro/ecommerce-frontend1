@@ -12,6 +12,7 @@ const CreateProduct = () => {
   });
 
   const [categories, setCategories] = useState([]);
+  const [quantity, setQuantity] = useState('');
   const [availableImages, setAvailableImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -70,15 +71,17 @@ const CreateProduct = () => {
     setCurrentPage(currentPage - 1);
   };
 
-  const handleSearch = event => {
-    setSearchQuery(event.target.value);
-  };
+// Função para lidar com a pesquisa
+const handleSearch = (event) => {
+  const query = event.target.value;
+  setAvailableImages(setSearchQuery.filter(image => image.name.includes(query)));
+};
 
   const handleRemoveImage = key => {
     setSelectedImages(selectedImages.filter(image => image.key !== key));
   };
 
-  const handleImageSelection = (image) => {
+  const handleImageSelection = image => {
     if (selectedImages.map(img => img.key).includes(image.key)) {
       setSelectedImages(selectedImages.filter(img => img.key !== image.key));
     } else {
@@ -93,13 +96,23 @@ const CreateProduct = () => {
     }
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setIsLoading(true);
+  
+
+  // Função para lidar com a mudança no campo de preço
+const handlePriceChange = (event) => {
+  let value = event.target.value;
+  value = value.replace(',', '.'); // Substitua vírgulas por pontos
+  setFormData({ ...formData, price: value });
+};
+
+
+  const handleSubmit = async event => {
+    event.preventDefault();
 
     const productData = {
       ...formData,
       image_keys: selectedImages.map(image => image.key),
+      quantity,
     };
 
     try {
@@ -122,32 +135,41 @@ const CreateProduct = () => {
     setIsLoading(false);
   };
 
-  Modal.setAppElement('#root') // or appElement="#root"
-
+  Modal.setAppElement('#root'); // or appElement="#root"
 
   return (
     <div className="container">
-      <form onSubmit={handleSubmit}>
-        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        <div className="form-group">
-          <h1>Cadastrar Produto</h1>
-          <label htmlFor="productName">Nome do Produto</label>
+    <form onSubmit={handleSubmit}>
+      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      <div className="form-group">
+        <h1>Cadastrar Produto</h1>
+        <label htmlFor="productName">Nome do Produto</label>
+        <input
+          type="text"
+          id="productName"
+          value={formData.productName}
+          onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+          required // Torne o preenchimento obrigatório
+        />
+          <label htmlFor="quantity">Quantidade</label>
           <input
-            type="text"
-            name="productName"
-            value={formData.productName}
-            onChange={handleChange}
+            type="number"
+            id="quantity"
+            value={quantity}
+            onChange={e => setQuantity(e.target.value)}
+            required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="price">Preço</label>
-          <input
-            type="text"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-          />
+        <label htmlFor="price">Preço</label>
+        <input
+          type="number" // Altere o tipo para number
+          id="price"
+          value={formData.price}
+          onChange={handlePriceChange} // Use a função handlePriceChange
+          required // Torne o preenchimento obrigatório
+        />
         </div>
         <div className="form-group">
           <label htmlFor="description">Descrição</label>
@@ -163,6 +185,7 @@ const CreateProduct = () => {
             name="categoryId"
             value={formData.categoryId}
             onChange={handleChange}
+            required // Torne o preenchimento obrigatório
           >
             <option value="">Selecione uma categoria</option>
             {categories.map(category => (
@@ -203,19 +226,23 @@ const CreateProduct = () => {
         <input
           type="text"
           value={searchQuery}
-          onChange={handleSearch}
+          onChange={handleSearch} // Use a função handleSearch
           placeholder="Buscar imagens..."
         />
         <p>Imagens selecionadas: {selectedImages.length}</p>
-        {availableImages.map(image => (
-  <img
-    className={`image-in-modal ${selectedImages.map(img => img.key).includes(image.key) ? 'selected-image-modal' : ''}`}
-    src={image.url}
-    alt={image.name}
-    key={image.key}
-    onClick={() => handleImageSelection(image)}
-  />
-))}
+        {availableImages.slice(0, 44).map(image => ( // Use slice para pegar as primeiras 44 imagens
+          <img
+            className={`image-in-modal ${
+              selectedImages.map(img => img.key).includes(image.key)
+                ? 'selected-image-modal'
+                : ''
+            }`}
+            key={image.key}
+            src={image.url}
+            alt={image.name}
+            onClick={() => handleImageSelection(image)}
+          />
+        ))}
       </Modal>
 
       {!!selectedImages.length && (
