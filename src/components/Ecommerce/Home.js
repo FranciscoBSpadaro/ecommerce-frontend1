@@ -1,19 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
-import '../../App.css';
-import { Carousel } from 'react-responsive-carousel';
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import Carousel from 'react-multi-carousel';
+import 'react-multi-carousel/lib/styles.css';
 import { ReactComponent as ArrowRight } from '../../Assets/right-arrow.svg';
 import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow.svg';
 
-function Home() {
+const responsiveSettings = {
+  superLargeDesktop: {
+    breakpoint: { max: 4000, min: 3000 },
+    items: 5,
+    draggable: false
+  },
+  desktop: {
+    breakpoint: { max: 3000, min: 1024 },
+    items: 5,
+    draggable: false
+  },
+  tablet: {
+    breakpoint: { max: 1024, min: 464 },
+    items: 2,
+    draggable: true
+  },
+  mobile: {
+    breakpoint: { max: 464, min: 0 },
+    items: 1,
+    draggable: true
+  }
+};
+
+const Home = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/public/products');
-        setProducts(response.data);
+        const { data } = await api.get('/public/products');
+        setProducts(data);
       } catch (error) {
         console.error('Erro ao buscar os produtos:', error);
       }
@@ -22,53 +44,62 @@ function Home() {
     fetchProducts();
   }, []);
 
-  const arrowStyles = {
-    position: 'absolute',
-    zIndex: 2,
-    top: 'calc(50% - 15px)',
-    width: 30,
-    height: 30,
-    cursor: 'pointer',
+  const renderArrow = (direction, onClickHandler, isDisabled = false) => {
+    const arrowStyle = {
+      position: 'absolute',
+      zIndex: 2,
+      top: 'calc(50% - 15px)',
+      width: 30,
+      height: 30,
+      cursor: 'pointer',
+      [direction]: 25,
+      opacity: isDisabled ? 0.5 : 1,
+      pointerEvents: isDisabled ? 'none' : 'auto'
+    };
+
+    const ArrowComponent = direction === 'left' ? ArrowLeft : ArrowRight;
+    const label = direction === 'left' ? 'Anterior' : 'Próximo';
+
+    return (
+      <ArrowComponent
+        onClick={onClickHandler}
+        title={label}
+        style={arrowStyle}
+      />
+    );
   };
 
-  const ArrowPrev = (onClickHandler, hasPrev, label) => 
-    hasPrev && (
-      <ArrowLeft onClick={onClickHandler} title={label} style={{ ...arrowStyles, left: 25 }} />
-    );
-
-  const ArrowNext = (onClickHandler, hasNext, label) => 
-    hasNext && (
-      <ArrowRight onClick={onClickHandler} title={label} style={{ ...arrowStyles, right: 25 }} />
-    );
-
   return (
-    <div className="container">
-      <h2>Ofertas Do Dia</h2>
-      <Carousel 
-        showThumbs={false} 
-        showStatus={false} 
-        showIndicators={false} 
-        infiniteLoop 
-        useKeyboardArrows
-        renderArrowPrev={ArrowPrev}
-        renderArrowNext={ArrowNext}
-      >
-        {products.map((product, index) => (
-          <div key={index}>
-            <p>Nome: {product.productName}</p>
-            <p>Preço: R$ {product.price}</p>
-            {product.image_keys && product.image_keys.length > 0 && (
-              <img
-                src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
-                alt={`Imagem de ${product.productName}`}
-                style={{ width: '200px', height: '200px' }}
-              />
-            )}
-          </div>
-        ))}
-      </Carousel>
-    </div>
+    <section>
+      <h2>Ofertas do Dia</h2>
+      {products && products.length > 0 ? (
+        <Carousel
+          responsive={responsiveSettings}
+          arrows
+          showDots={true}
+          infinite={true}
+          renderArrowPrev={(onClickHandler, hasPrev) => renderArrow('left', onClickHandler, !hasPrev)}
+          renderArrowNext={(onClickHandler, hasNext) => renderArrow('right', onClickHandler, !hasNext)}
+        >
+          {products.map(({ id, productName, price, image_keys }) => (
+            <div key={id}>
+              <p>Nome: {productName}</p>
+              <p>Preço: R$ {price.toFixed(2)}</p>
+              {image_keys && image_keys.length > 0 && (
+                <img
+                  src={`${process.env.REACT_APP_AWS_S3_URL}${image_keys[0]}`}
+                  alt={`Imagem de ${productName}`}
+                  style={{ width: '200px', height: '200px' }}
+                />
+              )}
+            </div>
+          ))}
+        </Carousel>
+      ) : (
+        <p>Carregando ofertas...</p>
+      )}
+    </section>
   );
-}
+};
 
 export default Home;
