@@ -36,12 +36,22 @@ export const FileInfo = styled.div`
         cursor: pointer;
       }
     }
+
+    strong {
+      font-size: 14px;
+
+      /* exibir apenas os 10 primeiros caracteres do nome do arquivo , os caracteres extras serão substituídos por "..." graças às propriedades text-overflow: ellipsis e white-space: nowrap.*/
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 105px; /* Ajuste conforme necessário */
+    }
   }
 `;
 
 export const Preview = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 46px;
+  height: 46px;
   border-radius: 5px;
   background-image: url(${props => props.src});
   background-repeat: no-repeat;

@@ -1,14 +1,35 @@
-import React from "react";
-import { CircularProgressbar } from "react-circular-progressbar";
-import { MdCheckCircle, MdError, MdLink } from "react-icons/md";
-import PropTypes from "prop-types";
+import React, { useState } from 'react';
+import { CircularProgressbar } from 'react-circular-progressbar';
+import { MdCheckCircle, MdError, MdLink } from 'react-icons/md';
+import PropTypes from 'prop-types';
 
-import { Container, FileInfo, Preview, DeleteButton } from "./styles";
+import { Container, FileInfo, Preview, DeleteButton } from './styles';
 
 function FileList({ files, onDelete }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const filesPerPage = 40;
+
+  const indexOfLastFile = currentPage * filesPerPage;
+  const indexOfFirstFile = indexOfLastFile - filesPerPage;
+  const currentFiles = files.slice(indexOfFirstFile, indexOfLastFile);
+
+  const totalPages = Math.ceil(files.length / filesPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
     <Container className="uploaded-images">
-      {files.map((file) => (
+      {currentFiles.map(file => (
         <li key={file.id}>
           <FileInfo>
             <Preview src={file.preview} />
@@ -26,22 +47,21 @@ function FileList({ files, onDelete }) {
           </FileInfo>
 
           <div>
-            {!file.uploaded &&
-              !file.error && (
-                <CircularProgressbar
-                  styles={{
-                    root: { width: 24 },
-                    path: { stroke: "#7159c1" }
-                  }}
-                  strokeWidth={10}
-                  value={file.progress}
-                />
-              )}
+            {!file.uploaded && !file.error && (
+              <CircularProgressbar
+                styles={{
+                  root: { width: 24 },
+                  path: { stroke: '#7159c1' },
+                }}
+                strokeWidth={10}
+                value={file.progress}
+              />
+            )}
             {file.deleteProgress && (
               <CircularProgressbar
                 styles={{
                   root: { width: 30 },
-                  path: { stroke: 'red' }
+                  path: { stroke: 'red' },
                 }}
                 strokeWidth={10}
                 value={file.deleteProgress}
@@ -59,13 +79,30 @@ function FileList({ files, onDelete }) {
           </div>
         </li>
       ))}
+      <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+        Voltar
+      </button>
+      <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+        Avançar
+      </button>
     </Container>
   );
 }
 
 FileList.propTypes = {
-  files: PropTypes.array.isRequired,
-  onDelete: PropTypes.func.isRequired
+  files: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      readableSize: PropTypes.string,
+      preview: PropTypes.string,
+      progress: PropTypes.number,
+      uploaded: PropTypes.bool,
+      error: PropTypes.bool,
+      url: PropTypes.string,
+    }),
+  ).isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default FileList;

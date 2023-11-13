@@ -101,7 +101,7 @@ class UploadImages extends Component {
       // Pare a simulação do progresso se ocorrer um erro
       clearInterval(uploadProgressInterval);
   
-      this.showMessage('Erro no upload da imagem', 'error');
+      this.showMessage('Erro no Upload da imagem , verifique o formato do arquivo ou o tamanho da imagem.', 'error');
       this.updateFile(uploadedFile.id, { error: true });
     }
   };

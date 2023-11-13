@@ -122,6 +122,9 @@ const CreateProduct = () => {
     setIsLoading(false);
   };
 
+  Modal.setAppElement('#root') // or appElement="#root"
+
+
   return (
     <div className="container">
       <form onSubmit={handleSubmit}>
