@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { ReactComponent as ArrowRight } from '../../Assets/right-arrow.svg';
+import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow.svg';
 
-const Home = () => {
+function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -18,30 +22,53 @@ const Home = () => {
     fetchProducts();
   }, []);
 
+  const arrowStyles = {
+    position: 'absolute',
+    zIndex: 2,
+    top: 'calc(50% - 15px)',
+    width: 30,
+    height: 30,
+    cursor: 'pointer',
+  };
+
+  const ArrowPrev = (onClickHandler, hasPrev, label) => 
+    hasPrev && (
+      <ArrowLeft onClick={onClickHandler} title={label} style={{ ...arrowStyles, left: 25 }} />
+    );
+
+  const ArrowNext = (onClickHandler, hasNext, label) => 
+    hasNext && (
+      <ArrowRight onClick={onClickHandler} title={label} style={{ ...arrowStyles, right: 25 }} />
+    );
+
   return (
     <div className="container">
-      <h1>Produtos</h1>
-      <ul>
+      <h2>Ofertas Do Dia</h2>
+      <Carousel 
+        showThumbs={false} 
+        showStatus={false} 
+        showIndicators={false} 
+        infiniteLoop 
+        useKeyboardArrows
+        renderArrowPrev={ArrowPrev}
+        renderArrowNext={ArrowNext}
+      >
         {products.map((product, index) => (
-          <li key={index}>
-            <div>
-              <p>Nome: {product.productName}</p>
-              <p>Preço: R$ {product.price}</p>
-              {product.image_keys && product.image_keys.length > 0 && (
-                <div>
-                  <img
-                    src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
-                    alt={`Imagem de ${product.productName}`}
-                    style={{ width: '200px', height: '200px' }}
-                  />
-                </div>
-              )}
-            </div>
-          </li>
+          <div key={index}>
+            <p>Nome: {product.productName}</p>
+            <p>Preço: R$ {product.price}</p>
+            {product.image_keys && product.image_keys.length > 0 && (
+              <img
+                src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+                alt={`Imagem de ${product.productName}`}
+                style={{ width: '200px', height: '200px' }}
+              />
+            )}
+          </div>
         ))}
-      </ul>
+      </Carousel>
     </div>
   );
-};
+}
 
 export default Home;
