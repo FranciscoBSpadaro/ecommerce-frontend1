@@ -4,28 +4,29 @@ import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { ReactComponent as ArrowRight } from '../../Assets/right-arrow.svg';
 import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow.svg';
+import { Card } from 'react-bootstrap';
 
 const responsiveSettings = {
   superLargeDesktop: {
     breakpoint: { max: 4000, min: 3000 },
     items: 5,
-    draggable: false
+    draggable: false,
   },
   desktop: {
     breakpoint: { max: 3000, min: 1024 },
     items: 5,
-    draggable: false
+    draggable: false, // Adicionado para não permitir arrastar o carrossel
   },
   tablet: {
     breakpoint: { max: 1024, min: 464 },
     items: 2,
-    draggable: true
+    draggable: true,
   },
   mobile: {
     breakpoint: { max: 464, min: 0 },
     items: 1,
-    draggable: true
-  }
+    draggable: true,
+  },
 };
 
 const Home = () => {
@@ -54,7 +55,7 @@ const Home = () => {
       cursor: 'pointer',
       [direction]: 25,
       opacity: isDisabled ? 0.5 : 1,
-      pointerEvents: isDisabled ? 'none' : 'auto'
+      pointerEvents: isDisabled ? 'none' : 'auto', // Adicionado para não permitir clicar no botão quando estiver desabilitado
     };
 
     const ArrowComponent = direction === 'left' ? ArrowLeft : ArrowRight;
@@ -72,32 +73,33 @@ const Home = () => {
   return (
     <section>
       <h2>Ofertas do Dia</h2>
-      {products && products.length > 0 ? (
-        <Carousel
-          responsive={responsiveSettings}
-          arrows
-          showDots={true}
-          infinite={true}
-          renderArrowPrev={(onClickHandler, hasPrev) => renderArrow('left', onClickHandler, !hasPrev)}
-          renderArrowNext={(onClickHandler, hasNext) => renderArrow('right', onClickHandler, !hasNext)}
-        >
-          {products.map(({ id, productName, price, image_keys }) => (
-            <div key={id}>
-              <p>Nome: {productName}</p>
-              <p>Preço: R$ {price.toFixed(2)}</p>
-              {image_keys && image_keys.length > 0 && (
-                <img
-                  src={`${process.env.REACT_APP_AWS_S3_URL}${image_keys[0]}`}
-                  alt={`Imagem de ${productName}`}
-                  style={{ width: '200px', height: '200px' }}
-                />
-              )}
-            </div>
-          ))}
-        </Carousel>
-      ) : (
-        <p>Carregando ofertas...</p>
-      )}
+
+      <Carousel
+        responsive={responsiveSettings}
+        arrows
+        showDots={true} // exibir os pontos de navegação
+        infinite={true} // rolagem infinita
+        slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
+        renderArrowPrev={(onClickHandler, hasPrev) =>
+          renderArrow('left', onClickHandler, !hasPrev)
+        }
+        renderArrowNext={(onClickHandler, hasNext) =>
+          renderArrow('right', onClickHandler, !hasNext)
+        }
+      >
+        {products.map((product, index) => (
+          <Card style={{ width: '18rem' }} key={index}>
+            <Card.Img
+              variant="top"
+              src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+            />
+            <Card.Body>
+              <Card.Title>{product.productName}</Card.Title>
+              <Card.Text>Preço: R$ {product.price.toFixed(2)}</Card.Text>
+            </Card.Body>
+          </Card>
+        ))}
+      </Carousel>
     </section>
   );
 };
