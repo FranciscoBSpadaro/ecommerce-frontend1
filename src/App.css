@@ -65,7 +65,7 @@ nav a:hover {
   display: flex;
   margin-top: 20px;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 .upload-button {
   display: flex;

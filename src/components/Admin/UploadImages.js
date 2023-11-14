@@ -14,6 +14,8 @@ class UploadImages extends Component {
       message: null,
       messageType: null, // 'success' or 'error'
       searchQuery: '',
+      hasMore: false,
+      page: 1,
     };
   }
 
@@ -27,23 +29,43 @@ class UploadImages extends Component {
   };
 
   componentDidMount() {
-    this.fetchUploadedFiles();
+    this.fetchUploadedFiles(this.state.page);
   }
 
-  fetchUploadedFiles = async () => {
+  fetchUploadedFiles = async (page) => {
+    const filesPerPage = 40;  // imagens por pagina
     try {
-      const response = await api.get("admin/uploads");
-      const uploadedFiles = response.data.map(file => ({
-        id: file.id,
-        name: file.name,
-        readableSize: filesize(file.size),
-        preview: file.url,
+      const response = await api.get("admin/uploads", {
+        params: {
+          limit: filesPerPage,
+          offset: (page - 1) * filesPerPage,
+        },
+      });
+      const uploadedFiles = response.data.images.map(file => ({
+        ...file,
+        id: String(file.id),
         uploaded: true,
-        url: file.url
+        preview: file.url,
       }));
-      this.setState({ uploadedFiles });
+      this.setState({ uploadedFiles, hasMore: response.data.hasMore });
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar as imagens:', error);
+    }
+  };
+
+  handleNextPage = () => {
+    if (this.state.hasMore) {
+      const nextPage = this.state.page + 1;
+      this.setState({ page: nextPage });
+      this.fetchUploadedFiles(nextPage);
+    }
+  };
+
+  handlePreviousPage = () => {
+    if (this.state.page > 1) {
+      const previousPage = this.state.page - 1;
+      this.setState({ page: previousPage });
+      this.fetchUploadedFiles(previousPage);
     }
   };
 
@@ -120,26 +142,29 @@ class UploadImages extends Component {
     this.setState({ searchQuery: event.target.value });
   };
 
-  handleSearchSubmit = async (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      try {
-        const response = await api.get('/admin/uploads/images', {
-          params: {
-            name: this.state.searchQuery,
-          },
-        });
-        const uploadedFiles = response.data.map(file => ({
-          ...file,
-          uploaded: true,
-          preview: file.url,
-        }));
-        this.setState({ uploadedFiles });
-      } catch (error) {
-        console.error('Erro ao buscar as imagens:', error);
-      }
+handleSearchSubmit = async (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
+    try {
+      const response = await api.get('/admin/uploads/images', {
+        params: {
+          name: searchQuery,
+          limit: filesPerPage,
+          offset: (page - 1) * filesPerPage,
+        },
+      });
+      const uploadedFiles = response.data.images.map(file => ({
+        ...file,
+        uploaded: true,
+        preview: file.url,
+      }));
+      this.setState({ uploadedFiles });
+    } catch (error) {
+      console.error('Erro ao buscar as imagens:', error);
     }
-  };
+  }
+};
 
   handleDelete = async id => {
     // Inicialize o progresso de exclusão com 0
@@ -175,14 +200,15 @@ class UploadImages extends Component {
       this.showMessage('Erro ao excluir a imagem', 'error');
     }
   };
+  
 
   componentWillUnmount() {
     this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
   }
 
   render() {
-    const { uploadedFiles, message, messageType, searchQuery } = this.state;
-
+    const { uploadedFiles, message, messageType, searchQuery, hasMore, page } = this.state;
+  
     return (
       <div className="container-upload">
         <h1>Upload de Imagens</h1>
@@ -193,8 +219,17 @@ class UploadImages extends Component {
           </p>
         )}
         {uploadedFiles.length > 0 && (
-          <FileList files={uploadedFiles} onDelete={this.handleDelete} />
+          <FileList files={uploadedFiles} onDelete={this.handleDelete} hasMore={hasMore} onNextPage={this.handleNextPage}
+          onPreviousPage={this.handlePreviousPage} />
         )}
+        <div className="uploaded-images">
+          <button onClick={this.handlePreviousPage} disabled={page === 1}>
+            Voltar
+          </button>
+          <button onClick={this.handleNextPage} disabled={!hasMore}>
+            Avançar
+          </button>
+        </div>
         <input
           type="text"
           value={searchQuery}
