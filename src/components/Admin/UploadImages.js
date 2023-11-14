@@ -146,6 +146,10 @@ handleSearchSubmit = async (event) => {
   if (event.key === 'Enter') {
     event.preventDefault();
     const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
+    if (searchQuery.length < 3) {
+      alert('Digite pelo menos 3 caracteres para realizar a busca');
+      return;
+    }
     try {
       const response = await api.get('/admin/uploads/images', {
         params: {
