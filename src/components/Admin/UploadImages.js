@@ -5,13 +5,15 @@ import api from "../../api";
 import Upload from "./Uploads";
 import FileList from "./FileList";
 
+
 class UploadImages extends Component {
   constructor(props) {
     super(props);
     this.state = {
       uploadedFiles: [],
       message: null,
-      messageType: null // 'success' or 'error'
+      messageType: null, // 'success' or 'error'
+      searchQuery: '',
     };
   }
 
@@ -114,6 +116,31 @@ class UploadImages extends Component {
     }));
   };
 
+  handleSearchChange = (event) => {
+    this.setState({ searchQuery: event.target.value });
+  };
+
+  handleSearchSubmit = async (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      try {
+        const response = await api.get('/admin/uploads/images', {
+          params: {
+            name: this.state.searchQuery,
+          },
+        });
+        const uploadedFiles = response.data.map(file => ({
+          ...file,
+          uploaded: true,
+          preview: file.url,
+        }));
+        this.setState({ uploadedFiles });
+      } catch (error) {
+        console.error('Erro ao buscar as imagens:', error);
+      }
+    }
+  };
+
   handleDelete = async id => {
     // Inicialize o progresso de exclusão com 0
     this.updateFile(id, { deleteProgress: 0 });
@@ -154,7 +181,7 @@ class UploadImages extends Component {
   }
 
   render() {
-    const { uploadedFiles, message, messageType } = this.state;
+    const { uploadedFiles, message, messageType, searchQuery } = this.state;
 
     return (
       <div className="container-upload">
@@ -168,9 +195,15 @@ class UploadImages extends Component {
         {uploadedFiles.length > 0 && (
           <FileList files={uploadedFiles} onDelete={this.handleDelete} />
         )}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={this.handleSearchChange}
+          onKeyDown={this.handleSearchSubmit}
+          placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+        />
       </div>
     );
   }
 }
-
 export default UploadImages;
