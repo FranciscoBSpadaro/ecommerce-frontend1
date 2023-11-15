@@ -142,33 +142,35 @@ class UploadImages extends Component {
     this.setState({ searchQuery: event.target.value });
   };
 
-handleSearchSubmit = async (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
-    if (searchQuery.length < 3) {
-      alert('Digite pelo menos 3 caracteres para realizar a busca');
-      return;
+  handleSearchSubmit = async (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
+      if (searchQuery.length < 3) {
+        this.showMessage('Digite pelo menos 3 caracteres para realizar a busca', 'error');
+        return;
+      }
+      try {
+        const response = await api.get('/admin/uploads/images', {
+          params: {
+            name: searchQuery,
+            limit: filesPerPage,
+            offset: (page - 1) * filesPerPage,
+          },
+        });
+        const uploadedFiles = response.data.images.map(file => ({
+          ...file,
+          uploaded: true,
+          preview: file.url,
+        }));
+        this.setState({ uploadedFiles, hasMore: response.data.hasMore });
+        this.showMessage('Busca realizada com sucesso', 'success');
+      } catch (error) {
+        this.showMessage('Erro ao buscar as imagens', 'error');
+        console.error('Erro ao buscar as imagens:', error);
+      }
     }
-    try {
-      const response = await api.get('/admin/uploads/images', {
-        params: {
-          name: searchQuery,
-          limit: filesPerPage,
-          offset: (page - 1) * filesPerPage,
-        },
-      });
-      const uploadedFiles = response.data.images.map(file => ({
-        ...file,
-        uploaded: true,
-        preview: file.url,
-      }));
-      this.setState({ uploadedFiles, hasMore: response.data.hasMore });
-    } catch (error) {
-      console.error('Erro ao buscar as imagens:', error);
-    }
-  }
-};
+  };
 
   handleDelete = async id => {
     // Inicialize o progresso de exclusão com 0
@@ -217,11 +219,6 @@ handleSearchSubmit = async (event) => {
       <div className="container-upload">
         <h1>Upload de Imagens</h1>
         <Upload onUpload={this.handleUpload} />
-        {message && (
-          <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
-            {message}
-          </p>
-        )}
         {uploadedFiles.length > 0 && (
           <FileList files={uploadedFiles} onDelete={this.handleDelete} hasMore={hasMore} onNextPage={this.handleNextPage}
           onPreviousPage={this.handlePreviousPage} />
@@ -234,6 +231,11 @@ handleSearchSubmit = async (event) => {
             Avançar
           </button>
         </div>
+        {message && (
+          <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
+            {message}
+          </p>
+        )}
         <input
           type="text"
           value={searchQuery}
