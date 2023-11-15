@@ -1,37 +1,32 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { uniqueId } from 'lodash';
 import { filesize } from 'filesize';
 import api from '../../api';
 import Upload from './Uploads';
 import FileList from './FileList';
 
-class UploadImages extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      uploadedFiles: [],
-      message: null,
-      messageType: null, // 'success' or 'error'
-      searchQuery: '',
-      hasMore: false,
-      page: 1,
-    };
-  }
+const UploadImagesPage = () => {
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState(null); // 'success' or 'error'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
 
-  showMessage = (message, messageType) => {
-    this.setState({ message, messageType });
+  // Função para exibir mensagem na tela por certo período de tempo.
+  const showMessage = (message, messageType) => {
+    setMessage(message);
+    setMessageType(messageType);
 
-    // Clear the message after 5 seconds
+    // Limpa a mensagem depois de 5 segundos.
     setTimeout(() => {
-      this.setState({ message: null, messageType: null });
+      setMessage(null);
+      setMessageType(null);
     }, 5000);
   };
 
-  componentDidMount() {
-    this.fetchUploadedFiles(this.state.page);
-  }
-
-  fetchUploadedFiles = async page => {
+  // Busca as imagens na API.
+  const fetchUploadedFiles = useCallback(async (page) => {
     const filesPerPage = 40; // imagens por pagina
     try {
       const response = await api.get('admin/uploads', {
@@ -40,36 +35,46 @@ class UploadImages extends Component {
           offset: (page - 1) * filesPerPage,
         },
       });
-      const uploadedFiles = response.data.images.map(file => ({
+      const uploadedFiles = response.data.images.map((file) => ({
         ...file,
         id: String(file.id),
         uploaded: true,
         preview: file.url,
       }));
-      this.setState({ uploadedFiles, hasMore: response.data.hasMore });
+      setUploadedFiles(uploadedFiles);
+      setHasMore(response.data.hasMore);
     } catch (error) {
       console.error('Erro ao buscar as imagens:', error);
+      showMessage('Erro ao buscar as imagens', 'error');
+    }
+  }, []);
+  // Busca as imagens quando a página é carregada ou quando a página muda.
+  useEffect(() => {
+    fetchUploadedFiles(page);
+  }, [page, fetchUploadedFiles]);
+  
+
+  // Vai para a próxima página de imagens.
+  const handleNextPage = () => {
+    if (hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchUploadedFiles(nextPage);
     }
   };
 
-  handleNextPage = () => {
-    if (this.state.hasMore) {
-      const nextPage = this.state.page + 1;
-      this.setState({ page: nextPage });
-      this.fetchUploadedFiles(nextPage);
+  // Vai para a página anterior de imagens.
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      const previousPage = page - 1;
+      setPage(previousPage);
+      fetchUploadedFiles(previousPage);
     }
   };
 
-  handlePreviousPage = () => {
-    if (this.state.page > 1) {
-      const previousPage = this.state.page - 1;
-      this.setState({ page: previousPage });
-      this.fetchUploadedFiles(previousPage);
-    }
-  };
-
-  handleUpload = files => {
-    const uploadedFiles = files.map(file => ({
+  // Faz upload de arquivos.
+  const handleUpload = async (files) => {
+    const uploadedFiles = files.map((file) => ({
       file,
       id: uniqueId(),
       name: file.name,
@@ -80,184 +85,181 @@ class UploadImages extends Component {
       error: false,
       url: null,
     }));
+    setUploadedFiles([...uploadedFiles, ...uploadedFiles]);
 
-    uploadedFiles.forEach(this.processUpload);
+    // Faz o upload dos arquivos.
+    uploadedFiles.forEach(async (uploadedFile) => {
+      const data = new FormData();
+      data.append('file', uploadedFile.file, uploadedFile.name);
 
-    this.setState(prevState => ({
-      uploadedFiles: [...prevState.uploadedFiles, ...uploadedFiles],
-    }));
-  };
+      // Inicialize o progresso com 0.
+      updateFile(uploadedFile.id, { progress: 0 });
 
-  processUpload = async uploadedFile => {
-    const data = new FormData();
-    data.append('file', uploadedFile.file, uploadedFile.name);
+      // Simule o progresso do upload.
+      const uploadProgressInterval = setInterval(() => {
+        setUploadedFiles((prevState) => {
+          const uploadedFiles = [...prevState];
+          const file = uploadedFiles.find((file) => file.id === uploadedFile.id);
 
-    // Inicialize o progresso com 0
-    this.updateFile(uploadedFile.id, { progress: 0 });
+          // Aumente o progresso em 5 a cada segundo.
+          file.progress = Math.min(file.progress + 5, 100);
 
-    // Simule o progresso do upload
-    const uploadProgressInterval = setInterval(() => {
-      this.setState(prevState => {
-        const uploadedFiles = [...prevState.uploadedFiles];
-        const file = uploadedFiles.find(file => file.id === uploadedFile.id);
-
-        // Aumente o progresso em 5 a cada segundo
-        file.progress = Math.min(file.progress + 5, 100);
-
-        return { uploadedFiles };
-      });
-    }, 1000);
-
-    try {
-      const response = await api.post('admin/uploads', data);
-
-      // Pare a simulação do progresso quando o upload for concluído
-      clearInterval(uploadProgressInterval);
-
-      this.updateFile(uploadedFile.id, {
-        uploaded: true,
-        id: response.data.id,
-        url: response.data.url,
-      });
-      this.showMessage('Upload de Imagem Concluído', 'success');
-    } catch (error) {
-      // Pare a simulação do progresso se ocorrer um erro
-      clearInterval(uploadProgressInterval);
-
-      this.showMessage(
-        'Erro no Upload da imagem , verifique o formato do arquivo ou o tamanho da imagem.',
-        'error',
-      );
-      this.updateFile(uploadedFile.id, { error: true });
-    }
-  };
-
-  updateFile = (id, data) => {
-    this.setState(prevState => ({
-      uploadedFiles: prevState.uploadedFiles.map(file =>
-        file.id === id ? { ...file, ...data } : file,
-      ),
-    }));
-  };
-
-  handleSearchChange = event => {
-    this.setState({ searchQuery: event.target.value });
-  };
-
-  handleSearchSubmit = async event => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
-      if (searchQuery.length < 3) {
-        this.showMessage(
-          'Digite pelo menos 3 caracteres para realizar a busca',
-          'error',
-        );
-        return;
-      }
-      try {
-        const response = await api.get('/admin/uploads/images', {
-          params: {
-            name: searchQuery,
-            limit: filesPerPage,
-            offset: (page - 1) * filesPerPage,
-          },
+          return uploadedFiles;
         });
-        const uploadedFiles = response.data.images.map(file => ({
-          ...file,
+      }, 1000);
+
+      try {
+        const response = await api.post('admin/uploads', data);
+
+        // Pare a simulação do progresso quando o upload for concluído.
+        clearInterval(uploadProgressInterval);
+
+        updateFile(uploadedFile.id, {
           uploaded: true,
-          preview: file.url,
-        }));
-        this.setState({ uploadedFiles, hasMore: response.data.hasMore });
-        this.showMessage('Busca realizada com sucesso', 'success');
+          id: response.data.id,
+          url: response.data.url,
+        });
+
+        showMessage('Upload de Imagem Concluído', 'success');
       } catch (error) {
-        this.showMessage('Erro ao buscar as imagens', 'error');
-        console.error('Erro ao buscar as imagens:', error);
+        // Pare a simulação do progresso se ocorrer um erro.
+        clearInterval(uploadProgressInterval);
+
+        showMessage(
+          'Erro no Upload da imagem, verifique o formato do arquivo ou o tamanho da imagem.',
+          'error'
+        );
+
+        updateFile(uploadedFile.id, { error: true });
       }
-    }
+    });
   };
 
-  handleDelete = async id => {
-    // Inicialize o progresso de exclusão com 0
-    this.updateFile(id, { deleteProgress: 0 });
+  // Atualiza os dados de um arquivo.
+  const updateFile = (id, data) => {
+    setUploadedFiles((prevState) =>
+      prevState.map((file) => (file.id === id ? { ...file, ...data } : file))
+    );
+  };
 
-    // Simule o progresso da exclusão
+  // Atualiza o estado da busca.
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Exclui um arquivo.
+  const handleDelete = async (id) => {
+    // Inicialize o progresso de exclusão com 0.
+    updateFile(id, { deleteProgress: 0 });
+
+    // Simule o progresso da exclusão.
     const deleteProgressInterval = setInterval(() => {
-      this.setState(prevState => {
-        const uploadedFiles = [...prevState.uploadedFiles];
-        const file = uploadedFiles.find(file => file.id === id);
+      setUploadedFiles((prevState) => {
+        const uploadedFiles = [...prevState];
+        const file = uploadedFiles.find((file) => file.id === id);
 
-        // Aumente o progresso em 20 a cada segundo
+        // Aumente o progresso em 20 a cada segundo.
         file.deleteProgress = Math.min(file.deleteProgress + 20, 100);
 
-        return { uploadedFiles };
+        return uploadedFiles;
       });
     }, 1000);
 
     try {
       await api.delete(`admin/uploads/${id}`);
 
-      // Pare a simulação do progresso quando a exclusão for concluída
+      // Pare a simulação do progresso quando a exclusão for concluída.
       clearInterval(deleteProgressInterval);
 
-      this.setState({
-        uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id),
-      });
-      this.showMessage('Imagem Excluída', 'success');
+      setUploadedFiles((prevState) =>
+        prevState.filter((file) => file.id !== id)
+      );
+
+      showMessage('Imagem Excluída', 'success');
     } catch (error) {
-      // Pare a simulação do progresso se ocorrer um erro
+      // Pare a simulação do progresso se ocorrer um erro.
       clearInterval(deleteProgressInterval);
 
-      this.showMessage('Erro ao excluir a imagem', 'error');
+      showMessage('Erro ao excluir a imagem', 'error');
     }
   };
 
-  componentWillUnmount() {
-    this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
-  }
+  // Faz a busca por imagens.
+  const handleSearchSubmit = async (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
 
-  render() {
-    const { uploadedFiles, message, messageType, searchQuery, hasMore, page } =
-      this.state;
+      if (searchQuery.length < 3) {
+        showMessage(
+          'Digite pelo menos 3 caracteres para realizar a busca',
+          'error'
+        );
+        return;
+      }
 
-    return (
-      <div className="container-upload">
-        <h1>Upload de Imagens</h1>
-        <Upload onUpload={this.handleUpload} />
-        {uploadedFiles.length > 0 && (
-          <FileList
-            files={uploadedFiles}
-            onDelete={this.handleDelete}
-            hasMore={hasMore}
-            onNextPage={this.handleNextPage}
-            onPreviousPage={this.handlePreviousPage}
-          />
-        )}
-        <div className="uploaded-images">
-          <button onClick={this.handlePreviousPage} disabled={page === 1}>
-            Voltar
-          </button>
-          <button onClick={this.handleNextPage} disabled={!hasMore}>
-            Avançar
-          </button>
-        </div>
-        <div className="center-title">
-          {message && (
-            <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
-              {message}
-            </p>
-          )}
-        </div>
-        <input
-          className="search-bar"
-          type="text"
-          value={searchQuery}
-          onChange={this.handleSearchChange}
-          onKeyDown={this.handleSearchSubmit}
-          placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+      const filesPerPage = 40; // imagens por pagina
+      const queryParams = {
+        name: searchQuery,
+        limit: filesPerPage,
+        offset: (page - 1) * filesPerPage,
+      };
+      try {
+        const response = await api.get('/admin/uploads/images', {
+          params: queryParams,
+        });
+        const uploadedFiles = response.data.images.map((file) => ({
+          ...file,
+          uploaded: true,
+          preview: file.url,
+        }));
+        setUploadedFiles(uploadedFiles);
+        setHasMore(response.data.hasMore);
+        showMessage('Busca realizada com sucesso', 'success');
+      } catch (error) {
+        showMessage('Erro ao buscar as imagens', 'error');
+        console.error('Erro ao buscar as imagens:', error);
+      }
+    }
+  };
+
+  return (
+    <div className="container-upload">
+      <h1>Upload de Imagens</h1>
+      <Upload onUpload={handleUpload} />
+      {uploadedFiles.length > 0 && (
+        <FileList
+          files={uploadedFiles}
+          onDelete={handleDelete}
+          hasMore={hasMore}
+          onNextPage={handleNextPage}
+          onPreviousPage={handlePreviousPage}
         />
+      )}
+      <div className="uploaded-images">
+        <button onClick={handlePreviousPage} disabled={page === 1}>
+          Voltar
+        </button>
+        <button onClick={handleNextPage} disabled={!hasMore}>
+          Avançar
+        </button>
       </div>
-    );
-  }
-}
-export default UploadImages;
+      <div className="center-title">
+        {message && (
+          <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
+            {message}
+          </p>
+        )}
+      </div>
+      <input
+        className="search-bar"
+        type="text"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        onKeyDown={handleSearchSubmit}
+        placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+      />
+    </div>
+  );
+};
+
+export default UploadImagesPage

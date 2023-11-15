@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api';
 import '../../App.css';
 import Modal from 'react-modal';
+//import { fetchUploadedFiles, handleSearchSubmit } from './UploadImages';
 
 const CreateProduct = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,12 @@ const CreateProduct = () => {
   useEffect(() => {
     const fetchAvailableImages = async () => {
       try {
-        const response = await api.get('/admin/uploads');
+        const response = await api.get('/admin/uploads', {
+          params: {
+            page: currentPage,
+            limit: 44, // images per page
+          },
+        });
         setAvailableImages(response.data);
       } catch (error) {
         console.error('Erro ao buscar as imagens disponíveis:', error);
@@ -47,7 +53,7 @@ const CreateProduct = () => {
     };
 
     fetchAvailableImages();
-  }, []);
+  }, [currentPage]);
 
   const handleChange = e => {
     setFormData({
@@ -64,13 +70,27 @@ const CreateProduct = () => {
     setIsImageModalOpen(false);
   };
 
-  const handleNext = () => {
-    setCurrentPage(currentPage + 1);
-  };
+  const handleNextPage = useCallback(() => {
+    if (currentPage) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
+  }, [currentPage]);
 
-  const handlePrev = () => {
-    setCurrentPage(currentPage - 1);
-  };
+  const handlePreviousPage = useCallback(() => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (availableImages.length % availableImages.length !== 0) {
+      handleNextPage();
+    }
+  }, [availableImages.length, handleNextPage]);
+
+  useEffect(() => {
+    setCurrentPage();
+  }, []);
 
   const handleSearchChange = event => {
     setSearchQuery(event.target.value);
@@ -78,17 +98,20 @@ const CreateProduct = () => {
 
   const handleSearchSubmit = async event => {
     if (event.key === 'Enter') {
-      // precionar enter e realiza a busca
       event.preventDefault();
       try {
-        const response = await api.get(
-          `/admin/uploads/images?name=${searchQuery}`,
-        );
+        const response = await api.get('/admin/uploads/images', {
+          params: {
+            name: searchQuery,
+            page: currentPage, // Use a variável currentPage
+            limit: 44,
+          },
+        });
         setAvailableImages(response.data);
-        setApiError(null); // Limpar o erro anterior
+        setApiError(null);
       } catch (error) {
         console.error('Erro ao buscar as imagens:', error);
-        setApiError('Imagen não localizada , verifique o nome digitado.');
+        setApiError('Imagem não localizada, verifique o nome digitado.');
       }
     }
   };
@@ -112,10 +135,9 @@ const CreateProduct = () => {
     }
   };
 
-  // Função para lidar com a mudança no campo de preço
   const handlePriceChange = event => {
     let value = event.target.value;
-    value = value.replace(',', '.'); // Substitua vírgulas por pontos
+    value = value.replace(',', '.');
     setFormData({ ...formData, price: value });
   };
 
@@ -148,7 +170,7 @@ const CreateProduct = () => {
     setIsLoading(false);
   };
 
-  Modal.setAppElement('#root'); // or appElement="#root"
+  Modal.setAppElement('#root');
 
   return (
     <div className="container">
@@ -162,10 +184,8 @@ const CreateProduct = () => {
             type="text"
             id="productName"
             value={formData.productName}
-            onChange={e =>
-              setFormData({ ...formData, productName: e.target.value })
-            }
-            required // Torne o preenchimento obrigatório
+            onChange={e => handleChange(e, 'productName')}
+            required
           />
           <label htmlFor="quantity">Quantidade</label>
           <input
@@ -179,11 +199,11 @@ const CreateProduct = () => {
         <div className="form-group">
           <label htmlFor="price">Preço</label>
           <input
-            type="number" // Altere o tipo para number
+            type="number"
             id="price"
             value={formData.price}
-            onChange={handlePriceChange} // Use a função handlePriceChange
-            required // Torne o preenchimento obrigatório
+            onChange={handlePriceChange}
+            required
           />
         </div>
         <div className="form-group">
@@ -191,7 +211,7 @@ const CreateProduct = () => {
           <textarea
             name="description"
             value={formData.description}
-            onChange={handleChange}
+            onChange={e => handleChange(e, 'description')}
           />
         </div>
         <div className="form-group">
@@ -199,8 +219,8 @@ const CreateProduct = () => {
           <select
             name="categoryId"
             value={formData.categoryId}
-            onChange={handleChange}
-            required // Torne o preenchimento obrigatório
+            onChange={e => handleChange(e, 'categoryId')}
+            required
           >
             <option value="">Selecione uma categoria</option>
             {categories.map(category => (
@@ -215,25 +235,15 @@ const CreateProduct = () => {
           <button type="button" onClick={handleOpenModal}>
             Incluir Imagens
           </button>
-          <button
-            type="submit"
-            disabled={
-              isLoading && (
-                <div className="loading-animation">
-                  <p>Cadastrando...</p>
-                </div>
-              )
-            }
-          >
-            {' '}
-            {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}{' '}
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}
           </button>
         </div>
       </form>
 
       <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-        <button onClick={handlePrev}>Anterior</button>
-        <button onClick={handleNext}>Próximo</button>
+        <button onClick={handlePreviousPage}>Anterior</button>
+        <button onClick={handleNextPage}>Próximo</button>
         <button className="modal-close" onClick={handleCloseModal}>
           Fechar
         </button>
@@ -244,13 +254,11 @@ const CreateProduct = () => {
           value={searchQuery}
           onChange={handleSearchChange}
           onKeyDown={handleSearchSubmit}
-          placeholder="Buscar imagens: Digite o nome da imagem e precione enter... 🔍"
+          placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
         />
         <p>Imagens selecionadas: {selectedImages.length}</p>
-        {availableImages.slice(0, 44).map(
-          (
-            image, // Use slice para pegar as primeiras 44 imagens
-          ) => (
+        {Array.isArray(availableImages) &&
+          availableImages.map(image => (
             <img
               className={`image-in-modal ${
                 selectedImages.map(img => img.key).includes(image.key)
@@ -262,8 +270,7 @@ const CreateProduct = () => {
               alt={image.name}
               onClick={() => handleImageSelection(image)}
             />
-          ),
-        )}
+          ))}
       </Modal>
 
       {!!selectedImages.length && (
