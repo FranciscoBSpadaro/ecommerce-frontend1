@@ -164,6 +164,12 @@ form button {
   margin-top: 10px;
 }
 
+input.search-bar {
+  font-size: 15px;
+  height: 35px;
+  
+}
+
 textarea,
 input[type='text'],
 select {

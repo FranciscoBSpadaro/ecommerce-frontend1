@@ -1,10 +1,9 @@
-import React, { Component } from "react";
-import { uniqueId } from "lodash";
-import { filesize } from "filesize";
-import api from "../../api";
-import Upload from "./Uploads";
-import FileList from "./FileList";
-
+import React, { Component } from 'react';
+import { uniqueId } from 'lodash';
+import { filesize } from 'filesize';
+import api from '../../api';
+import Upload from './Uploads';
+import FileList from './FileList';
 
 class UploadImages extends Component {
   constructor(props) {
@@ -32,10 +31,10 @@ class UploadImages extends Component {
     this.fetchUploadedFiles(this.state.page);
   }
 
-  fetchUploadedFiles = async (page) => {
-    const filesPerPage = 40;  // imagens por pagina
+  fetchUploadedFiles = async page => {
+    const filesPerPage = 40; // imagens por pagina
     try {
-      const response = await api.get("admin/uploads", {
+      const response = await api.get('admin/uploads', {
         params: {
           limit: filesPerPage,
           offset: (page - 1) * filesPerPage,
@@ -79,53 +78,56 @@ class UploadImages extends Component {
       progress: 0,
       uploaded: false,
       error: false,
-      url: null
+      url: null,
     }));
 
     uploadedFiles.forEach(this.processUpload);
-    
+
     this.setState(prevState => ({
-      uploadedFiles: [...prevState.uploadedFiles, ...uploadedFiles]
+      uploadedFiles: [...prevState.uploadedFiles, ...uploadedFiles],
     }));
   };
 
   processUpload = async uploadedFile => {
     const data = new FormData();
-    data.append("file", uploadedFile.file, uploadedFile.name);
-  
+    data.append('file', uploadedFile.file, uploadedFile.name);
+
     // Inicialize o progresso com 0
     this.updateFile(uploadedFile.id, { progress: 0 });
-  
+
     // Simule o progresso do upload
     const uploadProgressInterval = setInterval(() => {
       this.setState(prevState => {
         const uploadedFiles = [...prevState.uploadedFiles];
         const file = uploadedFiles.find(file => file.id === uploadedFile.id);
-  
+
         // Aumente o progresso em 5 a cada segundo
         file.progress = Math.min(file.progress + 5, 100);
-  
+
         return { uploadedFiles };
       });
     }, 1000);
-  
+
     try {
-      const response = await api.post("admin/uploads", data);
-  
+      const response = await api.post('admin/uploads', data);
+
       // Pare a simulação do progresso quando o upload for concluído
       clearInterval(uploadProgressInterval);
-  
+
       this.updateFile(uploadedFile.id, {
         uploaded: true,
         id: response.data.id,
-        url: response.data.url
+        url: response.data.url,
       });
       this.showMessage('Upload de Imagem Concluído', 'success');
     } catch (error) {
       // Pare a simulação do progresso se ocorrer um erro
       clearInterval(uploadProgressInterval);
-  
-      this.showMessage('Erro no Upload da imagem , verifique o formato do arquivo ou o tamanho da imagem.', 'error');
+
+      this.showMessage(
+        'Erro no Upload da imagem , verifique o formato do arquivo ou o tamanho da imagem.',
+        'error',
+      );
       this.updateFile(uploadedFile.id, { error: true });
     }
   };
@@ -133,21 +135,24 @@ class UploadImages extends Component {
   updateFile = (id, data) => {
     this.setState(prevState => ({
       uploadedFiles: prevState.uploadedFiles.map(file =>
-        file.id === id ? { ...file, ...data } : file
-      )
+        file.id === id ? { ...file, ...data } : file,
+      ),
     }));
   };
 
-  handleSearchChange = (event) => {
+  handleSearchChange = event => {
     this.setState({ searchQuery: event.target.value });
   };
 
-  handleSearchSubmit = async (event) => {
+  handleSearchSubmit = async event => {
     if (event.key === 'Enter') {
       event.preventDefault();
       const { searchQuery, page = 1, filesPerPage = 40 } = this.state;
       if (searchQuery.length < 3) {
-        this.showMessage('Digite pelo menos 3 caracteres para realizar a busca', 'error');
+        this.showMessage(
+          'Digite pelo menos 3 caracteres para realizar a busca',
+          'error',
+        );
         return;
       }
       try {
@@ -175,53 +180,58 @@ class UploadImages extends Component {
   handleDelete = async id => {
     // Inicialize o progresso de exclusão com 0
     this.updateFile(id, { deleteProgress: 0 });
-  
+
     // Simule o progresso da exclusão
     const deleteProgressInterval = setInterval(() => {
       this.setState(prevState => {
         const uploadedFiles = [...prevState.uploadedFiles];
         const file = uploadedFiles.find(file => file.id === id);
-  
+
         // Aumente o progresso em 20 a cada segundo
         file.deleteProgress = Math.min(file.deleteProgress + 20, 100);
-  
+
         return { uploadedFiles };
       });
     }, 1000);
-  
+
     try {
       await api.delete(`admin/uploads/${id}`);
-  
+
       // Pare a simulação do progresso quando a exclusão for concluída
       clearInterval(deleteProgressInterval);
-  
+
       this.setState({
-        uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id)
+        uploadedFiles: this.state.uploadedFiles.filter(file => file.id !== id),
       });
       this.showMessage('Imagem Excluída', 'success');
     } catch (error) {
       // Pare a simulação do progresso se ocorrer um erro
       clearInterval(deleteProgressInterval);
-  
+
       this.showMessage('Erro ao excluir a imagem', 'error');
     }
   };
-  
 
   componentWillUnmount() {
     this.state.uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview));
   }
 
   render() {
-    const { uploadedFiles, message, messageType, searchQuery, hasMore, page } = this.state;
-  
+    const { uploadedFiles, message, messageType, searchQuery, hasMore, page } =
+      this.state;
+
     return (
       <div className="container-upload">
         <h1>Upload de Imagens</h1>
         <Upload onUpload={this.handleUpload} />
         {uploadedFiles.length > 0 && (
-          <FileList files={uploadedFiles} onDelete={this.handleDelete} hasMore={hasMore} onNextPage={this.handleNextPage}
-          onPreviousPage={this.handlePreviousPage} />
+          <FileList
+            files={uploadedFiles}
+            onDelete={this.handleDelete}
+            hasMore={hasMore}
+            onNextPage={this.handleNextPage}
+            onPreviousPage={this.handlePreviousPage}
+          />
         )}
         <div className="uploaded-images">
           <button onClick={this.handlePreviousPage} disabled={page === 1}>
@@ -232,13 +242,14 @@ class UploadImages extends Component {
           </button>
         </div>
         <div className="center-title">
-        {message && (
-          <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
-            {message}
-          </p>
-        )}
+          {message && (
+            <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
+              {message}
+            </p>
+          )}
         </div>
         <input
+          className="search-bar"
           type="text"
           value={searchQuery}
           onChange={this.handleSearchChange}

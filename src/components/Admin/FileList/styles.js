@@ -15,7 +15,9 @@ export const Container = styled.ul`
   }
 `;
 
-export const FileInfo = styled.div`
+export const FileInfo = styled.div.attrs(props => ({
+  title: props.imageName,  /* exibir nome da imagem ao passar o cursor sob a imagem */
+}))`
   display: flex;
   align-items: center;
 
@@ -44,7 +46,7 @@ export const FileInfo = styled.div`
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 105px; /* Ajuste conforme necessário */
+      max-width: 80px; /* Ajuste conforme necessário */
     }
   }
 `;

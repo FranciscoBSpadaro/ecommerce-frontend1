@@ -3,14 +3,14 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import { MdCheckCircle, MdError, MdLink } from "react-icons/md";
 import PropTypes from "prop-types";
 
-import { Container, FileInfo, Preview, DeleteButton } from "./styles";
+import { Container, FileInfo, Preview, DeleteButton} from "./styles";
 
 function FileList({ files, onDelete}) {
   return (
     <Container className="uploaded-images">
       {files.map(file => (
         <li key={file.id}>
-          <FileInfo>
+          <FileInfo imageName={file.name}>
             <Preview src={file.preview} />
             <div>
               <strong>{file.name}</strong>
