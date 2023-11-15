@@ -85,7 +85,7 @@ const UploadImagesPage = () => {
       error: false,
       url: null,
     }));
-    setUploadedFiles([...uploadedFiles, ...uploadedFiles]);
+    setUploadedFiles(uploadedFiles);
 
     // Faz o upload dos arquivos.
     uploadedFiles.forEach(async (uploadedFile) => {
