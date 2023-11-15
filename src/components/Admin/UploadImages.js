@@ -186,6 +186,7 @@ const UploadImagesPage = () => {
 
   // Faz a busca por imagens.
   const handleSearchSubmit = async (event) => {
+    setPage(1); // pesquisa se inicia sempre na pagina 1
     if (event.key === 'Enter') {
       event.preventDefault();
 
@@ -224,7 +225,7 @@ const UploadImagesPage = () => {
 
   return (
     <div className="container-upload">
-      <h1>Upload de Imagens</h1>
+      <h1 className="center-title">Upload de Imagens</h1>
       <Upload onUpload={handleUpload} />
       {uploadedFiles.length > 0 && (
         <FileList
