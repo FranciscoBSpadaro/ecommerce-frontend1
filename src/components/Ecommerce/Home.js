@@ -5,6 +5,7 @@ import 'react-multi-carousel/lib/styles.css';
 import { ReactComponent as ArrowRight } from '../../Assets/right-arrow.svg';
 import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow.svg';
 import { Card } from 'react-bootstrap';
+import Footer from '../../components/Common/Footer';
 
 const responsiveSettings = {
   superLargeDesktop: {
@@ -102,6 +103,7 @@ const Home = () => {
           </Card>
         ))}
       </Carousel>
+      <Footer />
     </section>
   );
 };

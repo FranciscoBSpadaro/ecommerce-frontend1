@@ -129,7 +129,9 @@ nav a:hover {
 
 .center-title {
   text-align: center;
+  justify-content: center;
 }
+
 
 .side-menu,
 .main-content,
@@ -164,6 +166,18 @@ form button {
 
 textarea,
 input[type='text'],
+select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+textarea,
+input[type='password'],
 select {
   width: 100%;
   padding: 8px;
@@ -240,6 +254,7 @@ ul>li>button {
   font-size: large;
   margin: 0;
 }
+
 
 .image-list {
   display: grid;

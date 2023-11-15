@@ -231,11 +231,13 @@ class UploadImages extends Component {
             Avançar
           </button>
         </div>
+        <div className="center-title">
         {message && (
           <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
             {message}
           </p>
         )}
+        </div>
         <input
           type="text"
           value={searchQuery}
