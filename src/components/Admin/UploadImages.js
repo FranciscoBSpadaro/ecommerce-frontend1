@@ -163,7 +163,7 @@ handleSearchSubmit = async (event) => {
         uploaded: true,
         preview: file.url,
       }));
-      this.setState({ uploadedFiles });
+      this.setState({ uploadedFiles, hasMore: response.data.hasMore });
     } catch (error) {
       console.error('Erro ao buscar as imagens:', error);
     }
