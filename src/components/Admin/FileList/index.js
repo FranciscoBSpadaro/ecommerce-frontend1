@@ -10,7 +10,7 @@ function FileList({ files, onDelete}) {
     <Container className="uploaded-images">
       {files.map(file => (
         <li key={file.id}>
-          <FileInfo imagename={file.name}>
+          <FileInfo $imagename={file.name}>  {/* $imagename é uma propriedade transitórias, que são prefixadas com $ */}
             <Preview src={file.preview} />
             <div>
               <strong>{file.name}</strong>
