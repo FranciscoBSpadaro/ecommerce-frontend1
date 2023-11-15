@@ -52,8 +52,8 @@ export const FileInfo = styled.div.attrs(props => ({
 `;
 
 export const Preview = styled.div`
-  width: 70px;    /* Ajuste conforme necessário o tamanho das imagens */
-  height: 70px;
+  width: 80px;    /* Ajuste conforme necessário o tamanho das imagens */
+  height: 80px;
   border-radius: 5px;
   background-image: url(${props => props.src});
   background-repeat: no-repeat;
