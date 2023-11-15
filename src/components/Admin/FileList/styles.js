@@ -16,7 +16,7 @@ export const Container = styled.ul`
 `;
 
 export const FileInfo = styled.div.attrs(props => ({
-  title: props.imageName,  /* exibir nome da imagem ao passar o cursor sob a imagem */
+  title: props.imagename,  /* exibir nome da imagem ao passar o cursor sob a imagem */
 }))`
   display: flex;
   align-items: center;
