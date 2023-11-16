@@ -258,21 +258,22 @@ const UploadImagesPage = () => {
         <button onClick={handlePreviousPage} disabled={page === 1}>
           Voltar
         </button>
-        <p>Página {page}</p>
-        <button onClick={handleNextPage} disabled={!hasMore}>
-          Avançar
-        </button>
-      </div>
-      <div className="center-title">
+        <div className="center-title">
         {message && (
           <p style={{ color: messageType === 'success' ? 'green' : 'red' }}>
             {message}
           </p>
         )}
       </div>
+        <p>Página {page}</p>
+        <button onClick={handleNextPage} disabled={!hasMore}>
+          Avançar
+        </button>
+      </div>
       <input
         className="search-bar"
         type="text"
+        maxLength="40"
         value={searchQuery}
         onChange={handleSearchChange}
         onKeyDown={handleSearchSubmit}
