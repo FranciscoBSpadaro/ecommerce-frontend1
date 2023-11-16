@@ -95,18 +95,21 @@ const UploadImagesPage = () => {
       // Inicialize o progresso com 0.
       updateFile(uploadedFile.id, { progress: 0 });
 
-      // Simule o progresso do upload.
-      const uploadProgressInterval = setInterval(() => {
-        setUploadedFiles((prevState) => {
-          const uploadedFiles = [...prevState];
-          const file = uploadedFiles.find((file) => file.id === uploadedFile.id);
+// Simule o progresso do upload.
+const uploadProgressInterval = setInterval(() => {
+  setUploadedFiles((prevState) => {
+    const uploadedFiles = [...prevState];
+    const fileIndex = uploadedFiles.findIndex((file) => file.id === uploadedFile.id);
 
-          // Aumente o progresso em 5 a cada segundo.
-          file.progress = Math.min(file.progress + 5, 100);
+    // Verifique se o arquivo ainda existe antes de tentar acessar sua propriedade 'progress'.
+    if (fileIndex !== -1) {
+      // Aumente o progresso em 3 a cada segundo.
+      uploadedFiles[fileIndex].progress = Math.min(uploadedFiles[fileIndex].progress + 3, 100);
+    }
 
-          return uploadedFiles;
-        });
-      }, 1000);
+    return uploadedFiles;
+  });
+}, 1000);
 
       try {
         const response = await api.post('admin/uploads', data);
@@ -119,8 +122,8 @@ const UploadImagesPage = () => {
           id: response.data.id,
           url: response.data.url,
         });
-
-        showMessage('Upload de Imagem Concluído', 'success');
+        let imageName = uploadedFile.name.substring(0, 20);
+        showMessage(`Upload da Imagem ${imageName} foi Concluído`, 'success');
       } catch (error) {
         // Pare a simulação do progresso se ocorrer um erro.
         clearInterval(uploadProgressInterval);
