@@ -12,6 +12,7 @@ const UploadImagesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
+  const [searchPerformed, setSearchPerformed] = useState(false);  // solução para liberar botao apos pesquisa
 
   // Função para exibir mensagem na tela por certo período de tempo.
   const showMessage = (message, messageType) => {
@@ -26,7 +27,7 @@ const UploadImagesPage = () => {
   };
 
   // Busca as imagens na API.
-  const fetchUploadedFiles = useCallback(async (page) => {
+  const fetchUploadedFiles = useCallback(async page => {
     const filesPerPage = 40; // imagens por pagina
     try {
       const response = await api.get('admin/uploads', {
@@ -35,7 +36,7 @@ const UploadImagesPage = () => {
           offset: (page - 1) * filesPerPage,
         },
       });
-      const uploadedFiles = response.data.images.map((file) => ({
+      const uploadedFiles = response.data.images.map(file => ({
         ...file,
         id: String(file.id),
         uploaded: true,
@@ -52,7 +53,6 @@ const UploadImagesPage = () => {
   useEffect(() => {
     fetchUploadedFiles(page);
   }, [page, fetchUploadedFiles]);
-  
 
   // Vai para a próxima página de imagens.
   const handleNextPage = () => {
@@ -72,9 +72,15 @@ const UploadImagesPage = () => {
     }
   };
 
+  const handleFirstPage = () => {
+    setPage(1);
+    fetchUploadedFiles(1);
+    setSearchPerformed(false); // Reseta o estado de pesquisa
+  };
+
   // Faz upload de arquivos.
-  const handleUpload = async (files) => {
-    const uploadedFiles = files.map((file) => ({
+  const handleUpload = async files => {
+    const uploadedFiles = files.map(file => ({
       file,
       id: uniqueId(),
       name: file.name,
@@ -88,28 +94,33 @@ const UploadImagesPage = () => {
     setUploadedFiles(uploadedFiles);
 
     // Faz o upload dos arquivos.
-    uploadedFiles.forEach(async (uploadedFile) => {
+    uploadedFiles.forEach(async uploadedFile => {
       const data = new FormData();
       data.append('file', uploadedFile.file, uploadedFile.name);
 
       // Inicialize o progresso com 0.
       updateFile(uploadedFile.id, { progress: 0 });
 
-// Simule o progresso do upload.
-const uploadProgressInterval = setInterval(() => {
-  setUploadedFiles((prevState) => {
-    const uploadedFiles = [...prevState];
-    const fileIndex = uploadedFiles.findIndex((file) => file.id === uploadedFile.id);
+      // Simule o progresso do upload.
+      const uploadProgressInterval = setInterval(() => {
+        setUploadedFiles(prevState => {
+          const uploadedFiles = [...prevState];
+          const fileIndex = uploadedFiles.findIndex(
+            file => file.id === uploadedFile.id,
+          );
 
-    // Verifique se o arquivo ainda existe antes de tentar acessar sua propriedade 'progress'.
-    if (fileIndex !== -1) {
-      // Aumente o progresso em 3 a cada segundo.
-      uploadedFiles[fileIndex].progress = Math.min(uploadedFiles[fileIndex].progress + 3, 100);
-    }
+          // Verifique se o arquivo ainda existe antes de tentar acessar sua propriedade 'progress'. evitar erros ao iniciar um novo upload enquanto 1 upload ainda está em andamento
+          if (fileIndex !== -1) {
+            // Aumente o progresso em 3 a cada segundo.
+            uploadedFiles[fileIndex].progress = Math.min(
+              uploadedFiles[fileIndex].progress + 3,
+              100,
+            );
+          }
 
-    return uploadedFiles;
-  });
-}, 1000);
+          return uploadedFiles;
+        });
+      }, 1000);
 
       try {
         const response = await api.post('admin/uploads', data);
@@ -130,7 +141,7 @@ const uploadProgressInterval = setInterval(() => {
 
         showMessage(
           'Erro no Upload da imagem, verifique o formato do arquivo ou o tamanho da imagem.',
-          'error'
+          'error',
         );
 
         updateFile(uploadedFile.id, { error: true });
@@ -140,26 +151,21 @@ const uploadProgressInterval = setInterval(() => {
 
   // Atualiza os dados de um arquivo.
   const updateFile = (id, data) => {
-    setUploadedFiles((prevState) =>
-      prevState.map((file) => (file.id === id ? { ...file, ...data } : file))
+    setUploadedFiles(prevState =>
+      prevState.map(file => (file.id === id ? { ...file, ...data } : file)),
     );
   };
 
-  // Atualiza o estado da busca.
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
   // Exclui um arquivo.
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     // Inicialize o progresso de exclusão com 0.
     updateFile(id, { deleteProgress: 0 });
 
     // Simule o progresso da exclusão.
     const deleteProgressInterval = setInterval(() => {
-      setUploadedFiles((prevState) => {
+      setUploadedFiles(prevState => {
         const uploadedFiles = [...prevState];
-        const file = uploadedFiles.find((file) => file.id === id);
+        const file = uploadedFiles.find(file => file.id === id);
 
         // Aumente o progresso em 20 a cada segundo.
         file.deleteProgress = Math.min(file.deleteProgress + 20, 100);
@@ -174,9 +180,7 @@ const uploadProgressInterval = setInterval(() => {
       // Pare a simulação do progresso quando a exclusão for concluída.
       clearInterval(deleteProgressInterval);
 
-      setUploadedFiles((prevState) =>
-        prevState.filter((file) => file.id !== id)
-      );
+      setUploadedFiles(prevState => prevState.filter(file => file.id !== id));
 
       showMessage('Imagem Excluída', 'success');
     } catch (error) {
@@ -188,7 +192,7 @@ const uploadProgressInterval = setInterval(() => {
   };
 
   // Faz a busca por imagens.
-  const handleSearchSubmit = async (event) => {
+  const handleSearchSubmit = async event => {
     setPage(1); // pesquisa se inicia sempre na pagina 1
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -196,7 +200,7 @@ const uploadProgressInterval = setInterval(() => {
       if (searchQuery.length < 3) {
         showMessage(
           'Digite pelo menos 3 caracteres para realizar a busca',
-          'error'
+          'error',
         );
         return;
       }
@@ -211,19 +215,26 @@ const uploadProgressInterval = setInterval(() => {
         const response = await api.get('/admin/uploads/images', {
           params: queryParams,
         });
-        const uploadedFiles = response.data.images.map((file) => ({
+        const uploadedFiles = response.data.images.map(file => ({
           ...file,
           uploaded: true,
           preview: file.url,
         }));
         setUploadedFiles(uploadedFiles);
-        setHasMore(response.data.hasMore);
+        setHasMore(response.data.hasMore); // verifica sem tem mais itens em proximas paginas
+        setSearchPerformed(true); // Indica que uma pesquisa foi realizada
         showMessage('Busca realizada com sucesso', 'success');
       } catch (error) {
-        showMessage('Erro ao buscar as imagens', 'error');
+        showMessage(`Não existe imagens com o nome : ${searchQuery}`, 'error');
         console.error('Erro ao buscar as imagens:', error);
       }
+      setSearchQuery(''); // Limpa o campo de pesquisa
     }
+  };
+
+  // Atualiza o estado da busca.
+  const handleSearchChange = event => {
+    setSearchQuery(event.target.value);
   };
 
   return (
@@ -240,9 +251,14 @@ const uploadProgressInterval = setInterval(() => {
         />
       )}
       <div className="uploaded-images">
+      <button onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
+          Inicio
+
+        </button>
         <button onClick={handlePreviousPage} disabled={page === 1}>
           Voltar
         </button>
+        <p>Página {page}</p>
         <button onClick={handleNextPage} disabled={!hasMore}>
           Avançar
         </button>
@@ -266,4 +282,4 @@ const uploadProgressInterval = setInterval(() => {
   );
 };
 
-export default UploadImagesPage
+export default UploadImagesPage;
