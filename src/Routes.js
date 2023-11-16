@@ -5,10 +5,11 @@ import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import VerifyEmail from './components/Auth/VerifyEmail';
 import Logoff from './components/Auth/Logoff';
-import CreateProduct from './components/Admin/CreateProduct';
+import { CreateProduct } from './components/Admin/CreateProduct';
 import CreateCategory from './components/Admin/CreateCategory';
 import AdminDashboard from './components/Admin/AdminDashboard';
-import UploadImages from './components/Admin/UploadImages';
+import { UploadImageProvider } from './components/Admin/UploadImageProvider';
+import { UploadImages } from './components/Admin/UploadImages';
 import EditProducts from './components/Admin/EditProducts';
 import EditCategories from './components/Admin/EditCategories';
 import EditUsers from './components/Admin/EditUsers';
@@ -33,9 +34,17 @@ function AppRoutes({ isAdmin }) {
           <Route path="/admin/editProducts" element={<EditProducts />} />
           <Route path="/admin/editCategories" element={<EditCategories />} />
           <Route path="/admin/editUsers" element={<EditUsers />} />
-          <Route path="/admin/createproduct" element={<CreateProduct />} />
+          <Route path="/admin/createproduct" element={
+            <UploadImageProvider>
+              <CreateProduct />
+            </UploadImageProvider>
+          } />
           <Route path="/admin/createcategory" element={<CreateCategory />} />
-          <Route path="/admin/uploads" element={<UploadImages />} />
+          <Route path="/admin/uploads" element={
+            <UploadImageProvider>
+              <UploadImages />
+            </UploadImageProvider>
+          } />
         </>
       ) : (
         <Route path="/" element={<Navigate replace to="/login" />} />

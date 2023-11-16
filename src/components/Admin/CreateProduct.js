@@ -1,27 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
 import Modal from 'react-modal';
-//import { fetchUploadedFiles, handleSearchSubmit } from './UploadImages';
+import { useUploadImage } from './UploadImageProvider';
 
-const CreateProduct = () => {
+export const CreateProduct = () => {
   const [formData, setFormData] = useState({
     productName: '',
     price: '',
     description: '',
     categoryId: '',
   });
+  const {
+    searchQuery,
+    page,
+    searchPerformed,
+    fetchUploadedFiles,
+    uploadedFiles,
+    handleNextPage,
+    handlePreviousPage,
+    handleFirstPage,
+    handleSearchSubmit,
+    handleSearchChange,
+  } = useUploadImage();
+
+  useEffect(() => {
+    fetchUploadedFiles(page);
+  }, [page, fetchUploadedFiles]);
+
 
   const [categories, setCategories] = useState([]);
   const [quantity, setQuantity] = useState('');
-  const [availableImages, setAvailableImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [apiError, setApiError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -37,24 +50,6 @@ const CreateProduct = () => {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    const fetchAvailableImages = async () => {
-      try {
-        const response = await api.get('/admin/uploads', {
-          params: {
-            page: currentPage,
-            limit: 44, // images per page
-          },
-        });
-        setAvailableImages(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar as imagens disponíveis:', error);
-      }
-    };
-
-    fetchAvailableImages();
-  }, [currentPage]);
-
   const handleChange = e => {
     setFormData({
       ...formData,
@@ -68,53 +63,9 @@ const CreateProduct = () => {
 
   const handleCloseModal = () => {
     setIsImageModalOpen(false);
+
   };
 
-  const handleNextPage = useCallback(() => {
-    if (currentPage) {
-      setCurrentPage(prevPage => prevPage + 1);
-    }
-  }, [currentPage]);
-
-  const handlePreviousPage = useCallback(() => {
-    if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
-    }
-  }, [currentPage]);
-
-  useEffect(() => {
-    if (availableImages.length % availableImages.length !== 0) {
-      handleNextPage();
-    }
-  }, [availableImages.length, handleNextPage]);
-
-  useEffect(() => {
-    setCurrentPage();
-  }, []);
-
-  const handleSearchChange = event => {
-    setSearchQuery(event.target.value);
-  };
-
-  const handleSearchSubmit = async event => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      try {
-        const response = await api.get('/admin/uploads/images', {
-          params: {
-            name: searchQuery,
-            page: currentPage, // Use a variável currentPage
-            limit: 44,
-          },
-        });
-        setAvailableImages(response.data);
-        setApiError(null);
-      } catch (error) {
-        console.error('Erro ao buscar as imagens:', error);
-        setApiError('Imagem não localizada, verifique o nome digitado.');
-      }
-    }
-  };
 
   const handleRemoveImage = key => {
     setSelectedImages(selectedImages.filter(image => image.key !== key));
@@ -243,13 +194,20 @@ const CreateProduct = () => {
       </form>
 
       <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-        <button onClick={handlePreviousPage}>Anterior</button>
-        <button onClick={handleNextPage}>Próximo</button>
+        <button onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
+          Inicio
+        </button>
+        <p>Página {page}</p>
+        <button onClick={handlePreviousPage}>
+          Anterior
+        </button>
+        <button onClick={handleNextPage}>
+          Próximo
+          </button>
         <button className="modal-close" onClick={handleCloseModal}>
           Fechar
         </button>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {apiError && <p style={{ color: 'red' }}>{apiError}</p>}
         <input
           type="text"
           value={searchQuery}
@@ -258,8 +216,8 @@ const CreateProduct = () => {
           placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
         />
         <p>Imagens selecionadas: {selectedImages.length}</p>
-        {Array.isArray(availableImages) &&
-          availableImages.map(image => (
+        {Array.isArray(uploadedFiles) &&
+          uploadedFiles.map(image => (
             <img
               className={`image-in-modal ${
                 selectedImages.map(img => img.key).includes(image.key)
@@ -290,5 +248,3 @@ const CreateProduct = () => {
     </div>
   );
 };
-
-export default CreateProduct;
