@@ -183,8 +183,9 @@ const CreateProduct = () => {
           <input
             type="text"
             id="productName"
+            name="productName"
             value={formData.productName}
-            onChange={e => handleChange(e, 'productName')}
+            onChange={handleChange}
             required
           />
           <label htmlFor="quantity">Quantidade</label>
@@ -211,7 +212,7 @@ const CreateProduct = () => {
           <textarea
             name="description"
             value={formData.description}
-            onChange={e => handleChange(e, 'description')}
+            onChange={handleChange}
           />
         </div>
         <div className="form-group">
@@ -219,7 +220,7 @@ const CreateProduct = () => {
           <select
             name="categoryId"
             value={formData.categoryId}
-            onChange={e => handleChange(e, 'categoryId')}
+            onChange={handleChange}
             required
           >
             <option value="">Selecione uma categoria</option>
