@@ -7,10 +7,19 @@ import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 export const CreateProduct = () => {
   const [formData, setFormData] = useState({
     productName: '',
+    quantity: 0,
     price: '',
     description: '',
     categoryId: '',
   });
+
+  const [errors, setErrors] = useState({
+    productName: '',
+    price: '',
+    description: '',
+    quantity: '',
+  });
+
   const {
     searchQuery,
     page,
@@ -23,15 +32,11 @@ export const CreateProduct = () => {
     handleSearchChange,
   } = useUploadImage();
 
-
-
   const [categories, setCategories] = useState([]);
-  const [quantity, setQuantity] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -47,9 +52,40 @@ export const CreateProduct = () => {
   }, []);
 
   const handleChange = e => {
+    const { name, value } = e.target;
+
+    // Limiting the fields
+    if (name === 'productName' && value.length > 50) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        productName: 'O nome do produto deve ter no máximo 50 caracteres.',
+      }));
+      return;
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, productName: '' }));
+    }
+    if (name === 'price' && value.length > 15) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        price: 'O preço deve ter no máximo 15 caracteres.',
+      }));
+      return;
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, price: '' }));
+    }
+    if (name === 'description' && value.length > 100) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        description: 'A descrição deve ter no máximo 100 caracteres.',
+      }));
+      return;
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, description: '' }));
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
@@ -80,9 +116,49 @@ export const CreateProduct = () => {
     }
   };
 
+  const handleQuantityChange = e => {
+    const value = parseInt(e.target.value);
+
+    if (value < 0) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        quantity: 'A quantidade não pode ser negativa.',
+      }));
+      return;
+    } else if (value > 999999999999999) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        quantity: 'A quantidade deve ter no máximo 15 dígitos.',
+      }));
+      return;
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, quantity: '' }));
+    }
+
+    setFormData({
+      ...formData,
+      quantity: value,
+    });
+  };
+
   const handlePriceChange = event => {
     let value = event.target.value;
     value = value.replace(',', '.');
+    if (value < 0) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        quantity: 'A quantidade não pode ser negativa.',
+      }));
+      return;
+    } else if (value > 999999999999999) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        quantity: 'A quantidade deve ter no máximo 15 dígitos.',
+      }));
+      return;
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, quantity: '' }));
+    }
     setFormData({ ...formData, price: value });
   };
 
@@ -92,7 +168,6 @@ export const CreateProduct = () => {
     const productData = {
       ...formData,
       image_keys: selectedImages.map(image => image.key),
-      quantity,
     };
 
     try {
@@ -111,8 +186,6 @@ export const CreateProduct = () => {
         setErrorMessage('');
       }, 5000);
     }
-
-    setIsLoading(false);
   };
 
   Modal.setAppElement('#root');
@@ -122,6 +195,9 @@ export const CreateProduct = () => {
       <form onSubmit={handleSubmit}>
         {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        {errors.productName && (
+          <p style={{ color: 'red' }}>{errors.productName}</p>
+        )}
         <div className="form-group">
           <h1>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
@@ -133,15 +209,17 @@ export const CreateProduct = () => {
             onChange={handleChange}
             required
           />
+          {errors.quantity && <p style={{ color: 'red' }}>{errors.quantity}</p>}
           <label htmlFor="quantity">Quantidade</label>
           <input
             type="number"
             id="quantity"
-            value={quantity}
-            onChange={e => setQuantity(e.target.value)}
+            value={formData.quantity}
+            onChange={handleQuantityChange}
             required
           />
         </div>
+        {errors.price && <p style={{ color: 'red' }}>{errors.price}</p>}
         <div className="form-group">
           <label htmlFor="price">Preço</label>
           <input
@@ -153,6 +231,9 @@ export const CreateProduct = () => {
           />
         </div>
         <div className="form-group">
+          {errors.description && (
+            <p style={{ color: 'red' }}>{errors.description}</p>
+          )}
           <label htmlFor="description">Descrição</label>
           <textarea
             name="description"
@@ -181,8 +262,17 @@ export const CreateProduct = () => {
           <button className="button" type="button" onClick={handleOpenModal}>
             Incluir Imagens
           </button>
-          <button className="button" type="submit" disabled={isLoading}>
-            {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}
+          <button
+            className="button"
+            type="submit"
+            disabled={
+              !formData.productName ||
+              !formData.categoryId ||
+              !formData.quantity ||
+              !formData.price
+            }
+          >
+            Cadastrar Produto
           </button>
         </div>
       </form>
