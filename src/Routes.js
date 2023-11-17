@@ -15,6 +15,7 @@ import EditCategories from './components/Admin/EditCategories';
 import EditUsers from './components/Admin/EditUsers';
 import Password from './components/Auth/Password';
 import Profile from './components/Ecommerce/Profile';
+import Address from './components/Ecommerce/Address';
 import ForgotPassword from './components/Auth/ForgotPassword';
 
 function AppRoutes({ isAdmin }) {
@@ -27,6 +28,7 @@ function AppRoutes({ isAdmin }) {
       <Route path="/verifyemail" element={<VerifyEmail />} />
       <Route path="/password" element={<Password />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/address" element={<Address />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
       {isAdmin ? (
         <>
