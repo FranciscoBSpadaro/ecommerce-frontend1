@@ -184,24 +184,24 @@ export const CreateProduct = () => {
         </div>
         <div className="form-group">
           <label htmlFor="images">Imagens do Produto</label>
-          <button type="button" onClick={handleOpenModal}>
+          <button className="button" type="button" onClick={handleOpenModal}>
             Incluir Imagens
           </button>
-          <button type="submit" disabled={isLoading}>
+          <button className="button" type="submit" disabled={isLoading}>
             {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}
           </button>
         </div>
       </form>
 
       <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-        <button onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
+        <button className="button" onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
           Inicio
         </button>
         <p>Página {page}</p>
-        <button onClick={handlePreviousPage}>
+        <button className="" onClick={handlePreviousPage}>
           Anterior
         </button>
-        <button onClick={handleNextPage}>
+        <button className="" onClick={handleNextPage}>
           Próximo
           </button>
         <button className="modal-close" onClick={handleCloseModal}>
@@ -238,7 +238,7 @@ export const CreateProduct = () => {
           {selectedImages.map(image => (
             <div key={image.key}>
               <img className="selected-image" src={image.url} alt={image.key} />
-              <button onClick={() => handleRemoveImage(image.key)}>
+              <button className="button" onClick={() => handleRemoveImage(image.key)}>
                 Remover
               </button>
             </div>

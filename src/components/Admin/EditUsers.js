@@ -108,7 +108,7 @@ const EditUser = () => {
           <option value="email">E-mail</option>
           <option value="username">Username</option>
         </select>
-        <button type="submit">Buscar</button>
+        <button className="button" type="submit">Buscar</button>
       </form>
       </div>
 
@@ -143,11 +143,11 @@ const EditUser = () => {
               disabled={!editMode}
             />
           </div>
-          <button type="button" onClick={handleEditMode} disabled={!!serverSuccess}>
+          <button className="button" type="button" onClick={handleEditMode} disabled={!!serverSuccess}>
             Editar
           </button>
           {editMode && (
-            <button type="submit" disabled={!!serverSuccess}>
+            <button className="button" type="submit" disabled={!!serverSuccess}>
               Salvar
             </button>
           )}

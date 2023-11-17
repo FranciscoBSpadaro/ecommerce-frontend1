@@ -73,7 +73,7 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Login</button>
+        <button className='button' type="submit">Login</button>
         {isLoading && <div className="loading-animation"><p>Entrando na loja...</p></div>}
       </form>
       <p style={{ textAlign: 'center' }}>

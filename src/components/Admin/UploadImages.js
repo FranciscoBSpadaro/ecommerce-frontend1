@@ -40,10 +40,10 @@ export const UploadImages = () => {
         />
       )}
       <div className="uploaded-images">
-        <button onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
+        <button className='button' onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
           Inicio
         </button>
-        <button onClick={handlePreviousPage} disabled={page === 1}>
+        <button className='button' onClick={handlePreviousPage} disabled={page === 1}>
           Voltar
         </button>
         <div className="center-title">
@@ -54,7 +54,7 @@ export const UploadImages = () => {
           )}
         </div>
         <p>Página {page}</p>
-        <button onClick={handleNextPage} disabled={!hasMore}>
+        <button className='button' onClick={handleNextPage} disabled={!hasMore}>
           Avançar
         </button>
       </div>

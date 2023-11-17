@@ -19,7 +19,7 @@ header {
 nav {
   display: flex;
   justify-content: space-between;
-  background-color: #3699c5;
+  background-color: #007BFF;
   padding: 0;
   max-height: 100px;
 }
@@ -43,7 +43,7 @@ nav a:hover {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background-color: #3699c5;
+  background-color: #007BFF;
   color: black;
   text-align: center;
   padding: 0;
@@ -177,6 +177,7 @@ nav a:hover {
 
 .button:hover {
   background-color: #0056b3;
+  color: chartreuse;
 }
 
 
