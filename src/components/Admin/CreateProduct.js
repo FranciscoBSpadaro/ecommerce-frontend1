@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
 import Modal from 'react-modal';
-import { useUploadImage } from './UploadImageProvider';
+import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 
 export const CreateProduct = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +15,6 @@ export const CreateProduct = () => {
     searchQuery,
     page,
     searchPerformed,
-    fetchUploadedFiles,
     uploadedFiles,
     handleNextPage,
     handlePreviousPage,
@@ -24,9 +23,6 @@ export const CreateProduct = () => {
     handleSearchChange,
   } = useUploadImage();
 
-  useEffect(() => {
-    fetchUploadedFiles(page);
-  }, [page, fetchUploadedFiles]);
 
 
   const [categories, setCategories] = useState([]);
@@ -63,9 +59,7 @@ export const CreateProduct = () => {
 
   const handleCloseModal = () => {
     setIsImageModalOpen(false);
-
   };
-
 
   const handleRemoveImage = key => {
     setSelectedImages(selectedImages.filter(image => image.key !== key));
@@ -192,45 +186,50 @@ export const CreateProduct = () => {
           </button>
         </div>
       </form>
-
-      <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-        <button className="button" onClick={handleFirstPage} disabled={page === 1 && !searchPerformed}>
-          Inicio
-        </button>
-        <p>Página {page}</p>
-        <button className="" onClick={handlePreviousPage}>
-          Anterior
-        </button>
-        <button className="" onClick={handleNextPage}>
-          Próximo
+      <UploadImageProvider filesPerPage={50}>
+        <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
+          <button
+            className="button"
+            onClick={handleFirstPage}
+            disabled={page === 1 && !searchPerformed}
+          >
+            Inicio
           </button>
-        <button className="modal-close" onClick={handleCloseModal}>
-          Fechar
-        </button>
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          onKeyDown={handleSearchSubmit}
-          placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
-        />
-        <p>Imagens selecionadas: {selectedImages.length}</p>
-        {Array.isArray(uploadedFiles) &&
-          uploadedFiles.map(image => (
-            <img
-              className={`image-in-modal ${
-                selectedImages.map(img => img.key).includes(image.key)
-                  ? 'selected-image-modal'
-                  : ''
-              }`}
-              key={image.key}
-              src={image.url}
-              alt={image.name}
-              onClick={() => handleImageSelection(image)}
-            />
-          ))}
-      </Modal>
+          <p>Página {page}</p>
+          <button className="" onClick={handlePreviousPage}>
+            Anterior
+          </button>
+          <button className="" onClick={handleNextPage}>
+            Próximo
+          </button>
+          <button className="modal-close" onClick={handleCloseModal}>
+            Fechar
+          </button>
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearchSubmit}
+            placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+          />
+          <p>Imagens selecionadas: {selectedImages.length}</p>
+          {Array.isArray(uploadedFiles) &&
+            uploadedFiles.map(image => (
+              <img
+                className={`image-in-modal ${
+                  selectedImages.map(img => img.key).includes(image.key)
+                    ? 'selected-image-modal'
+                    : ''
+                }`}
+                key={image.key}
+                src={image.url}
+                alt={image.name}
+                onClick={() => handleImageSelection(image)}
+              />
+            ))}
+        </Modal>
+      </UploadImageProvider>
 
       {!!selectedImages.length && (
         <div className="product-images">
@@ -238,7 +237,10 @@ export const CreateProduct = () => {
           {selectedImages.map(image => (
             <div key={image.key}>
               <img className="selected-image" src={image.url} alt={image.key} />
-              <button className="button" onClick={() => handleRemoveImage(image.key)}>
+              <button
+                className="button-remove-produdct"
+                onClick={() => handleRemoveImage(image.key)}
+              >
                 Remover
               </button>
             </div>

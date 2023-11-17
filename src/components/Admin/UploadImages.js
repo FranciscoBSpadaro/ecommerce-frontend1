@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useUploadImage } from './UploadImageProvider';
 import Upload from './Uploads';
 import FileList from './FileList';
@@ -12,7 +12,6 @@ export const UploadImages = () => {
     hasMore,
     page,
     searchPerformed,
-    fetchUploadedFiles,
     handleNextPage,
     handlePreviousPage,
     handleFirstPage,
@@ -22,9 +21,6 @@ export const UploadImages = () => {
     handleSearchChange,
   } = useUploadImage();
 
-  useEffect(() => {
-    fetchUploadedFiles(page);
-  }, [page, fetchUploadedFiles]);
 
   return (
     <div className="container-upload">

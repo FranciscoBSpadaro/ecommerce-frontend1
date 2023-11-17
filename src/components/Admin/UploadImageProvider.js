@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { uniqueId } from 'lodash';
 import { filesize } from 'filesize';
 import api from '../../api';
@@ -7,14 +13,14 @@ import api from '../../api';
 export const UploadImageContext = createContext();
 
 // Crie um provedor de contexto que encapsula a lógica do componente UploadImages
-export const UploadImageProvider = ({ children }) => {
+export const UploadImageProvider = ({ children, filesPerPage = 40 }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState(null); 
+  const [messageType, setMessageType] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [searchPerformed, setSearchPerformed] = useState(false);  
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
   const showMessage = (message, messageType) => {
     setMessage(message);
@@ -26,28 +32,30 @@ export const UploadImageProvider = ({ children }) => {
     }, 5000);
   };
 
-  const fetchUploadedFiles = useCallback(async page => {
-    const filesPerPage = 40;
-    try {
-      const response = await api.get('admin/uploads', {
-        params: {
-          limit: filesPerPage,
-          offset: (page - 1) * filesPerPage,
-        },
-      });
-      const uploadedFiles = response.data.images.map(file => ({
-        ...file,
-        id: String(file.id),
-        uploaded: true,
-        preview: file.url,
-      }));
-      setUploadedFiles(uploadedFiles);
-      setHasMore(response.data.hasMore);
-    } catch (error) {
-      console.error('Erro ao buscar as imagens:', error);
-      showMessage('Erro ao buscar as imagens', 'error');
-    }
-  }, []);
+  const fetchUploadedFiles = useCallback(
+    async page => {
+      try {
+        const response = await api.get('admin/uploads', {
+          params: {
+            limit: filesPerPage,
+            offset: (page - 1) * filesPerPage,
+          },
+        });
+        const uploadedFiles = response.data.images.map(file => ({
+          ...file,
+          id: String(file.id),
+          uploaded: true,
+          preview: file.url,
+        }));
+        setUploadedFiles(uploadedFiles);
+        setHasMore(response.data.hasMore);
+      } catch (error) {
+        console.error('Erro ao buscar as imagens:', error);
+        showMessage('Erro ao buscar as imagens', 'error');
+      }
+    },
+    [filesPerPage],
+  );
 
   useEffect(() => {
     fetchUploadedFiles(page);
@@ -57,7 +65,6 @@ export const UploadImageProvider = ({ children }) => {
     if (hasMore) {
       const nextPage = page + 1;
       setPage(nextPage);
-      fetchUploadedFiles(nextPage);
     }
   };
 
@@ -65,14 +72,13 @@ export const UploadImageProvider = ({ children }) => {
     if (page > 1) {
       const previousPage = page - 1;
       setPage(previousPage);
-      fetchUploadedFiles(previousPage);
     }
   };
 
   const handleFirstPage = () => {
     setPage(1);
-    fetchUploadedFiles(1);
-    setSearchPerformed(false); 
+    fetchUploadedFiles(1);  // faz o fetch da pagina 1 mesmo se a busca está na pagina 1
+    setSearchPerformed(false);
   };
 
   const handleUpload = async files => {
@@ -101,7 +107,7 @@ export const UploadImageProvider = ({ children }) => {
           const fileIndex = uploadedFiles.findIndex(
             file => file.id === uploadedFile.id,
           );
-          
+
           if (fileIndex !== -1) {
             uploadedFiles[fileIndex].progress = Math.min(
               uploadedFiles[fileIndex].progress + 3,
@@ -186,7 +192,6 @@ export const UploadImageProvider = ({ children }) => {
         return;
       }
 
-      const filesPerPage = 40;
       const queryParams = {
         name: searchQuery,
         limit: filesPerPage,
@@ -249,7 +254,9 @@ export const useUploadImage = () => {
   const context = useContext(UploadImageContext);
 
   if (!context) {
-    throw new Error('useUploadImage must be used within an UploadImageProvider');
+    throw new Error(
+      'useUploadImage must be used within an UploadImageProvider',
+    );
   }
 
   return context;
