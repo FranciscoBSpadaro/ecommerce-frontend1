@@ -56,6 +56,11 @@ nav a:hover {
   justify-content: space-evenly;
 }
 
+.container-create-products {
+  display: grid;
+  justify-content: space-evenly;
+}
+
 .container-upload {
   display: grid;
   justify-content: center;
@@ -72,9 +77,7 @@ nav a:hover {
 }
 
 .product-images {
-   display: grid;
-   justify-content: center;
-   justify-items: center;
+   display: flex;
 }
 
 .modal-close {
@@ -96,6 +99,7 @@ nav a:hover {
   width: 120px; /* imagens selecionadas do cadastro de produtos */
   height: 100px; 
   object-fit: cover;
+  margin-inline: 10px;
 }
 
 .center-container {

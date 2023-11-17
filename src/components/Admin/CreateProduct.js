@@ -118,7 +118,7 @@ export const CreateProduct = () => {
   Modal.setAppElement('#root');
 
   return (
-    <div className="container">
+    <div className="container-create-products">
       <form onSubmit={handleSubmit}>
         {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
@@ -230,10 +230,9 @@ export const CreateProduct = () => {
             ))}
         </Modal>
       </UploadImageProvider>
-
+      <h2 className="center-title">Imagens selecionadas:</h2>
       {!!selectedImages.length && (
         <div className="product-images">
-          <h2>Imagens selecionadas:</h2>
           {selectedImages.map(image => (
             <div key={image.key}>
               <img className="selected-image" src={image.url} alt={image.key} />
