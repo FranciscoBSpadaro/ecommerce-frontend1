@@ -137,6 +137,13 @@ nav a:hover {
   justify-items: center;
 }
 
+.center-container-adm {
+  display: flex;
+  height: 25vh;
+  justify-content: center;
+  align-items: center;
+}
+
 .center-title {
   text-align: center;
   justify-content: center;

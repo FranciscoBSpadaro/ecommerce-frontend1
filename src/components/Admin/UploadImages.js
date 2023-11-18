@@ -1,9 +1,17 @@
 import React from 'react';
-import { useUploadImage } from './UploadImageProvider';
+import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 import Upload from './Uploads';
 import FileList from './FileList';
 
 export const UploadImages = () => {
+  return (
+    <UploadImageProvider filesPerPage={40}>
+      <UploadImagesContent />
+    </UploadImageProvider>
+  );
+};
+
+const UploadImagesContent = () => {
   const {
     uploadedFiles,
     message,

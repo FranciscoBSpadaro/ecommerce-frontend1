@@ -12,7 +12,7 @@ import api from '../../api';
 export const UploadImageContext = createContext();
 
 // provedor de contexto que encapsula a lógica do componente UploadImages
-export const UploadImageProvider = ({ children, filesPerPage = 40 }) => {
+export const UploadImageProvider = ({ children, filesPerPage }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
@@ -33,6 +33,10 @@ export const UploadImageProvider = ({ children, filesPerPage = 40 }) => {
 
   const fetchUploadedFiles = useCallback(
     async page => {
+      if (!filesPerPage) { // se filesperpage for undefined considera o valor definido nos componentes que o usa.
+        return;
+      }
+  
       try {
         const response = await api.get('admin/uploads', {
           params: {

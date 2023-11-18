@@ -5,6 +5,14 @@ import Modal from 'react-modal';
 import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 
 export const CreateProduct = () => {
+  return (
+    <UploadImageProvider filesPerPage={44}>
+      <CreateProductContent />
+    </UploadImageProvider>
+  );
+};
+
+const CreateProductContent = () => {
   const [formData, setFormData] = useState({
     productName: '',
     quantity: 0,
@@ -308,7 +316,6 @@ export const CreateProduct = () => {
           </button>
         </div>
       </form>
-      <UploadImageProvider filesPerPage={50}>
         <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
           {imageSelectionError && (
             <p style={{ color: 'red' }}>{imageSelectionError}</p>
@@ -361,7 +368,6 @@ export const CreateProduct = () => {
               />
             ))}
         </Modal>
-      </UploadImageProvider>
       <h2 className="center-title">Imagens selecionadas:</h2>
       {!!selectedImages.length && (
         <div className="product-images">
