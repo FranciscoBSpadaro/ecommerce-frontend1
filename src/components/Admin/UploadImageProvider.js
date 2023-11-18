@@ -9,10 +9,9 @@ import { uniqueId } from 'lodash';
 import { filesize } from 'filesize';
 import api from '../../api';
 
-// Crie um contexto
 export const UploadImageContext = createContext();
 
-// Crie um provedor de contexto que encapsula a lógica do componente UploadImages
+// provedor de contexto que encapsula a lógica do componente UploadImages
 export const UploadImageProvider = ({ children, filesPerPage = 40 }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [message, setMessage] = useState(null);
@@ -77,7 +76,7 @@ export const UploadImageProvider = ({ children, filesPerPage = 40 }) => {
 
   const handleFirstPage = () => {
     setPage(1);
-    fetchUploadedFiles(1);  // faz o fetch da pagina 1 mesmo se a busca está na pagina 1
+    fetchUploadedFiles(1); // faz o fetch da pagina 1 mesmo se a busca está na pagina 1
     setSearchPerformed(false);
   };
 

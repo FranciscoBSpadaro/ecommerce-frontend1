@@ -82,6 +82,11 @@ nav a:hover {
 
 .modal-close {
   float: right;
+  font-size: 16px;
+  color: #fff;
+  background-color: #f34a5c;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .image-in-modal {

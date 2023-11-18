@@ -13,16 +13,10 @@ export const CreateProduct = () => {
     categoryId: '',
   });
 
-  const [errors, setErrors] = useState({
-    productName: '',
-    price: '',
-    description: '',
-    quantity: '',
-  });
-
   const {
     searchQuery,
     page,
+    hasMore,
     searchPerformed,
     uploadedFiles,
     handleNextPage,
@@ -37,6 +31,7 @@ export const CreateProduct = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [imageSelectionError, setImageSelectionError] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -44,7 +39,10 @@ export const CreateProduct = () => {
         const response = await api.get('/categories');
         setCategories(response.data);
       } catch (error) {
-        console.error('Erro ao buscar as categorias:', error);
+        setErrorMessage(`Ocorreu um erro: ${error.response.data.message || error.response.data.error}`);
+        setTimeout(() => {
+          setErrorMessage('');
+        }, 5000);
       }
     };
 
@@ -53,34 +51,109 @@ export const CreateProduct = () => {
 
   const handleChange = e => {
     const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleChangeProduct = e => {
+    const { name, value } = e.target;
 
     // Limiting the fields
     if (name === 'productName' && value.length > 50) {
-      setErrors(prevErrors => ({
+      setErrorMessage(prevErrors => ({
         ...prevErrors,
         productName: 'O nome do produto deve ter no máximo 50 caracteres.',
       }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
+      }, 5000);
       return;
     } else {
-      setErrors(prevErrors => ({ ...prevErrors, productName: '' }));
+      setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
     }
-    if (name === 'price' && value.length > 15) {
-      setErrors(prevErrors => ({
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleQuantityChange = e => {
+    const value = parseInt(e.target.value);
+
+    if (value < 0) {
+      setErrorMessage(prevErrors => ({
         ...prevErrors,
-        price: 'O preço deve ter no máximo 15 caracteres.',
+        quantity: 'A quantidade não pode ser negativa.',
       }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
+      }, 5000);
+      return;
+    } else if (value > 999999999) {
+      setErrorMessage(prevErrors => ({
+        ...prevErrors,
+        quantity: 'A quantidade deve ter no máximo 9 dígitos.',
+      }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
+      }, 5000);
       return;
     } else {
-      setErrors(prevErrors => ({ ...prevErrors, price: '' }));
+      setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
     }
+
+    setFormData({
+      ...formData,
+      quantity: value,
+    });
+  };
+
+  const handlePriceChange = event => {
+    let value = event.target.value;
+    value = value.replace(',', '.'); // trocar ponto
+    if (value < 0) {
+      setErrorMessage(prevErrors => ({
+        ...prevErrors,
+        price: 'O Preço não pode ser negativo.',
+      }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
+      }, 5000);
+      return;
+    } else if (value > 999999999999999) {
+      setErrorMessage(prevErrors => ({
+        ...prevErrors,
+        price: 'O Valor máximo deve ter no máximo 15 dígitos.',
+      }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
+      }, 5000);
+      return;
+    } else {
+      setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
+    }
+    setFormData({
+      ...formData,
+      price: value,
+    });
+  };
+
+  const handleChangeDescription = e => {
+    const { name, value } = e.target;
     if (name === 'description' && value.length > 100) {
-      setErrors(prevErrors => ({
+      setErrorMessage(prevErrors => ({
         ...prevErrors,
         description: 'A descrição deve ter no máximo 100 caracteres.',
       }));
+      setTimeout(() => {
+        setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
+      }, 5000);
       return;
     } else {
-      setErrors(prevErrors => ({ ...prevErrors, description: '' }));
+      setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
     }
 
     setFormData({
@@ -93,22 +166,14 @@ export const CreateProduct = () => {
     setIsImageModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsImageModalOpen(false);
-  };
-
-  const handleRemoveImage = key => {
-    setSelectedImages(selectedImages.filter(image => image.key !== key));
-  };
-
   const handleImageSelection = image => {
     if (selectedImages.map(img => img.key).includes(image.key)) {
       setSelectedImages(selectedImages.filter(img => img.key !== image.key));
     } else {
       if (selectedImages.length >= 5) {
-        setErrorMessage('O máximo de imagens por produto é 5.');
+        setImageSelectionError('O máximo de imagens por produto é 5.');
         setTimeout(() => {
-          setErrorMessage('');
+          setImageSelectionError('');
         }, 5000);
         return;
       }
@@ -116,50 +181,12 @@ export const CreateProduct = () => {
     }
   };
 
-  const handleQuantityChange = e => {
-    const value = parseInt(e.target.value);
-
-    if (value < 0) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade não pode ser negativa.',
-      }));
-      return;
-    } else if (value > 999999999999999) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade deve ter no máximo 15 dígitos.',
-      }));
-      return;
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, quantity: '' }));
-    }
-
-    setFormData({
-      ...formData,
-      quantity: value,
-    });
+  const handleRemoveImage = key => {
+    setSelectedImages(selectedImages.filter(image => image.key !== key));
   };
 
-  const handlePriceChange = event => {
-    let value = event.target.value;
-    value = value.replace(',', '.');
-    if (value < 0) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade não pode ser negativa.',
-      }));
-      return;
-    } else if (value > 999999999999999) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade deve ter no máximo 15 dígitos.',
-      }));
-      return;
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, quantity: '' }));
-    }
-    setFormData({ ...formData, price: value });
+  const handleCloseModal = () => {
+    setIsImageModalOpen(false);
   };
 
   const handleSubmit = async event => {
@@ -181,7 +208,7 @@ export const CreateProduct = () => {
         }, 5000);
       }
     } catch (error) {
-      setErrorMessage(error.response.data.message);
+      setErrorMessage(error.response.data.message || error.response.data.error);
       setTimeout(() => {
         setErrorMessage('');
       }, 5000);
@@ -193,23 +220,29 @@ export const CreateProduct = () => {
   return (
     <div className="container-create-products">
       <form onSubmit={handleSubmit}>
-        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {errors.productName && (
-          <p style={{ color: 'red' }}>{errors.productName}</p>
-        )}
         <div className="form-group">
           <h1>Cadastrar Produto</h1>
+          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+          {typeof errorMessage === 'string' ? (
+            <p style={{ color: 'red' }}>{errorMessage}</p>
+          ) : (
+            Object.values(errorMessage).filter(Boolean).join(' ') && (
+              <p style={{ color: 'red' }}>
+                {Object.values(errorMessage).filter(Boolean).join(' ')}
+              </p>
+            )
+          )}
+
           <label htmlFor="productName">Nome do Produto</label>
           <input
             type="text"
             id="productName"
             name="productName"
             value={formData.productName}
-            onChange={handleChange}
+            onChange={handleChangeProduct}
             required
           />
-          {errors.quantity && <p style={{ color: 'red' }}>{errors.quantity}</p>}
+
           <label htmlFor="quantity">Quantidade</label>
           <input
             type="number"
@@ -219,7 +252,6 @@ export const CreateProduct = () => {
             required
           />
         </div>
-        {errors.price && <p style={{ color: 'red' }}>{errors.price}</p>}
         <div className="form-group">
           <label htmlFor="price">Preço</label>
           <input
@@ -231,14 +263,11 @@ export const CreateProduct = () => {
           />
         </div>
         <div className="form-group">
-          {errors.description && (
-            <p style={{ color: 'red' }}>{errors.description}</p>
-          )}
           <label htmlFor="description">Descrição</label>
           <textarea
             name="description"
             value={formData.description}
-            onChange={handleChange}
+            onChange={handleChangeDescription}
           />
         </div>
         <div className="form-group">
@@ -278,6 +307,9 @@ export const CreateProduct = () => {
       </form>
       <UploadImageProvider filesPerPage={50}>
         <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
+          {imageSelectionError && (
+            <p style={{ color: 'red' }}>{imageSelectionError}</p>
+          )}
           <button
             className="button"
             onClick={handleFirstPage}
@@ -286,16 +318,15 @@ export const CreateProduct = () => {
             Inicio
           </button>
           <p>Página {page}</p>
-          <button className="" onClick={handlePreviousPage}>
-            Anterior
-          </button>
-          <button className="" onClick={handleNextPage}>
-            Próximo
-          </button>
+          <button className='button' onClick={handlePreviousPage} disabled={page === 1}>
+          Voltar
+        </button>
+        <button className='button' onClick={handleNextPage} disabled={!hasMore}>
+          Avançar
+        </button>
           <button className="modal-close" onClick={handleCloseModal}>
             Fechar
           </button>
-          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
           <input
             type="text"
             value={searchQuery}
