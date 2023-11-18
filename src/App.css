@@ -173,7 +173,7 @@ nav a:hover {
 .button {
   display: inline-block;
   padding: 10px 20px;
-  margin: 10px 0;
+  margin-right: 10px; /* adiciona margem à direita */
   font-size: 16px;
   text-align: center;
   text-decoration: none;
@@ -212,6 +212,29 @@ nav a:hover {
   background-color: #b30000;
   color: chartreuse
 }
+
+.button-login {
+  display: inline-block;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #fff;
+  background-color: #007BFF;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-login:disabled {   /* estilo de botao desabilitado */
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.button-login:not(:disabled):hover {  /* seletor :not para desabilitar o hover quando o status do button = disable*/
+  background-color: #0056b3;
+  color: chartreuse;
+}
+
 
 form button {
   margin-top: 10px;
@@ -317,6 +340,13 @@ ul>li>button {
   font-style: normal;
   font-size: large;
   margin: 0;
+}
+
+.error-messages-login {
+  padding-top: 120px;
+  position: fixed;
+  top: 0;
+
 }
 
 
