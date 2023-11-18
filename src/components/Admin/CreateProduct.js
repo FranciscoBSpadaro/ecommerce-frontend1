@@ -39,7 +39,11 @@ export const CreateProduct = () => {
         const response = await api.get('/categories');
         setCategories(response.data);
       } catch (error) {
-        setErrorMessage(`Ocorreu um erro: ${error.response.data.message || error.response.data.error}`);
+        setErrorMessage(
+          `Ocorreu um erro: ${
+            error.response.data.message || error.response.data.error
+          }`,
+        );
         setTimeout(() => {
           setErrorMessage('');
         }, 5000);
@@ -60,7 +64,6 @@ export const CreateProduct = () => {
   const handleChangeProduct = e => {
     const { name, value } = e.target;
 
-    // Limiting the fields
     if (name === 'productName' && value.length > 50) {
       setErrorMessage(prevErrors => ({
         ...prevErrors,
@@ -113,7 +116,7 @@ export const CreateProduct = () => {
 
   const handlePriceChange = event => {
     let value = event.target.value;
-    value = value.replace(',', '.'); // trocar ponto
+    value = value.replace(',', '.');
     if (value < 0) {
       setErrorMessage(prevErrors => ({
         ...prevErrors,
@@ -317,13 +320,20 @@ export const CreateProduct = () => {
           >
             Inicio
           </button>
-          <p>Página {page}</p>
-          <button className='button' onClick={handlePreviousPage} disabled={page === 1}>
-          Voltar
-        </button>
-        <button className='button' onClick={handleNextPage} disabled={!hasMore}>
-          Avançar
-        </button>
+          <button
+            className="button"
+            onClick={handlePreviousPage}
+            disabled={page === 1}
+          >
+            Voltar
+          </button>
+          <button
+            className="button"
+            onClick={handleNextPage}
+            disabled={!hasMore}
+          >
+            Avançar
+          </button>
           <button className="modal-close" onClick={handleCloseModal}>
             Fechar
           </button>
@@ -334,6 +344,7 @@ export const CreateProduct = () => {
             onKeyDown={handleSearchSubmit}
             placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
           />
+          <p>Página {page}</p>
           <p>Imagens selecionadas: {selectedImages.length}</p>
           {Array.isArray(uploadedFiles) &&
             uploadedFiles.map(image => (
