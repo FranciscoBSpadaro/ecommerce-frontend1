@@ -115,7 +115,7 @@ const CreateProductContent = () => {
 
   const handlePriceChange = event => {
     let value = event.target.value;
-  
+
     // Permitir que o valor do campo seja vazio
     if (value === '') {
       setFormData({
@@ -124,7 +124,7 @@ const CreateProductContent = () => {
       });
       return;
     }
-  
+
     // Permitir apenas números, pontos e vírgulas
     const regex = /^[0-9.,]+$/;
     if (!regex.test(value)) {
@@ -134,38 +134,44 @@ const CreateProductContent = () => {
     const commaCount = (value.match(/,/g) || []).length;
     if (commaCount > 1) {
       // Exibir uma mensagem de erro
-      setErrorMessage('Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.');
+      setErrorMessage(
+        'Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.',
+      );
       setTimeout(() => {
         setErrorMessage('');
       }, 5000);
       return;
     }
-  
+
     // Verificar se o número total de dígitos excede 10 e se os dígitos após a vírgula excedem 2
     const digitCount = value.replace(/[^0-9]/g, '').length;
     const decimalCount = value.split(',')[1]?.length || 0;
     if (digitCount > 10 || decimalCount > 2) {
       // Exibir uma mensagem de erro
-      setErrorMessage('Atenção, a quantidade total de digitos deve ser 12,  no padrão decimal 99.999.999,99 ou 10 digitos no formato 9999999999');
+      setErrorMessage(
+        'Atenção, a quantidade total de digitos deve ser 12,  no padrão decimal 99.999.999,99 ou 10 digitos no formato 9999999999',
+      );
       setTimeout(() => {
         setErrorMessage('');
       }, 6000);
       return;
     }
-  
+
     // Verificar se o valor tem mais de duas casas decimais
     const parts = value.split(',');
     if (parts.length > 1 && parts[1].length > 2) {
       // Remover os dígitos extras
       value = parts[0] + ',' + parts[1].substring(0, 2);
-  
+
       // Exibir uma mensagem de erro
-      setErrorMessage('Atenção, respeite as casas decimais. Use ponto antes de vírgulas.');
+      setErrorMessage(
+        'Atenção, respeite as casas decimais. Use ponto antes de vírgulas.',
+      );
       setTimeout(() => {
         setErrorMessage('');
       }, 5000);
     }
-  
+
     setFormData({
       ...formData,
       price: value,
@@ -220,7 +226,7 @@ const CreateProductContent = () => {
     setIsImageModalOpen(false);
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = price => {
     let parts = price.split('.');
     if (parts.length > 2) {
       let lastPart = parts.pop();
@@ -238,15 +244,14 @@ const CreateProductContent = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-  
+
     const price = formatPrice(formData.price);
-  
+
     const productData = {
       ...formData,
       price,
       image_keys: selectedImages.map(image => image.key),
     };
-  
 
     try {
       const response = await api.post('/admin/products', productData, {});
