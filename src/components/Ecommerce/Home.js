@@ -85,18 +85,18 @@ const Home = () => {
           renderArrow('left', onClickHandler, !hasPrev)
         }
         renderArrowNext={(onClickHandler, hasNext) =>
-          renderArrow('right', onClickHandler, !hasNext)
+          renderArrow('right', onClickHandler, !hasNext) // Adicionado para desabilitar o botão quando não houver mais itens para avançar
         }
       >
         {products.map((product, index) => (
           <Card style={{ width: '18rem' }} key={index}>
             <Card.Img
               variant="top"
-              src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+              src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem 
             />
             <Card.Body>
               <Card.Title>{product.productName}</Card.Title>
-              <Card.Text>Preço: R$ {product.price.toFixed(2)}</Card.Text>
+              <Card.Text>Preço: {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Card.Text>  { /* adicionado para formatar o preço na moeda brasileira */ }
               <Card.Text>Descrição: {product.description}</Card.Text>
               <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
             </Card.Body>
