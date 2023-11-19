@@ -95,13 +95,6 @@ const CreateProductContent = () => {
     const value = parseInt(e.target.value);
 
     if (value < 0) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade não pode ser negativa.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
-      }, 5000);
       return;
     } else if (value > 999999999) {
       setErrorMessage(prevErrors => ({
@@ -112,8 +105,6 @@ const CreateProductContent = () => {
         setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
       }, 5000);
       return;
-    } else {
-      setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
     }
 
     setFormData({
@@ -124,28 +115,57 @@ const CreateProductContent = () => {
 
   const handlePriceChange = event => {
     let value = event.target.value;
-    value = value.replace(',', '.');
-    if (value < 0) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        price: 'O Preço não pode ser negativo.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
-      }, 5000);
+  
+    // Permitir que o valor do campo seja vazio
+    if (value === '') {
+      setFormData({
+        ...formData,
+        price: value,
+      });
       return;
-    } else if (value > 999999999999999) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        price: 'O Valor máximo deve ter no máximo 15 dígitos.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
-      }, 5000);
-      return;
-    } else {
-      setErrorMessage(prevErrors => ({ ...prevErrors, price: '' }));
     }
+  
+    // Permitir apenas números, pontos e vírgulas
+    const regex = /^[0-9.,]+$/;
+    if (!regex.test(value)) {
+      return;
+    }
+    // Verificar se o valor tem mais de uma vírgula
+    const commaCount = (value.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      // Exibir uma mensagem de erro
+      setErrorMessage('Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 5000);
+      return;
+    }
+  
+    // Verificar se o número total de dígitos excede 10 e se os dígitos após a vírgula excedem 2
+    const digitCount = value.replace(/[^0-9]/g, '').length;
+    const decimalCount = value.split(',')[1]?.length || 0;
+    if (digitCount > 10 || decimalCount > 2) {
+      // Exibir uma mensagem de erro
+      setErrorMessage('Atenção, a quantidade total de digitos deve ser 12,  no padrão decimal 99.999.999,99 ou 10 digitos no formato 9999999999');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 6000);
+      return;
+    }
+  
+    // Verificar se o valor tem mais de duas casas decimais
+    const parts = value.split(',');
+    if (parts.length > 1 && parts[1].length > 2) {
+      // Remover os dígitos extras
+      value = parts[0] + ',' + parts[1].substring(0, 2);
+  
+      // Exibir uma mensagem de erro
+      setErrorMessage('Atenção, respeite as casas decimais. Use ponto antes de vírgulas.');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 5000);
+    }
+  
     setFormData({
       ...formData,
       price: value,
@@ -154,10 +174,10 @@ const CreateProductContent = () => {
 
   const handleChangeDescription = e => {
     const { name, value } = e.target;
-    if (name === 'description' && value.length > 100) {
+    if (name === 'description' && value.length > 55) {
       setErrorMessage(prevErrors => ({
         ...prevErrors,
-        description: 'A descrição deve ter no máximo 100 caracteres.',
+        description: 'A descrição curta deve ter no máximo 55 caracteres.',
       }));
       setTimeout(() => {
         setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
@@ -200,13 +220,33 @@ const CreateProductContent = () => {
     setIsImageModalOpen(false);
   };
 
+  const formatPrice = (price) => {
+    let parts = price.split('.');
+    if (parts.length > 2) {
+      let lastPart = parts.pop();
+      let formattedPrice = parts.join('') + '.' + lastPart;
+      return formattedPrice;
+    } else {
+      price = price.replace(',', '.');
+      const digitCount = price.replace(/[^0-9]/g, '').length;
+      if (digitCount === 10) {
+        price = price.slice(0, -2) + '.' + price.slice(-2);
+      }
+      return price;
+    }
+  };
+
   const handleSubmit = async event => {
     event.preventDefault();
-
+  
+    const price = formatPrice(formData.price);
+  
     const productData = {
       ...formData,
+      price,
       image_keys: selectedImages.map(image => image.key),
     };
+  
 
     try {
       const response = await api.post('/admin/products', productData, {});
@@ -266,11 +306,10 @@ const CreateProductContent = () => {
         <div className="form-group">
           <label htmlFor="price">Preço</label>
           <input
-            type="number"
+            type="text"
             id="price"
             value={formData.price}
             onChange={handlePriceChange}
-            step="0.01"
             required
           />
         </div>
@@ -317,58 +356,54 @@ const CreateProductContent = () => {
           </button>
         </div>
       </form>
-        <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-          {imageSelectionError && (
-            <p style={{ color: 'red' }}>{imageSelectionError}</p>
-          )}
-          <button
-            className="button"
-            onClick={handleFirstPage}
-            disabled={page === 1 && !searchPerformed}
-          >
-            Inicio
-          </button>
-          <button
-            className="button"
-            onClick={handlePreviousPage}
-            disabled={page === 1}
-          >
-            Voltar
-          </button>
-          <button
-            className="button"
-            onClick={handleNextPage}
-            disabled={!hasMore}
-          >
-            Avançar
-          </button>
-          <button className="modal-close" onClick={handleCloseModal}>
-            Fechar
-          </button>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={handleSearchSubmit}
-            placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
-          />
-          <p>Página {page}</p>
-          <p>Imagens selecionadas: {selectedImages.length}</p>
-          {Array.isArray(uploadedFiles) &&
-            uploadedFiles.map(image => (
-              <img
-                className={`image-in-modal ${
-                  selectedImages.map(img => img.key).includes(image.key)
-                    ? 'selected-image-modal'
-                    : ''
-                }`}
-                key={image.key}
-                src={image.url}
-                alt={image.name}
-                onClick={() => handleImageSelection(image)}
-              />
-            ))}
-        </Modal>
+      <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
+        {imageSelectionError && (
+          <p style={{ color: 'red' }}>{imageSelectionError}</p>
+        )}
+        <button
+          className="button"
+          onClick={handleFirstPage}
+          disabled={page === 1 && !searchPerformed}
+        >
+          Inicio
+        </button>
+        <button
+          className="button"
+          onClick={handlePreviousPage}
+          disabled={page === 1}
+        >
+          Voltar
+        </button>
+        <button className="button" onClick={handleNextPage} disabled={!hasMore}>
+          Avançar
+        </button>
+        <button className="modal-close" onClick={handleCloseModal}>
+          Fechar
+        </button>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onKeyDown={handleSearchSubmit}
+          placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+        />
+        <p>Página {page}</p>
+        <p>Imagens selecionadas: {selectedImages.length}</p>
+        {Array.isArray(uploadedFiles) &&
+          uploadedFiles.map(image => (
+            <img
+              className={`image-in-modal ${
+                selectedImages.map(img => img.key).includes(image.key)
+                  ? 'selected-image-modal'
+                  : ''
+              }`}
+              key={image.key}
+              src={image.url}
+              alt={image.name}
+              onClick={() => handleImageSelection(image)}
+            />
+          ))}
+      </Modal>
       <h2 className="center-title">Imagens selecionadas:</h2>
       {!!selectedImages.length && (
         <div className="product-images">

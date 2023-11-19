@@ -96,7 +96,7 @@ const Home = () => {
             />
             <Card.Body>
               <Card.Title>{product.productName}</Card.Title>
-              <Card.Text>Preço: {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Card.Text>  { /* adicionado para formatar o preço na moeda brasileira */ }
+              <Card.Text>Preço: {Number(product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Card.Text>  { /* adicionado para formatar o preço na moeda brasileira */ }
               <Card.Text>Descrição: {product.description}</Card.Text>
               <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
             </Card.Body>
