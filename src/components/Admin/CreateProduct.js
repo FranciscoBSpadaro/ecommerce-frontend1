@@ -270,6 +270,7 @@ const CreateProductContent = () => {
             id="price"
             value={formData.price}
             onChange={handlePriceChange}
+            step="0.01"
             required
           />
         </div>

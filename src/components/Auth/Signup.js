@@ -15,28 +15,43 @@ const Signup = () => {
     const timer = setTimeout(() => {
       setErrorMessage('');
     }, 5000);
-
+    
     return () => {
       clearTimeout(timer);
     };
   }, [errorMessage]);
 
-  const handleNameChange = (e) => {
-    if (!e.target.value.includes(' ')) {
-      if (e.target.value.length <= 20) {
-        setUsername(e.target.value);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSuccessMessage('');
+    }, 5000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [successMessage]);
+
+  const handleNameChange = e => {
+    const value = e.target.value;
+    if (!value.includes(' ')) {
+      if (value.length <= 20) {
+        setUsername(value);
       } else {
-        setUsername(e.target.value.slice(0, 20));
+        setErrorMessage('O Apelido de usuário não pode exceder 20 caracteres.');
       }
     } else {
       setErrorMessage('O Apelido de usuário não pode conter espaços!');
     }
   };
 
-  const handleEmailBlur = (e) => {
+  const handleEmailChange = e => {
+    const value = e.target.value;
+    setEmail(value.slice(0, 50));
+  };
+
+  const handleEmailBlur = e => {
     const value = e.target.value;
     if (value.length > 50) {
-      setErrorMessage('O Email deve ter no máximo 50 caracteres.');
+      setErrorMessage('O Email não pode exceder 50 caracteres');
     } else if (!value.includes('@') || value.includes(' ')) {
       setErrorMessage('O Email não pode conter espaços e precisa ter um "@"');
     } else {
@@ -44,7 +59,7 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -83,11 +98,13 @@ const Signup = () => {
   }, [username, email, password]);
 
   return (
-    <div className="login-form">
+    <div className="center-container-login">
+      <div className="error-messages-login">
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      </div>
       <h2 className="h1">📝 Cadastro ✨</h2>
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <form onSubmit={handleSubmit}>
+      <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Usuário"
@@ -98,19 +115,27 @@ const Signup = () => {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange}
           onBlur={handleEmailBlur}
         />
         <input
           type="password"
           placeholder="Senha"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
         />
-        <button type="submit" disabled={isButtonDisabled}>
+        <button
+          className="button-login"
+          type="submit"
+          disabled={isButtonDisabled}
+        >
           Cadastrar
         </button>
-        {isLoading && <div className="loading-animation"><p>Cadastrando...</p></div>}
+        {isLoading && (
+          <div className="loading-animation">
+            <p>Cadastrando...</p>
+          </div>
+        )}
       </form>
     </div>
   );
