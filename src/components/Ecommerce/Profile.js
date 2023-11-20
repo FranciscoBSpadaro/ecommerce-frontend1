@@ -6,6 +6,7 @@ const Profile = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState('');
   const [creationErrorMessage, setCreationErrorMessage] = useState('');
+  const [isFormValid, setIsFormValid] = useState(false);
   const [form, setForm] = useState({
     nomeCompleto: '',
     telefone: '',
@@ -38,7 +39,7 @@ const Profile = () => {
 
   const handleFormChange = e => {
     const { name, value } = e.target;
-
+  
     if ((name === 'telefone' || name === 'celular') && !/^\d*$/.test(value)) {
       setCreationErrorMessage(
         'Por favor, preencha os campos de telefone e celular com números.',
@@ -61,6 +62,13 @@ const Profile = () => {
       setCreationErrorMessage(
         'Formato do Nome inválido, Máximo 20 letras para cada parte do seu nome, Adicione um Espaço.',
       );
+    } else if (
+      name === 'nomeCompleto' &&
+      value.split(' ').length > 6
+    ) {
+      setCreationErrorMessage(
+        'Formato do Nome inválido, Máximo de 5 espaços permitidos.',
+      );
     } else {
       setForm({
         ...form,
@@ -68,6 +76,12 @@ const Profile = () => {
       });
       setCreationErrorMessage('');
     }
+  
+    // Verifique se todos os campos estão preenchidos corretamente
+    const isFormValid = form.nomeCompleto && form.telefone && form.celular && !creationErrorMessage && value !== '';
+  
+    // Atualize o estado isFormValid
+    setIsFormValid(isFormValid);
   };
 
   const createProfile = async () => {
@@ -192,7 +206,7 @@ const Profile = () => {
                 pattern="[0-9]{8,}"
                 maxLength={11}
               />
-              <button type="button" onClick={updateProfile}>
+              <button type="button" onClick={updateProfile} disabled={!isFormValid}>
                 Atualizar Perfil
               </button>
             </form>
@@ -232,7 +246,7 @@ const Profile = () => {
               maxLength={11}
             />
           </form>
-          <button className="button" type="button" onClick={createProfile}>
+          <button className="button" type="button" onClick={createProfile} disabled={!isFormValid}>
             Criar Perfil
           </button>
         </div>
