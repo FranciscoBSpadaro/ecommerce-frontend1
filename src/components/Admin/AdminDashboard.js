@@ -39,6 +39,9 @@ const AdminDashboard = () => {
         <Link to="/admin/createProduct" className="button">
           Adicionar Novo Produto
         </Link>
+        <Link to="/admin/EditProducts" className="button">
+          Alterar Produtos
+        </Link>
 
         <Link to="/admin/uploads" className="button">
           Imagens De Produtos
