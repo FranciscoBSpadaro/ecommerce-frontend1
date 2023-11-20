@@ -32,7 +32,9 @@ const UploadImagesContent = () => {
 
   return (
     <div className="container-upload">
+      <div className='form-group'>
       <h1 className="center-title">Upload de Imagens</h1>
+      </div>
       <Upload onUpload={handleUpload} />
       {uploadedFiles.length > 0 && (
         <FileList

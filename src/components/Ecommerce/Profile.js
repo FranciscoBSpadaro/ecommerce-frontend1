@@ -213,7 +213,7 @@ const Profile = () => {
               maxLength={90}
             />
             <input
-              type="tel"
+              type="text"
               name="telefone"
               value={form.telefone}
               onChange={handleFormChange}
@@ -223,7 +223,7 @@ const Profile = () => {
               maxLength={10}
             />
             <input
-              type="tel"
+              type="text"
               name="celular"
               value={form.celular}
               onChange={handleFormChange}
@@ -232,7 +232,7 @@ const Profile = () => {
               maxLength={11}
             />
           </form>
-          <button type="button" onClick={createProfile}>
+          <button className="button" type="button" onClick={createProfile}>
             Criar Perfil
           </button>
         </div>

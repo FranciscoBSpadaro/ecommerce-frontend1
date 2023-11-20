@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
-import { ReactComponent as ArrowRight } from '../../Assets/right-arrow.svg';
-import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow.svg';
+import { ReactComponent as ArrowRight } from '../../Assets/right-arrow-svgrepo-com.svg';
+import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow-svgrepo-com.svg';
 import { Card } from 'react-bootstrap';
 import Footer from '../../components/Common/Footer';
 
@@ -50,18 +50,18 @@ const Home = () => {
     const arrowStyle = {
       position: 'absolute',
       zIndex: 2,
-      top: 'calc(50% - 15px)',
-      width: 30,
-      height: 30,
+      top: direction === 'left' ? 'calc(48% - 15px)' : 'calc(50% - 15px)', // ajusta a posição vertical da seta esquerda
+      width: 40,
+      height: 40,
       cursor: 'pointer',
-      [direction]: 25,
+      [direction]: direction === 'left' ? 0 : 25, // ajusta a posição horizontal da seta esquerda
       opacity: isDisabled ? 0.5 : 1,
-      pointerEvents: isDisabled ? 'none' : 'auto', // Adicionado para não permitir clicar no botão quando estiver desabilitado
+      pointerEvents: isDisabled ? 'none' : 'auto',
     };
-
+  
     const ArrowComponent = direction === 'left' ? ArrowLeft : ArrowRight;
     const label = direction === 'left' ? 'Anterior' : 'Próximo';
-
+  
     return (
       <ArrowComponent
         onClick={onClickHandler}
@@ -69,7 +69,7 @@ const Home = () => {
         style={arrowStyle}
       />
     );
-  };
+  }
 
   return (
     <section>
@@ -83,6 +83,7 @@ const Home = () => {
         slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
         customLeftArrow={renderArrow('left')}
         customRightArrow={renderArrow('right')}
+        rtl={''} // Adicionado explicitamente para nao dar erro no console
       >
         {products.map((product, index) => (
           <Card style={{ width: '18rem' }} key={index}>
