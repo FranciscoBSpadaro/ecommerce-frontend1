@@ -22,6 +22,8 @@ const EditProductContent = ({ productId }) => {
     price: '',
     description: '',
     categoryId: '',
+    discountPrice: '', // novo atributo
+    isOffer: false, // novo estado para controlar se o produto é uma oferta
   });
 
   const {
@@ -30,8 +32,6 @@ const EditProductContent = ({ productId }) => {
     hasMore,
     searchPerformed,
     uploadedFiles,
-    handleImageSelection,
-    handleRemoveImage,
     handleNextPage,
     handlePreviousPage,
     handleFirstPage,
@@ -40,11 +40,11 @@ const EditProductContent = ({ productId }) => {
   } = useUploadImage();
 
   const [categories, setCategories] = useState([]);
-  const [selectedImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [imageSelectionError] = useState('');
+  const [imageSelectionError, setImageSelectionError] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -95,12 +95,18 @@ const EditProductContent = ({ productId }) => {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name === 'isOffer') {
+      setFormData({
+        ...formData,
+        [name]: e.target.checked,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
-  
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -135,7 +141,28 @@ const EditProductContent = ({ productId }) => {
     }
   };
 
+  const handleImageSelection = image => {
+    if (selectedImages.map(img => img.key).includes(image.key)) {
+      setSelectedImages(selectedImages.filter(img => img.key !== image.key));
+    } else {
+      if (selectedImages.length >= 5) {
+        setImageSelectionError('O máximo de imagens por produto é 5.');
+        setTimeout(() => {
+          setImageSelectionError('');
+        }, 5000);
+        return;
+      }
+      setSelectedImages([...selectedImages, image]);
+    }
+  };
+
+  const handleRemoveImage = key => {
+    setSelectedImages(selectedImages.filter(image => image.key !== key));
+  };
+
   const handleCloseModal = () => setIsImageModalOpen(false);
+
+  Modal.setAppElement(document.body);
 
   return (
     <>
@@ -171,16 +198,39 @@ const EditProductContent = ({ productId }) => {
             onChange={handleChange}
             required
           />
-
-          <label htmlFor="description">Descrição:</label>
-          <textarea
-            name="description"
-            id="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          />
-
+          <label>
+            Criar Oferta
+            <input
+              type="checkbox"
+              name="isOffer"
+              checked={formData.isOffer}
+              onChange={handleChange}
+            />
+          </label>
+          {formData.isOffer && (
+            <>
+              <div>
+                <label htmlFor="discountPrice">Preço de Desconto:</label>
+                <input
+                  type="text"
+                  name="discountPrice"
+                  id="discountPrice"
+                  value={formData.discountPrice}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <label htmlFor="description">Descrição:</label>
+              <textarea
+                name="description"
+                id="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
+            </>
+          )}
+          <div>
           <label htmlFor="categoryId">Categoria:</label>
           <select
             name="categoryId"
@@ -196,15 +246,7 @@ const EditProductContent = ({ productId }) => {
               </option>
             ))}
           </select>
-          <label>
-            É oferta?
-            <input
-              type="checkbox"
-              name="isOffer"
-              checked={formData.isOffer}
-              onChange={handleChange}
-            />
-          </label>
+          </div>
 
           <button type="submit">Atualizar Produto</button>
         </form>
@@ -285,8 +327,11 @@ const EditProductContent = ({ productId }) => {
                     src={image.url}
                     alt={image.key}
                   />
-                  <button onClick={() => handleRemoveImage(image)}>
-                    Remover imagem
+                  <button
+                    className="button-remove-produdct"
+                    onClick={() => handleRemoveImage(image.key)}
+                  >
+                    Remover
                   </button>
                 </div>
               ))}

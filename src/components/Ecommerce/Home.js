@@ -50,7 +50,7 @@ const Home = () => {
     const arrowStyle = {
       position: 'absolute',
       zIndex: 2,
-      top: direction === 'left' ? 'calc(48% - 15px)' : 'calc(50% - 15px)', // ajusta a posição vertical da seta esquerda
+      top: direction === 'left' ? 'calc(46% - 15px)' : 'calc(50% - 15px)', // ajusta a posição  da seta esquerda e :  direita
       width: 40,
       height: 40,
       cursor: 'pointer',
