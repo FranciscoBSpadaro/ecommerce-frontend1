@@ -188,6 +188,10 @@ p {
   justify-content: center;
 }
 
+.right-float {
+  float: right;
+}
+
 
 .side-menu,
 .main-content,

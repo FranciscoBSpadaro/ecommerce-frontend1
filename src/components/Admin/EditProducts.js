@@ -207,7 +207,9 @@ const EditProductContent = ({ productId }) => {
   return (
     <>
       <div className="container-edit-products">
+      <div className="form-group">
         <h1>Editar Produto</h1>
+        </div>
         <Carousel
           responsive={responsiveSettings}
           arrows
@@ -329,16 +331,17 @@ const EditProductContent = ({ productId }) => {
             </select>
           </div>
 
-          <button type="submit">Atualizar Produto</button>
-          <div>
+          <button className="button" type="submit">Atualizar Produto</button>
+          <div className='right-float'>
           <button className="button-remove-produdct" type="button" onClick={handleDelete}>Excluir Produto</button>
           </div>
         </form>
         </div>
-
-        <button onClick={() => setIsImageModalOpen(true)}>
+        <div className='form-group'>
+        <button className="button" onClick={() => setIsImageModalOpen(true)}>
           Selecionar Imagens
         </button>
+        </div>
 
         {/* Render a success message if the product was updated successfully */}
         {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
@@ -403,6 +406,7 @@ const EditProductContent = ({ productId }) => {
         {/* Render selected images */}
         {selectedImages.length > 0 && (
           <>
+          <div className='form-group'>
             <h2 className="center-title">Imagens selecionadas:</h2>
             <div className="product-images">
               {selectedImages.map((image, index) => (
@@ -416,6 +420,7 @@ const EditProductContent = ({ productId }) => {
                   </button>
                 </div>
               ))}
+            </div>
             </div>
           </>
         )}
