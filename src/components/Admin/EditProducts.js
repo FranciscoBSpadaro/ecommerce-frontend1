@@ -167,219 +167,215 @@ const EditProductContent = ({ productId }) => {
 
   return (
     <>
-        <div className="container-edit-products">
-          <h1>Editar Produto</h1>
-          <Carousel
-            responsive={responsiveSettings}
-            arrows
-            showDots={true} // exibir os pontos de navegação
-            infinite={false} // rolagem infinita
-            slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
-            customLeftArrow={<ArrowFix>{renderArrow('left')}</ArrowFix>}
-            customRightArrow={<ArrowFix>{renderArrow('right')}</ArrowFix>}
-            rtl={''} // Adicionado explicitamente para nao dar erro no console
-          >
-            {products.map((product, index) => (
-              <div
-                style={{ margin: '0 25px' }}
-                key={index}
-                onClick={() => handleProductSelection(product)}
-              >
-                <Card style={{ width: '18rem' }}>
-                  <Card.Img
-                    variant="top"
-                    src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
-                  />
-                  <Card.Body>
-                    <Card.Title>{product.productName}</Card.Title>
-                    <Card.Text>
-                      Preço:{' '}
-                      {Number(product.price).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      })}
-                    </Card.Text>{' '}
-                    {/* adicionado para formatar o preço na moeda brasileira */}
-                    <Card.Text>Descrição: {product.description}</Card.Text>
-                    <Card.Text>
-                      Quantidade em Estoque: {product.quantity}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </div>
-            ))}
-          </Carousel>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="productName">Nome do Produto:</label>
-            <input
-              type="text"
-              name="productName"
-              id="productName"
-              value={productName}
-              onChange={e => setProductName(e.target.value)}
-              required
-            />
-
-            <label htmlFor="quantity">Quantidade:</label>
-            <input
-              type="number"
-              name="quantity"
-              id="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              required
-            />
-
-            <label htmlFor="price">Preço:</label>
-            <input
-              type="text"
-              name="price"
-              id="price"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
-            <label>
-              Criar Oferta
-              <input
-                type="checkbox"
-                name="isOffer"
-                checked={formData.isOffer}
-                onChange={handleChange}
-              />
-            </label>
-            {formData.isOffer && (
-              <>
-                <div>
-                  <label htmlFor="discountPrice">Preço de Desconto:</label>
-                  <input
-                    type="text"
-                    name="discountPrice"
-                    id="discountPrice"
-                    value={formData.discountPrice}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </>
-            )}
-            <div>
-              <label htmlFor="description">Descrição:</label>
-              <textarea
-                name="description"
-                id="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-              />
-              <label htmlFor="categoryId">Categoria:</label>
-              <select
-                name="categoryId"
-                id="categoryId"
-                value={formData.categoryId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Selecione uma opção</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit">Atualizar Produto</button>
-          </form>
-
-          <button onClick={() => setIsImageModalOpen(true)}>
-            Selecionar Imagens
-          </button>
-
-          {/* Render a success message if the product was updated successfully */}
-          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-
-          {/* Render an error message if an error occurs */}
-          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-
-          {/* Render a modal to select images */}
-          <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-            {imageSelectionError && (
-              <p style={{ color: 'red' }}>{imageSelectionError}</p>
-            )}
-            <button
-              className="button"
-              onClick={handleFirstPage}
-              disabled={page === 1 && !searchPerformed}
+      <div className="container-edit-products">
+        <h1>Editar Produto</h1>
+        <Carousel
+          responsive={responsiveSettings}
+          arrows
+          showDots={true} // exibir os pontos de navegação
+          infinite={false} // rolagem infinita
+          slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
+          customLeftArrow={<ArrowFix>{renderArrow('left')}</ArrowFix>}
+          customRightArrow={<ArrowFix>{renderArrow('right')}</ArrowFix>}
+          rtl={''} // Adicionado explicitamente para nao dar erro no console
+        >
+          {products.map((product, index) => (
+            <div
+              style={{ margin: '0 25px' }}
+              key={index}
+              onClick={() => handleProductSelection(product)}
             >
-              Inicio
-            </button>
-            <button
-              className="button"
-              onClick={handlePreviousPage}
-              disabled={page === 1}
-            >
-              Voltar
-            </button>
-            <button
-              className="button"
-              onClick={handleNextPage}
-              disabled={!hasMore}
-            >
-              Avançar
-            </button>
-            <button className="modal-close" onClick={handleCloseModal}>
-              Fechar
-            </button>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyDown={handleSearchSubmit}
-              placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
-            />
-            <p>Página {page}</p>
-            <p>Imagens selecionadas: {selectedImages.length}</p>
-            {Array.isArray(uploadedFiles) &&
-              uploadedFiles.map(image => (
-                <img
-                  className={`image-in-modal ${
-                    selectedImages.map(img => img.key).includes(image.key)
-                      ? 'selected-image-modal'
-                      : ''
-                  }`}
-                  key={image.key}
-                  src={image.url}
-                  alt={image.name}
-                  onClick={() => handleImageSelection(image)}
+              <Card style={{ width: '18rem' }}>
+                <Card.Img
+                  variant="top"
+                  src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
                 />
-              ))}
-          </Modal>
+                <Card.Body>
+                  <Card.Title>{product.productName}</Card.Title>
+                  <Card.Text>
+                    Preço:{' '}
+                    {Number(product.price).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </Card.Text>{' '}
+                  {/* adicionado para formatar o preço na moeda brasileira */}
+                  <Card.Text>Descrição: {product.description}</Card.Text>
+                  <Card.Text>
+                    Quantidade em Estoque: {product.quantity}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </div>
+          ))}
+        </Carousel>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="productName">Nome do Produto:</label>
+          <input
+            type="text"
+            name="productName"
+            id="productName"
+            value={productName}
+            onChange={e => setProductName(e.target.value)}
+            required
+          />
 
-          {/* Render selected images */}
-          {selectedImages.length > 0 && (
+          <label htmlFor="quantity">Quantidade:</label>
+          <input
+            type="number"
+            name="quantity"
+            id="quantity"
+            value={formData.quantity}
+            onChange={handleChange}
+            required
+          />
+
+          <label htmlFor="price">Preço:</label>
+          <input
+            type="text"
+            name="price"
+            id="price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+          />
+          <label>
+            Criar Oferta
+            <input
+              type="checkbox"
+              name="isOffer"
+              checked={formData.isOffer}
+              onChange={handleChange}
+            />
+          </label>
+          {formData.isOffer && (
             <>
-              <h2 className="center-title">Imagens selecionadas:</h2>
-              <div className="product-images">
-                {selectedImages.map((image, index) => (
-                  <div key={index}>
-                    <img
-                      key={image.key || index}
-                      src={image.url}
-                      alt="Product"
-                    />
-                    <button
-                      className="button-remove-produdct"
-                      onClick={() => handleRemoveImage(image.key)}
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
+              <div>
+                <label htmlFor="discountPrice">Preço de Desconto:</label>
+                <input
+                  type="text"
+                  name="discountPrice"
+                  id="discountPrice"
+                  value={formData.discountPrice}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </>
           )}
-        </div>
+          <div>
+            <label htmlFor="description">Descrição:</label>
+            <textarea
+              name="description"
+              id="description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="categoryId">Categoria:</label>
+            <select
+              name="categoryId"
+              id="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Selecione uma opção</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button type="submit">Atualizar Produto</button>
+        </form>
+
+        <button onClick={() => setIsImageModalOpen(true)}>
+          Selecionar Imagens
+        </button>
+
+        {/* Render a success message if the product was updated successfully */}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+
+        {/* Render an error message if an error occurs */}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+
+        {/* Render a modal to select images */}
+        <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
+          {imageSelectionError && (
+            <p style={{ color: 'red' }}>{imageSelectionError}</p>
+          )}
+          <button
+            className="button"
+            onClick={handleFirstPage}
+            disabled={page === 1 && !searchPerformed}
+          >
+            Inicio
+          </button>
+          <button
+            className="button"
+            onClick={handlePreviousPage}
+            disabled={page === 1}
+          >
+            Voltar
+          </button>
+          <button
+            className="button"
+            onClick={handleNextPage}
+            disabled={!hasMore}
+          >
+            Avançar
+          </button>
+          <button className="modal-close" onClick={handleCloseModal}>
+            Fechar
+          </button>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearchSubmit}
+            placeholder="Buscar imagens: Digite o nome da imagem e pressione enter... 🔍"
+          />
+          <p>Página {page}</p>
+          <p>Imagens selecionadas: {selectedImages.length}</p>
+          {Array.isArray(uploadedFiles) &&
+            uploadedFiles.map(image => (
+              <img
+                className={`image-in-modal ${
+                  selectedImages.map(img => img.key).includes(image.key)
+                    ? 'selected-image-modal'
+                    : ''
+                }`}
+                key={image.key}
+                src={image.url}
+                alt={image.name}
+                onClick={() => handleImageSelection(image)}
+              />
+            ))}
+        </Modal>
+
+        {/* Render selected images */}
+        {selectedImages.length > 0 && (
+          <>
+            <h2 className="center-title">Imagens selecionadas:</h2>
+            <div className="product-images">
+              {selectedImages.map((image, index) => (
+                <div key={index}>
+                  <img key={image.key || index} src={image.url} alt="Product" />
+                  <button
+                    className="button-remove-produdct"
+                    onClick={() => handleRemoveImage(image.key)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 };
