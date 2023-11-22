@@ -6,21 +6,21 @@ import { ReactComponent as ArrowLeft } from '../../Assets/left-arrow-svgrepo-com
 export const CarouselContext = createContext();
 
 export const CarouselProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
-  
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const { data } = await api.get('/public/products');
-          setProducts(data);
-        } catch (error) {
-          console.error('Erro ao buscar os produtos:', error);
-        }
-      };
-  
-      fetchProducts();
-    }, []);
-    
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/public/products');
+        setProducts(data);
+      } catch (error) {
+        console.error('Erro ao buscar os produtos:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const responsiveSettings = {
     superLargeDesktop: {
       breakpoint: { max: 4000, min: 3000 },
@@ -70,7 +70,9 @@ export const CarouselProvider = ({ children }) => {
   };
 
   return (
-    <CarouselContext.Provider value={{ products, setProducts, responsiveSettings, renderArrow }}>
+    <CarouselContext.Provider
+      value={{ products, setProducts, responsiveSettings, renderArrow }}
+    >
       {children}
     </CarouselContext.Provider>
   );
