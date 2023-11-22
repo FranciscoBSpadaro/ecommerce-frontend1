@@ -29,6 +29,7 @@ const EditProductContent = ({ productId }) => {
 
   const [formData, setFormData] = useState({
     productName: '',
+    productId: productId,
     quantity: 0,
     price: '',
     description: '',
@@ -91,6 +92,11 @@ const EditProductContent = ({ productId }) => {
         [name]: value,
       });
     }
+
+    // Se o nome do produto for alterado, atualize productName
+    if (name === 'productName') {
+      setProductName(value);
+    }
   };
 
   const handleSubmit = async event => {
@@ -107,7 +113,7 @@ const EditProductContent = ({ productId }) => {
 
     try {
       const response = await api.put(
-        `/admin/products/${productId}`,
+        `/admin/products/${productData.productId}`,
         productData,
       );
 
@@ -129,6 +135,7 @@ const EditProductContent = ({ productId }) => {
   const handleProductSelection = product => {
     setFormData({
       productName: product.productName,
+      productId: product.productId,
       quantity: product.quantity,
       price: product.price,
       description: product.description,
@@ -136,7 +143,7 @@ const EditProductContent = ({ productId }) => {
       discountPrice: product.discountPrice,
       isOffer: product.isOffer,
     });
-    setProductName(product.productName);
+    setProductName(productName);
 
     // Atualize selectedImages com as image_keys do produto, ou um array vazio se image_keys for undefined
     setSelectedImages(product.image_keys || []);
@@ -215,8 +222,8 @@ const EditProductContent = ({ productId }) => {
             type="text"
             name="productName"
             id="productName"
-            value={productName}
-            onChange={e => setProductName(e.target.value)}
+            value={formData.productName}
+            onChange={handleChange}
             required
           />
 
