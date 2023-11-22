@@ -50,7 +50,7 @@ const Home = () => {
     const arrowStyle = {
       position: 'absolute',
       zIndex: 2,
-      top: direction === 'left' ? 'calc(46% - 15px)' : 'calc(50% - 15px)', // ajusta a posição  da seta esquerda e :  direita
+      top: direction === 'left' ? 'calc(50% - 15px)' : 'calc(50% - 15px)', // ajusta a posição  da seta esquerda e :  direita
       width: 40,
       height: 40,
       cursor: 'pointer',
@@ -58,10 +58,10 @@ const Home = () => {
       opacity: isDisabled ? 0.5 : 1,
       pointerEvents: isDisabled ? 'none' : 'auto',
     };
-  
+
     const ArrowComponent = direction === 'left' ? ArrowLeft : ArrowRight;
     const label = direction === 'left' ? 'Anterior' : 'Próximo';
-  
+
     return (
       <ArrowComponent
         onClick={onClickHandler}
@@ -69,7 +69,7 @@ const Home = () => {
         style={arrowStyle}
       />
     );
-  }
+  };
 
   return (
     <section>
@@ -86,25 +86,29 @@ const Home = () => {
         rtl={''} // Adicionado explicitamente para nao dar erro no console
       >
         {products.map((product, index) => (
-          <Card style={{ width: '18rem' }} key={index}>
-            <Card.Img
-              variant="top"
-              src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
-            />
-            <Card.Body>
-              <Card.Title>{product.productName}</Card.Title>
-              <Card.Text>
-                Preço:{' '}
-                {Number(product.price).toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })}
-              </Card.Text>{' '}
-              {/* adicionado para formatar o preço na moeda brasileira */}
-              <Card.Text>Descrição: {product.description}</Card.Text>
-              <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
-            </Card.Body>
-          </Card>
+          <div style={{ margin: '0 25px' }}>
+            {' '}
+            {/* Adicione um pouco de margem ao redor do card */}
+            <Card style={{ width: '18rem' }} key={index}>
+              <Card.Img
+                variant="top"
+                src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
+              />
+              <Card.Body>
+                <Card.Title>{product.productName}</Card.Title>
+                <Card.Text>
+                  Preço:{' '}
+                  {Number(product.price).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })}
+                </Card.Text>{' '}
+                {/* adicionado para formatar o preço na moeda brasileira */}
+                <Card.Text>Descrição: {product.description}</Card.Text>
+                <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
         ))}
       </Carousel>
       <Footer />
