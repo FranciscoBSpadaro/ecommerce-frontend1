@@ -145,9 +145,14 @@ const EditProductContent = ({ productId }) => {
     });
     setProductName(productName);
 
-    // Atualize selectedImages com as image_keys do produto, ou um array vazio se image_keys for undefined
-    setSelectedImages(product.image_keys || []);
-  };
+  // Atualizar selectedImages com as URLs das imagens do produto
+  setSelectedImages(
+    product.image_keys.map(key => ({
+      key,
+      url: `${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`,
+    }))
+  );
+};
 
   const handleImageSelection = image => {
     if (selectedImages.map(img => img.key).includes(image.key)) {
@@ -216,6 +221,7 @@ const EditProductContent = ({ productId }) => {
             </div>
           ))}
         </Carousel>
+        <div className="container-create-products">
         <form onSubmit={handleSubmit}>
           <label htmlFor="productName">Nome do Produto:</label>
           <input
@@ -298,6 +304,7 @@ const EditProductContent = ({ productId }) => {
 
           <button type="submit">Atualizar Produto</button>
         </form>
+        </div>
 
         <button onClick={() => setIsImageModalOpen(true)}>
           Selecionar Imagens
@@ -370,7 +377,7 @@ const EditProductContent = ({ productId }) => {
             <div className="product-images">
               {selectedImages.map((image, index) => (
                 <div key={index}>
-                  <img key={image.key || index} src={image.url} alt="Product" />
+                  <img className="selected-image" key={image.key || index} src={image.url} alt="Product" />
                   <button
                     className="button-remove-produdct"
                     onClick={() => handleRemoveImage(image.key)}
