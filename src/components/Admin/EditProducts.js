@@ -296,7 +296,7 @@ const EditProductContent = ({ productId }) => {
               <option value="">Selecione uma opção</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>
-                  {category.name}
+                  {category.categoryName}
                 </option>
               ))}
             </select>
