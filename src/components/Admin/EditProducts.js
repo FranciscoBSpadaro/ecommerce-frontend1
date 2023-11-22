@@ -6,7 +6,7 @@ import Modal from 'react-modal';
 import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
-import { CarouselContext, CarouselProvider } from '../Admin/CarouselProvider';
+import { CarouselContext } from '../Admin/CarouselProvider';
 import { Card } from 'react-bootstrap';
 
 const EditProduct = () => {
@@ -167,7 +167,6 @@ const EditProductContent = ({ productId }) => {
 
   return (
     <>
-      <CarouselProvider>
         <div className="container-edit-products">
           <h1>Editar Produto</h1>
           <Carousel
@@ -381,7 +380,6 @@ const EditProductContent = ({ productId }) => {
             </>
           )}
         </div>
-      </CarouselProvider>
     </>
   );
 };
