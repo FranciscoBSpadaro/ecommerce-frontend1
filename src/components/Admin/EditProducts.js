@@ -8,6 +8,8 @@ import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { CarouselContext } from '../Admin/CarouselProvider';
 import { Card } from 'react-bootstrap';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -177,6 +179,31 @@ const EditProductContent = ({ productId }) => {
 
   Modal.setAppElement(document.body);
 
+  const handleDelete = () => {
+    confirmAlert({
+      title: 'Confirmar exclusão',
+      message: 'Você realmente deseja excluir este produto?',
+      buttons: [
+        {
+          label: 'Sim',
+          onClick: async () => {
+            try {
+              const response = await api.delete(`/admin/products/${formData.productId}`);
+              console.log(response.data);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        },
+        {
+          label: 'Não',
+          onClick: () => {}
+        }
+      ]
+    });
+  };
+  
+
   return (
     <>
       <div className="container-edit-products">
@@ -303,6 +330,9 @@ const EditProductContent = ({ productId }) => {
           </div>
 
           <button type="submit">Atualizar Produto</button>
+          <div>
+          <button className="button-remove-produdct" type="button" onClick={handleDelete}>Excluir Produto</button>
+          </div>
         </form>
         </div>
 
