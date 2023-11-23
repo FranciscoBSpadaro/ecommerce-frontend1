@@ -28,6 +28,66 @@ const Home = () => {
         customRightArrow={<ArrowFix>{renderArrow('right')}</ArrowFix>}
         rtl={''} // Adicionado explicitamente para nao dar erro no console
       >
+        {products
+          .filter(product => product.isOffer) // Filtrar produtos com isOffer = true
+          .map((product, index) => {
+            const price = Number(product.price);
+            const discountPrice = Number(product.discountPrice);
+
+            // Calcule o desconto como uma porcentagem
+            const discount = ((price - discountPrice) / price) * 100;
+
+            return (
+              <div style={{ margin: '0 25px' }} key={index}>
+                <Card style={{ width: '18rem' }}>
+                  <Card.Img
+                    variant="top"
+                    src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+                  />
+                  <Card.Body>
+                    <Card.Title>{product.productName}</Card.Title>
+                    <Card.Text style={{ textDecoration: 'line-through' }}>
+                      Preço:{' '}
+                      {price.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })}
+                    </Card.Text>
+                    <Card.Text>
+                      Preço de Oferta:{' '}
+                      {discountPrice.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })}
+                    </Card.Text>
+                    <Card.Text>
+                      Desconto de {discount.toFixed(2)}% Economize{' '}
+                      {(price - discountPrice).toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })}
+                    </Card.Text>
+                    <Card.Text>Descrição: {product.description}</Card.Text>
+                    <Card.Text>
+                      Quantidade em Estoque: {product.quantity}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </div>
+            );
+          })}
+      </Carousel>
+      <h2>Outros Produtos</h2>
+      <Carousel
+        responsive={responsiveSettings}
+        arrows
+        showDots={true} // exibir os pontos de navegação
+        infinite={false} // rolagem infinita
+        slidesToSlide={5} // Adicionado para avançar/retroceder 5 itens por clique
+        customLeftArrow={<ArrowFix>{renderArrow('left')}</ArrowFix>}
+        customRightArrow={<ArrowFix>{renderArrow('right')}</ArrowFix>}
+        rtl={''} // Adicionado explicitamente para nao dar erro no console
+      >
         {products.map((product, index) => (
           <div style={{ margin: '0 25px' }} key={index}>
             <Card style={{ width: '18rem' }}>
@@ -52,7 +112,7 @@ const Home = () => {
           </div>
         ))}
       </Carousel>
-      <Footer />
+      <Footer className='content' />
     </section>
   );
 };

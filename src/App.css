@@ -75,9 +75,7 @@ p {
 }
 
 .footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  display: grid;
   background: linear-gradient(to right, #007BFF, #2ca9bc);
   color: white;
   text-align: center;
