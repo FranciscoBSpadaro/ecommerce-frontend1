@@ -16,7 +16,7 @@ const Home = () => {
 
   return (
     <section>
-      <h2>Ofertas do Dia</h2>
+      <h2 style={{ marginLeft: '30px' }}>Ofertas do Dia</h2>
 
       <Carousel
         responsive={responsiveSettings}
@@ -77,7 +77,7 @@ const Home = () => {
             );
           })}
       </Carousel>
-      <h2>Outros Produtos</h2>
+      <h2 style={{ marginLeft: '30px' }}>Ofertas do Dia</h2>
       <Carousel
         responsive={responsiveSettings}
         arrows
@@ -96,7 +96,9 @@ const Home = () => {
                 src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
               />
               <Card.Body>
-                <Card.Title>{product.productName}</Card.Title>
+                <Card.Title style={{ overflowWrap: 'break-word' }}>
+                  {product.productName}
+                  </Card.Title>
                 <Card.Text>
                   Preço:{' '}
                   {Number(product.price).toLocaleString('pt-BR', {
@@ -105,14 +107,16 @@ const Home = () => {
                   })}
                 </Card.Text>{' '}
                 {/* adicionado para formatar o preço na moeda brasileira */}
-                <Card.Text>Descrição: {product.description}</Card.Text>
+                <Card.Text style={{ overflowWrap: 'break-word' }}>
+                  Descrição: {product.description}
+                  </Card.Text>
                 <Card.Text>Quantidade em Estoque: {product.quantity}</Card.Text>
               </Card.Body>
             </Card>
           </div>
         ))}
       </Carousel>
-      <Footer className='content' />
+      <Footer className="content" />
     </section>
   );
 };
