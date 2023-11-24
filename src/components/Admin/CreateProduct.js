@@ -19,6 +19,8 @@ const CreateProductContent = () => {
     price: '',
     description: '',
     categoryId: '',
+    model: '',
+    brand: '',
   });
 
   const {
@@ -296,6 +298,25 @@ const CreateProductContent = () => {
             name="productName"
             value={formData.productName}
             onChange={handleChangeProduct}
+            required
+          />
+          <label htmlFor="model">Modelo</label>
+          <input
+            type="text"
+            id="model"
+            name="model"
+            value={formData.model}
+            onChange={handleChange}
+            required
+          />
+
+          <label htmlFor="brand">Marca</label>
+          <input
+            type="text"
+            id="brand"
+            name="brand"
+            value={formData.brand}
+            onChange={handleChange}
             required
           />
 

@@ -22,7 +22,7 @@ const EditProduct = () => {
 };
 
 const EditProductContent = ({ productId }) => {
-  const { products, responsiveSettings, renderArrow } =
+  const { products, responsiveSettings, renderArrow, fetchProducts } =
     useContext(CarouselContext);
   const ArrowFix = arrowProps => {
     const { carouselState, children, ...restArrowProps } = arrowProps;
@@ -36,8 +36,10 @@ const EditProductContent = ({ productId }) => {
     price: '',
     description: '',
     categoryId: '',
-    discountPrice: '', // novo atributo
+    discountPrice: '', // preço de desconto
     isOffer: false, // novo estado para controlar se o produto é uma oferta
+    model: '', // modelo
+    brand: '', // marca
   });
 
   const {
@@ -103,26 +105,33 @@ const EditProductContent = ({ productId }) => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-
-    // Format price if needed
-    // const price = formatPrice(formData.price);
-
+  
     const productData = {
       ...formData,
-      // price,
       image_keys: selectedImages.map(image => image.key),
     };
-
+  
     try {
       const response = await api.put(
         `/admin/products/${productData.productId}`,
         productData,
       );
-
+  
       if (response.status === 200) {
         setSuccessMessage('Produto atualizado com sucesso');
-        setTimeout(() => setSuccessMessage(''), 5000);
-        // Redirect to product details or product list
+        setTimeout(() => {
+          setSuccessMessage(''); // Limpa a mensagem de sucesso
+          setFormData({ // Limpa o formulário
+            productName: '',
+            quantity: 0,
+            price: '',
+            description: '',
+            categoryId: '',
+            brand: '',
+            model: '',
+          });
+          fetchProducts(); // Atualiza os produtos do carrossel
+        }, 5000);
       }
     } catch (error) {
       setErrorMessage(
@@ -137,6 +146,8 @@ const EditProductContent = ({ productId }) => {
   const handleProductSelection = product => {
     setFormData({
       productName: product.productName,
+      brand: product.brand,
+      model: product.model,
       productId: product.productId,
       quantity: product.quantity,
       price: product.price,
@@ -147,14 +158,14 @@ const EditProductContent = ({ productId }) => {
     });
     setProductName(productName);
 
-  // Atualizar selectedImages com as URLs das imagens do produto
-  setSelectedImages(
-    product.image_keys.map(key => ({
-      key,
-      url: `${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`,
-    }))
-  );
-};
+    // Atualizar selectedImages com as URLs das imagens do produto
+    setSelectedImages(
+      product.image_keys.map(key => ({
+        key,
+        url: `${process.env.REACT_APP_AWS_S3_URL}${key}`, // Use a chave correspondente para cada imagem
+      })),
+    );
+  };
 
   const handleImageSelection = image => {
     if (selectedImages.map(img => img.key).includes(image.key)) {
@@ -188,27 +199,28 @@ const EditProductContent = ({ productId }) => {
           label: 'Sim',
           onClick: async () => {
             try {
-              const response = await api.delete(`/admin/products/${formData.productId}`);
+              const response = await api.delete(
+                `/admin/products/${formData.productId}`,
+              );
               console.log(response.data);
             } catch (error) {
               console.error(error);
             }
-          }
+          },
         },
         {
           label: 'Não',
-          onClick: () => {}
-        }
-      ]
+          onClick: () => {},
+        },
+      ],
     });
   };
-  
 
   return (
     <>
       <div className="container-edit-products">
-      <div className="form-group">
-        <h1>Editar Produto</h1>
+        <div className="form-group">
+          <h1>Editar Produto</h1>
         </div>
         <Carousel
           responsive={responsiveSettings}
@@ -226,129 +238,139 @@ const EditProductContent = ({ productId }) => {
               key={index}
               onClick={() => handleProductSelection(product)}
             >
-              <Card style={{ width: '18rem' }}>
+              <Card style={{ width: '14rem', height: '15rem' }}>
                 <Card.Img
                   variant="top"
                   src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`} // concatenando a url da imagem do bucket s3 com a key da imagem
                 />
                 <Card.Body>
                   <Card.Title>{product.productName}</Card.Title>
-                  <Card.Text>
-                    Preço:{' '}
-                    {Number(product.price).toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    })}
-                  </Card.Text>{' '}
-                  {/* adicionado para formatar o preço na moeda brasileira */}
-                  <Card.Text>Descrição: {product.description}</Card.Text>
-                  <Card.Text>
-                    Quantidade em Estoque: {product.quantity}
-                  </Card.Text>
                 </Card.Body>
               </Card>
             </div>
           ))}
         </Carousel>
         <div className="container-create-products">
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="productName">Nome do Produto:</label>
-          <input
-            type="text"
-            name="productName"
-            id="productName"
-            value={formData.productName}
-            onChange={handleChange}
-            required
-          />
-
-          <label htmlFor="quantity">Quantidade:</label>
-          <input
-            type="number"
-            name="quantity"
-            id="quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-            required
-          />
-
-          <label htmlFor="price">Preço:</label>
-          <input
-            type="text"
-            name="price"
-            id="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-          />
-          <label>
-            Criar Oferta
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="productName">Nome do Produto:</label>
             <input
-              type="checkbox"
-              name="isOffer"
-              checked={formData.isOffer}
-              onChange={handleChange}
-            />
-          </label>
-          {formData.isOffer && (
-            <>
-              <div>
-                <label htmlFor="discountPrice">Preço de Desconto:</label>
-                <input
-                  type="text"
-                  name="discountPrice"
-                  id="discountPrice"
-                  value={formData.discountPrice}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </>
-          )}
-          <div>
-            <label htmlFor="description">Descrição:</label>
-            <textarea
-              name="description"
-              id="description"
-              value={formData.description}
+              type="text"
+              name="productName"
+              id="productName"
+              value={formData.productName}
               onChange={handleChange}
               required
             />
-            <label htmlFor="categoryId">Categoria:</label>
-            <select
-              name="categoryId"
-              id="categoryId"
-              value={formData.categoryId}
+            <label htmlFor="model">Modelo</label>
+            <input
+              type="text"
+              id="model"
+              name="model"
+              value={formData.model}
               onChange={handleChange}
               required
-            >
-              <option value="">Selecione uma opção</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.categoryName}
-                </option>
-              ))}
-            </select>
-          </div>
+            />
 
-          <button className="button" type="submit">Atualizar Produto</button>
-          <div className='right-float'>
-          <button className="button-remove-produdct" type="button" onClick={handleDelete}>Excluir Produto</button>
-          </div>
-        </form>
+            <label htmlFor="brand">Marca</label>
+            <input
+              type="text"
+              id="brand"
+              name="brand"
+              value={formData.brand}
+              onChange={handleChange}
+              required
+            />
+
+            <label htmlFor="quantity">Quantidade:</label>
+            <input
+              type="number"
+              name="quantity"
+              id="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              required
+            />
+
+            <label htmlFor="price">Preço:</label>
+            <input
+              type="text"
+              name="price"
+              id="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
+            />
+            <label>
+              Criar Oferta
+              <input
+                type="checkbox"
+                name="isOffer"
+                checked={formData.isOffer}
+                onChange={handleChange}
+              />
+            </label>
+            {formData.isOffer && (
+              <>
+                <div>
+                  <label htmlFor="discountPrice">Preço de Desconto:</label>
+                  <input
+                    type="text"
+                    name="discountPrice"
+                    id="discountPrice"
+                    value={formData.discountPrice}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </>
+            )}
+            <div>
+              <label htmlFor="description">Descrição:</label>
+              <textarea
+                name="description"
+                id="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
+              <label htmlFor="categoryId">Categoria:</label>
+              <select
+                name="categoryId"
+                id="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione uma opção</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button className="button" type="submit">
+              Atualizar Produto
+            </button>
+            <div className="right-float">
+              <button
+                className="button-remove-produdct"
+                type="button"
+                onClick={handleDelete}
+              >
+                Excluir Produto
+              </button>
+            </div>
+          </form>
         </div>
-        <div className='form-group'>
-        <button className="button" onClick={() => setIsImageModalOpen(true)}>
-          Selecionar Imagens
-        </button>
+        <div className="form-group">
+          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          <button className="button" onClick={() => setIsImageModalOpen(true)}>
+            Selecionar Imagens
+          </button>
         </div>
-
-        {/* Render a success message if the product was updated successfully */}
-        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-
-        {/* Render an error message if an error occurs */}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-
         {/* Render a modal to select images */}
         <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
           {imageSelectionError && (
@@ -406,21 +428,26 @@ const EditProductContent = ({ productId }) => {
         {/* Render selected images */}
         {selectedImages.length > 0 && (
           <>
-          <div className='form-group'>
-            <h2 className="center-title">Imagens selecionadas:</h2>
-            <div className="product-images">
-              {selectedImages.map((image, index) => (
-                <div key={index}>
-                  <img className="selected-image" key={image.key || index} src={image.url} alt="Product" />
-                  <button
-                    className="button-remove-produdct"
-                    onClick={() => handleRemoveImage(image.key)}
-                  >
-                    Remover
-                  </button>
-                </div>
-              ))}
-            </div>
+            <div className="form-group">
+              <h2 className="center-title">Imagens selecionadas:</h2>
+              <div className="product-images">
+                {selectedImages.map((image, index) => (
+                  <div key={index}>
+                    <img
+                      className="selected-image"
+                      key={image.key || index}
+                      src={image.url}
+                      alt="Product"
+                    />
+                    <button
+                      className="button-remove-produdct"
+                      onClick={() => handleRemoveImage(image.key)}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}

@@ -8,16 +8,16 @@ export const CarouselContext = createContext();
 export const CarouselProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await api.get('/public/products');
-        setProducts(data);
-      } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
-      }
-    };
+  const fetchProducts = async () => {
+    try {
+      const { data } = await api.get('/public/products');
+      setProducts(data);
+    } catch (error) {
+      console.error('Erro ao buscar os produtos:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -71,7 +71,7 @@ export const CarouselProvider = ({ children }) => {
 
   return (
     <CarouselContext.Provider
-      value={{ products, setProducts, responsiveSettings, renderArrow }}
+      value={{ products, setProducts, responsiveSettings, renderArrow, fetchProducts }}
     >
       {children}
     </CarouselContext.Provider>

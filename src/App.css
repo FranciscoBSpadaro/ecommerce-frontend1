@@ -29,7 +29,7 @@ nav {
   display: flex;
   justify-content: space-between;
   background: linear-gradient(to right, #2ca9bc, #007BFF);
-  max-height: 100px;
+  max-height: 85px;
 }
 
 nav a {
