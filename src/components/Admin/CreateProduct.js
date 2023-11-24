@@ -3,6 +3,14 @@ import api from '../../api';
 import '../../App.css';
 import Modal from 'react-modal';
 import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
+import {
+  handleChangeProduct,
+  handleChangeBrand,
+  handleChangeModel,
+  handleQuantityChange,
+  handlePriceChange,
+  handleChangeDescription,
+} from './handleChangesCreateProduct';
 
 export const CreateProduct = () => {
   return (
@@ -71,134 +79,28 @@ const CreateProductContent = () => {
     });
   };
 
-  const handleChangeProduct = e => {
-    const { name, value } = e.target;
-
-    if (name === 'productName' && value.length > 50) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        productName: 'O nome do produto deve ter no máximo 50 caracteres.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
-      }, 5000);
-      return;
-    } else {
-      setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
-    }
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleProductChange = e => {
+    handleChangeProduct(e, setErrorMessage, formData, setFormData);
   };
 
-  const handleQuantityChange = e => {
-    const value = parseInt(e.target.value);
-
-    if (value < 0) {
-      return;
-    } else if (value > 999999999) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        quantity: 'A quantidade deve ter no máximo 9 dígitos.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
-      }, 5000);
-      return;
-    }
-
-    setFormData({
-      ...formData,
-      quantity: value,
-    });
+  const handleBrandChange = e => {
+    handleChangeBrand(e, setErrorMessage, formData, setFormData);
   };
 
-  const handlePriceChange = event => {
-    let value = event.target.value;
-
-    // Permitir que o valor do campo seja vazio
-    if (value === '') {
-      setFormData({
-        ...formData,
-        price: value,
-      });
-      return;
-    }
-
-    // Permitir apenas números, pontos e vírgulas
-    const regex = /^[0-9.,]+$/;
-    if (!regex.test(value)) {
-      return;
-    }
-    // Verificar se o valor tem mais de uma vírgula
-    const commaCount = (value.match(/,/g) || []).length;
-    if (commaCount > 1) {
-      // Exibir uma mensagem de erro
-      setErrorMessage(
-        'Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.',
-      );
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 5000);
-      return;
-    }
-
-    // Verificar se o número total de dígitos excede 10 e se os dígitos após a vírgula excedem 2
-    const digitCount = value.replace(/[^0-9]/g, '').length;
-    const decimalCount = value.split(',')[1]?.length || 0;
-    if (digitCount > 10 || decimalCount > 2) {
-      // Exibir uma mensagem de erro
-      setErrorMessage(
-        'Atenção, a quantidade total de digitos deve ser 12,  no padrão decimal 99.999.999,99 ou 10 digitos no formato 9999999999',
-      );
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 6000);
-      return;
-    }
-
-    // Verificar se o valor tem mais de duas casas decimais
-    const parts = value.split(',');
-    if (parts.length > 1 && parts[1].length > 2) {
-      // Remover os dígitos extras
-      value = parts[0] + ',' + parts[1].substring(0, 2);
-
-      // Exibir uma mensagem de erro
-      setErrorMessage(
-        'Atenção, respeite as casas decimais. Use ponto antes de vírgulas.',
-      );
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 5000);
-    }
-
-    setFormData({
-      ...formData,
-      price: value,
-    });
+  const handleModelChange = e => {
+    handleChangeModel(e, setErrorMessage, formData, setFormData);
   };
 
-  const handleChangeDescription = e => {
-    const { name, value } = e.target;
-    if (name === 'description' && value.length > 55) {
-      setErrorMessage(prevErrors => ({
-        ...prevErrors,
-        description: 'A descrição curta deve ter no máximo 55 caracteres.',
-      }));
-      setTimeout(() => {
-        setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
-      }, 5000);
-      return;
-    } else {
-      setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
-    }
+  const handleChangeQuantity = e => {
+    handleQuantityChange(e, setErrorMessage, formData, setFormData);
+  };
 
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleChangePrice = e => {
+    handlePriceChange(e, setErrorMessage, formData, setFormData);
+  };
+
+  const handleDescriptionChange = e => {
+    handleChangeDescription(e, setErrorMessage, formData, setFormData);
   };
 
   const handleOpenModal = () => {
@@ -276,47 +178,50 @@ const CreateProductContent = () => {
   Modal.setAppElement('#root');
 
   return (
-    <div className="container-create-products">
+    <div className="container-create-products" style={{ position: 'relative' }}>
+      <div className="message-container">
+        {successMessage && <p className="success-messages">{successMessage}</p>}
+        {typeof errorMessage === 'string' ? (
+          <p className="error-messages" dangerouslySetInnerHTML={{ __html: errorMessage.replace(/\n/g, '<br />') }} />
+        ) : (
+          Object.values(errorMessage)
+            .filter(Boolean)
+            .map((error, index) => (
+              <p key={index} className="error-messages">
+                {error}
+              </p>
+            ))
+        )}
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <h1>Cadastrar Produto</h1>
-          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-          {typeof errorMessage === 'string' ? (
-            <p style={{ color: 'red' }}>{errorMessage}</p>
-          ) : (
-            Object.values(errorMessage).filter(Boolean).join(' ') && (
-              <p style={{ color: 'red' }}>
-                {Object.values(errorMessage).filter(Boolean).join(' ')}
-              </p>
-            )
-          )}
-
+              <h1>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
           <input
             type="text"
             id="productName"
             name="productName"
             value={formData.productName}
-            onChange={handleChangeProduct}
+            onChange={handleProductChange}
             required
           />
-          <label htmlFor="model">Modelo</label>
-          <input
-            type="text"
-            id="model"
-            name="model"
-            value={formData.model}
-            onChange={handleChange}
-            required
-          />
-
           <label htmlFor="brand">Marca</label>
           <input
             type="text"
             id="brand"
             name="brand"
             value={formData.brand}
-            onChange={handleChange}
+            onChange={handleBrandChange}
+            required
+          />
+
+          <label htmlFor="model">Modelo</label>
+          <input
+            type="text"
+            id="model"
+            name="model"
+            value={formData.model}
+            onChange={handleModelChange}
             required
           />
 
@@ -325,7 +230,7 @@ const CreateProductContent = () => {
             type="number"
             id="quantity"
             value={formData.quantity}
-            onChange={handleQuantityChange}
+            onChange={handleChangeQuantity}
             required
           />
         </div>
@@ -335,7 +240,7 @@ const CreateProductContent = () => {
             type="text"
             id="price"
             value={formData.price}
-            onChange={handlePriceChange}
+            onChange={handleChangePrice}
             required
           />
         </div>
@@ -344,7 +249,7 @@ const CreateProductContent = () => {
           <textarea
             name="description"
             value={formData.description}
-            onChange={handleChangeDescription}
+            onChange={handleDescriptionChange}
           />
         </div>
         <div className="form-group">

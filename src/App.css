@@ -93,6 +93,15 @@ p {
   justify-content: space-evenly;
 }
 
+.message-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .container-upload {
   display: grid;
   justify-content: center;

@@ -105,23 +105,24 @@ const EditProductContent = ({ productId }) => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-  
+
     const productData = {
       ...formData,
       image_keys: selectedImages.map(image => image.key),
     };
-  
+
     try {
       const response = await api.put(
         `/admin/products/${productData.productId}`,
         productData,
       );
-  
+
       if (response.status === 200) {
         setSuccessMessage('Produto atualizado com sucesso');
         setTimeout(() => {
           setSuccessMessage(''); // Limpa a mensagem de sucesso
-          setFormData({ // Limpa o formulário
+          setFormData({
+            // Limpa o formulário
             productName: '',
             quantity: 0,
             price: '',
@@ -261,16 +262,6 @@ const EditProductContent = ({ productId }) => {
               onChange={handleChange}
               required
             />
-            <label htmlFor="model">Modelo</label>
-            <input
-              type="text"
-              id="model"
-              name="model"
-              value={formData.model}
-              onChange={handleChange}
-              required
-            />
-
             <label htmlFor="brand">Marca</label>
             <input
               type="text"
@@ -280,7 +271,15 @@ const EditProductContent = ({ productId }) => {
               onChange={handleChange}
               required
             />
-
+            <label htmlFor="model">Modelo</label>
+            <input
+              type="text"
+              id="model"
+              name="model"
+              value={formData.model}
+              onChange={handleChange}
+              required
+            />
             <label htmlFor="quantity">Quantidade:</label>
             <input
               type="number"
