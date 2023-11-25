@@ -1,48 +1,42 @@
-export const handleChangeProduct = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
-  const { name, value } = e.target;
+import { toast } from 'react-toastify';
 
-  if (name === 'productName' && value.length > 45) {
-    setErrorMessage(prevErrors => ({
-      ...prevErrors,
-      productName: 'O nome do produto deve ter no máximo 45 caracteres.',
-    }));
-    setTimeout(() => {
-      setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
-    }, 5000);
-    return;
-  } else {
-    setErrorMessage(prevErrors => ({ ...prevErrors, productName: '' }));
-  }
+export const useHandleChangeProduct = (formData, setFormData) => {
+  const handleChangeProduct = e => {
+    const { name, value } = e.target;
 
-  setFormData({
-    ...formData,
-    [name]: value,
-  });
+    if (value.length > 45) {
+      const errorMessage =
+        'O nome do produto deve ter no máximo 45 caracteres.';
+
+      // Verificar se o toast com o ID errorMessage já está ativo
+      if (!toast.isActive(errorMessage)) {
+        toast.error(errorMessage, { toastId: errorMessage });
+      }
+
+      return;
+    }
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  return handleChangeProduct;
 };
 
-export const handleChangeBrand = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
+export const handleChangeBrand = (e, formData, setFormData) => {
   const { name, value } = e.target;
+
   if (value.length > 25) {
-    setErrorMessage(prevErrors => ({
-      ...prevErrors,
-      brand: 'A marca deve ter no máximo 25 caracteres.',
-    }));
-    setTimeout(() => {
-      setErrorMessage(prevErrors => ({ ...prevErrors, brand: '' }));
-    }, 5000);
+    const errorMessage = 'A marca deve ter no máximo 25 caracteres.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
-  } else {
-    setErrorMessage(prevErrors => ({ ...prevErrors, brand: '' }));
   }
 
   setFormData({
@@ -51,25 +45,19 @@ export const handleChangeBrand = (
   });
 };
 
-export const handleChangeModel = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
+export const handleChangeModel = (e, formData, setFormData) => {
   const { name, value } = e.target;
+
   if (value.length > 25 || value.includes(' ')) {
-    setErrorMessage(prevErrors => ({
-      ...prevErrors,
-      model:
-        'O modelo deve ter no máximo 25 caracteres e não deve conter espaços.',
-    }));
-    setTimeout(() => {
-      setErrorMessage(prevErrors => ({ ...prevErrors, model: '' }));
-    }, 5000);
+    const errorMessage =
+      'O modelo deve ter no máximo 25 caracteres e não deve conter espaços.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
-  } else {
-    setErrorMessage(prevErrors => ({ ...prevErrors, model: '' }));
   }
 
   setFormData({
@@ -78,24 +66,19 @@ export const handleChangeModel = (
   });
 };
 
-export const handleQuantityChange = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
+export const handleQuantityChange = (e, formData, setFormData) => {
   const value = parseInt(e.target.value);
 
   if (value < 0) {
     return;
   } else if (value > 999999999) {
-    setErrorMessage(prevErrors => ({
-      ...prevErrors,
-      quantity: 'A quantidade deve ter no máximo 9 dígitos.',
-    }));
-    setTimeout(() => {
-      setErrorMessage(prevErrors => ({ ...prevErrors, quantity: '' }));
-    }, 5000);
+    const errorMessage = 'A quantidade deve ter no máximo 9 dígitos.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
   }
 
@@ -105,12 +88,7 @@ export const handleQuantityChange = (
   });
 };
 
-export const handlePriceChange = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
+export const handlePriceChange = (e, formData, setFormData) => {
   let value = e.target.value;
 
   // Permitir que o valor do campo seja vazio
@@ -130,26 +108,41 @@ export const handlePriceChange = (
 
   // Verificar se um ponto é inserido após uma vírgula
   if (value.includes(',') && value.split(',')[1].includes('.')) {
-    // Exibir uma mensagem de erro
-    setErrorMessage(
-      'Atenção, não é permitido inserir um ponto se ja digitou uma vírgula.',
-    );
-    setTimeout(() => {
-      setErrorMessage('');
-    }, 5000);
+    const errorMessage =
+      'Atenção, não é permitido inserir um ponto se ja digitou uma vírgula.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
   }
 
   // Verificar se o valor tem mais de uma vírgula
   const commaCount = (value.match(/,/g) || []).length;
   if (commaCount > 1) {
-    // Exibir uma mensagem de erro
-    setErrorMessage(
-      'Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.',
-    );
-    setTimeout(() => {
-      setErrorMessage('');
-    }, 5000);
+    const errorMessage =
+      'Atenção, respeite as casas decimais. Use apenas 1 vírgula depois de colocar pontos.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
+    return;
+  }
+
+  // Verificar se há dois ou mais pontos em sequência
+  if (/(\.\.)+/.test(value)) {
+    const errorMessage =
+      'Atenção, não é permitido inserir dois ou mais pontos em sequência.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
   }
 
@@ -157,28 +150,15 @@ export const handlePriceChange = (
   const digitCount = value.replace(/[^0-9]/g, '').length;
   const decimalCount = value.split(',')[1]?.length || 0;
   if (digitCount > 10 || decimalCount > 2) {
-    // Exibir uma mensagem de erro
-    setErrorMessage(
-      `Atenção, o preço deve ter um total de 12 dígitos. \n use o padrão decimal 99.999.999,99 ou 10 dígitos no formato 9999999999`,
-    );
-    setTimeout(() => {
-      setErrorMessage('');
-    }, 6000);
-    return;
-  }
-  // Verificar se o valor tem mais de duas casas decimais
-  const parts = value.split(',');
-  if (parts.length > 1 && parts[1].length > 2) {
-    // Remover os dígitos extras
-    value = parts[0] + ',' + parts[1].substring(0, 2);
+    const errorMessage =
+      'Atenção, o preço deve ter um total de 10 dígitos. use o padrão decimal 99.999.999,99 ou 99999999,99 ou 8 dígitos no formato 99999999';
 
-    // Exibir uma mensagem de erro
-    setErrorMessage(
-      'Atenção, respeite as casas decimais. Use ponto antes de vírgulas.',
-    );
-    setTimeout(() => {
-      setErrorMessage('');
-    }, 5000);
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
+    return;
   }
 
   setFormData({
@@ -187,24 +167,18 @@ export const handlePriceChange = (
   });
 };
 
-export const handleChangeDescription = (
-  e,
-  setErrorMessage,
-  formData,
-  setFormData,
-) => {
+export const handleChangeDescription = (e, formData, setFormData) => {
   const { name, value } = e.target;
+
   if (name === 'description' && value.length > 55) {
-    setErrorMessage(prevErrors => ({
-      ...prevErrors,
-      description: 'A descrição curta deve ter no máximo 55 caracteres.',
-    }));
-    setTimeout(() => {
-      setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
-    }, 5000);
+    const errorMessage = 'A descrição curta deve ter no máximo 55 caracteres.';
+
+    // Verificar se o toast com o ID errorMessage já está ativo
+    if (!toast.isActive(errorMessage)) {
+      toast.error(errorMessage, { toastId: errorMessage });
+    }
+
     return;
-  } else {
-    setErrorMessage(prevErrors => ({ ...prevErrors, description: '' }));
   }
 
   setFormData({

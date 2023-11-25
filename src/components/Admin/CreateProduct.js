@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../App.css';
 import Modal from 'react-modal';
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useUploadImage, UploadImageProvider } from './UploadImageProvider';
 import {
-  handleChangeProduct,
+  useHandleChangeProduct,
   handleChangeBrand,
   handleChangeModel,
   handleQuantityChange,
@@ -47,9 +50,6 @@ const CreateProductContent = () => {
   const [categories, setCategories] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [imageSelectionError, setImageSelectionError] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -57,14 +57,10 @@ const CreateProductContent = () => {
         const response = await api.get('/categories');
         setCategories(response.data);
       } catch (error) {
-        setErrorMessage(
-          `Ocorreu um erro: ${
-            error.response.data.message || error.response.data.error
-          }`,
-        );
-        setTimeout(() => {
-          setErrorMessage('');
-        }, 5000);
+        const errorMessage = `Ocorreu um erro: ${
+          error.response.data.message || error.response.data.error
+        }`;
+        toast.error(errorMessage);
       }
     };
 
@@ -79,28 +75,26 @@ const CreateProductContent = () => {
     });
   };
 
-  const handleProductChange = e => {
-    handleChangeProduct(e, setErrorMessage, formData, setFormData);
-  };
+  const handleProductChange = useHandleChangeProduct(formData, setFormData);
 
   const handleBrandChange = e => {
-    handleChangeBrand(e, setErrorMessage, formData, setFormData);
+    handleChangeBrand(e, formData, setFormData);
   };
 
   const handleModelChange = e => {
-    handleChangeModel(e, setErrorMessage, formData, setFormData);
+    handleChangeModel(e, formData, setFormData);
   };
 
   const handleChangeQuantity = e => {
-    handleQuantityChange(e, setErrorMessage, formData, setFormData);
+    handleQuantityChange(e, formData, setFormData);
   };
 
   const handleChangePrice = e => {
-    handlePriceChange(e, setErrorMessage, formData, setFormData);
+    handlePriceChange(e, formData, setFormData);
   };
 
   const handleDescriptionChange = e => {
-    handleChangeDescription(e, setErrorMessage, formData, setFormData);
+    handleChangeDescription(e, formData, setFormData);
   };
 
   const handleOpenModal = () => {
@@ -112,10 +106,13 @@ const CreateProductContent = () => {
       setSelectedImages(selectedImages.filter(img => img.key !== image.key));
     } else {
       if (selectedImages.length >= 5) {
-        setImageSelectionError('O máximo de imagens por produto é 5.');
-        setTimeout(() => {
-          setImageSelectionError('');
-        }, 5000);
+        const errorMessage = 'O máximo de imagens por produto é 5.';
+
+        // Verificar se o toast com o ID errorMessage já está ativo
+        if (!toast.isActive(errorMessage)) {
+          toast.error(errorMessage, { toastId: errorMessage });
+        }
+
         return;
       }
       setSelectedImages([...selectedImages, image]);
@@ -131,25 +128,28 @@ const CreateProductContent = () => {
   };
 
   const formatPrice = price => {
-    let parts = price.split('.');
-    if (parts.length > 2) {
-      let lastPart = parts.pop();
-      let formattedPrice = parts.join('') + '.' + lastPart;
-      return formattedPrice;
-    } else {
-      price = price.replace(',', '.');
-      const digitCount = price.replace(/[^0-9]/g, '').length;
-      if (digitCount === 10) {
-        price = price.slice(0, -2) + '.' + price.slice(-2);
-      }
-      return price;
+    // Remover pontos usados como separadores de milhar e substituir a vírgula por um ponto
+    price = price.replace(/\./g, '').replace(',', '.');
+
+    // Se o preço for um número de 10 dígitos sem um ponto decimal, adicione um ponto antes dos últimos dois dígitos
+    if (/^\d{10}$/.test(price)) {
+      price = price.slice(0, -2) + '.' + price.slice(-2);
     }
+
+    // Converter o preço para um número e formatá-lo com duas casas decimais
+    price = parseFloat(price).toFixed(2);
+
+    return price;
   };
 
   const handleSubmit = async event => {
     event.preventDefault();
 
     const price = formatPrice(formData.price);
+
+    if (!price) {
+      return;
+    }
 
     const productData = {
       ...formData,
@@ -161,17 +161,13 @@ const CreateProductContent = () => {
       const response = await api.post('/admin/products', productData, {});
 
       if (response.status === 201) {
-        setSuccessMessage('Produto cadastrado com sucesso');
+        toast.success('Produto cadastrado com sucesso!');
         setTimeout(() => {
-          setSuccessMessage('');
           window.location.reload();
         }, 5000);
       }
     } catch (error) {
-      setErrorMessage(error.response.data.message || error.response.data.error);
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 5000);
+      toast.error(error.response.data.message || error.response.data.error);
     }
   };
 
@@ -179,23 +175,10 @@ const CreateProductContent = () => {
 
   return (
     <div className="container-create-products" style={{ position: 'relative' }}>
-      <div className="message-container">
-        {successMessage && <p className="success-messages">{successMessage}</p>}
-        {typeof errorMessage === 'string' ? (
-          <p className="error-messages" dangerouslySetInnerHTML={{ __html: errorMessage.replace(/\n/g, '<br />') }} />
-        ) : (
-          Object.values(errorMessage)
-            .filter(Boolean)
-            .map((error, index) => (
-              <p key={index} className="error-messages">
-                {error}
-              </p>
-            ))
-        )}
-      </div>
+      <ToastContainer limit={5} />
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-              <h1>Cadastrar Produto</h1>
+          <h1>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
           <input
             type="text"
@@ -288,9 +271,7 @@ const CreateProductContent = () => {
         </div>
       </form>
       <Modal isOpen={isImageModalOpen} onRequestClose={handleCloseModal}>
-        {imageSelectionError && (
-          <p style={{ color: 'red' }}>{imageSelectionError}</p>
-        )}
+        <ToastContainer limit={5} />
         <button
           className="button"
           onClick={handleFirstPage}
