@@ -170,6 +170,7 @@ p {
 }
 
 .center-container-login {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -450,20 +451,23 @@ ul>li>button {
 
 /* Animações */
 
-.loading-animation,
-.loader {
+.loading-animation {
+  color: green;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 200px;
-  /* Defina a altura desejada */
 }
 
 .loading-animation:before,
 .loader {
   content: '';
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top: 3px solid #333;
+  border: 3px solid #007BFF;
+  border-top: 3px solid yellowgreen;
   border-radius: 50%;
   width: 30px;
   height: 30px;
