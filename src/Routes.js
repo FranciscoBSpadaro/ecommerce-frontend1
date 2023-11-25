@@ -17,11 +17,23 @@ import Password from './components/Auth/Password';
 import Profile from './components/Ecommerce/Profile';
 import Address from './components/Ecommerce/Address';
 import ForgotPassword from './components/Auth/ForgotPassword';
+import { CarouselProvider } from './components/Admin/CarouselProvider';
 
 function AppRoutes({ isAdmin }) {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={
+        <CarouselProvider>
+          <Home />
+        </CarouselProvider>
+      } />
+      {isAdmin && (
+        <Route path="/admin/editProducts" element={
+          <CarouselProvider>
+            <EditProducts />
+          </CarouselProvider>
+        } />
+      )}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/logoff" element={<Logoff />} />
@@ -33,7 +45,6 @@ function AppRoutes({ isAdmin }) {
       {isAdmin ? (
         <>
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/editProducts" element={<EditProducts />} />
           <Route path="/admin/editCategories" element={<EditCategories />} />
           <Route path="/admin/editUsers" element={<EditUsers />} />
           <Route path="/admin/createproduct" element={

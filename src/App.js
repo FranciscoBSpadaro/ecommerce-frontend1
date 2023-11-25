@@ -5,10 +5,9 @@ import Navbar from './components/Common/Navbar';
 import AppRoutes from './Routes';
 import './App.css';
 import { jwtDecode } from 'jwt-decode';
-import { CarouselProvider } from '../src/components/Admin/CarouselProvider';
 
 function App() {
-  const [user, setUser] = useState({isAuthenticated: false, isAdmin: false});
+  const [user, setUser] = useState({ isAuthenticated: false, isAdmin: false });
 
   useEffect(() => {
     checkToken();
@@ -18,17 +17,21 @@ function App() {
     const token = sessionStorage.getItem('token');
     if (token) {
       const decodedToken = jwtDecode(token);
-      setUser({isAuthenticated: true, isAdmin: decodedToken.isAdmin || false});
+      setUser({
+        isAuthenticated: true,
+        isAdmin: decodedToken.isAdmin || false,
+      });
     }
   };
 
   return (
     <Router>
       <div>
-        <Navbar isAuthenticated={user.isAuthenticated} isAdmin={user.isAuthenticated && user.isAdmin} />
-        <CarouselProvider>
-          <AppRoutes isAdmin={user.isAuthenticated && user.isAdmin} />
-        </CarouselProvider>
+        <Navbar
+          isAuthenticated={user.isAuthenticated}
+          isAdmin={user.isAuthenticated && user.isAdmin}
+        />
+        <AppRoutes isAdmin={user.isAuthenticated && user.isAdmin} />
       </div>
     </Router>
   );
