@@ -1,128 +1,119 @@
 import React, { useState, useEffect } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import api from '../../api';
 import '../../App.css';
+import {
+  handleNameChange,
+  handleNameBlur,
+  handleEmailChange,
+  handleEmailBlur,
+  handlePasswordChange,
+} from './handleChangesSignup';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [passwordIsValid, setPasswordIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setErrorMessage('');
-    }, 5000);
-    
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [errorMessage]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSuccessMessage('');
-    }, 5000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [successMessage]);
-
-  const handleNameChange = e => {
-    const value = e.target.value;
-    if (!value.includes(' ')) {
-      if (value.length <= 20) {
-        setUsername(value);
-      } else {
-        setErrorMessage('O Apelido de usuário não pode exceder 20 caracteres.');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (password && !passwordRegex.test(password)) {
+      setPasswordIsValid(false);
+      const errorMessage =
+        'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas e números.';
+      if (!toast.isActive(errorMessage)) {
+        toast.error(errorMessage, { toastId: errorMessage, autoClose: 10000 });
       }
     } else {
-      setErrorMessage('O Apelido de usuário não pode conter espaços!');
+      setPasswordIsValid(true);
     }
-  };
+  }, [password]);
 
-  const handleEmailChange = e => {
-    const value = e.target.value;
-    setEmail(value.slice(0, 50));
-  };
-
-  const handleEmailBlur = e => {
-    const value = e.target.value;
-    if (value.length > 50) {
-      setErrorMessage('O Email não pode exceder 50 caracteres');
-    } else if (!value.includes('@') || value.includes(' ')) {
-      setErrorMessage('O Email não pode conter espaços e precisa ter um "@"');
-    } else {
-      setErrorMessage('');
+  const registerUser = async (username, email, password, setIsLoading) => {
+    const response = await api.post('/users/signup', {
+      username,
+      email,
+      password,
+    });
+    if (response.data.message) {
+      setIsLoading(true);
+      toast.success(response.data.message);
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setTimeout(() => {
+        window.location.replace('/login');
+        setIsLoading(false);
+      }, 5000);
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      if (username && email && password) {
-        setSuccessMessage('Cadastrando...');
-        const response = await api.post('/users/signup', {
-          username,
-          email,
-          password,
-        });
-
-        setSuccessMessage(response.data.message);
-        setErrorMessage('');
-        setUsername('');
-        setEmail('');
-        setPassword('');
-        setTimeout(() => {
-          setSuccessMessage('');
-          setIsLoading(false);
-          window.location.replace('/login');
-        }, 5000);
+      toast.success('Cadastrando...');
+      if (username && email && password && passwordIsValid) {
+        await registerUser(username, email, password, setIsLoading);
       } else {
-        setErrorMessage('Por favor, preencha todos os campos corretamente.');
-        setIsLoading(false);
+        const errorMessage =
+          'Por favor, preencha todos os campos corretamente.';
+        if (!toast.isActive(errorMessage)) {
+          toast.error(errorMessage);
+        }
       }
     } catch (error) {
-      setErrorMessage(error.response.data.message);
-      setIsLoading(false);
-      console.error('Erro ao cadastrar:', error);
+      const errorMessage = error.response.data.message;
+      if (!toast.isActive(errorMessage)) {
+        toast.error(errorMessage);
+        console.error('Erro ao cadastrar:', error);
+      }
     }
   };
 
-  useEffect(() => {
-    setIsButtonDisabled(!(username && email && password));
-  }, [username, email, password]);
+  const isButtonDisabled =
+    username.length < 5 ||
+    email.length < 5 ||
+    password.length < 8 ||
+    !passwordIsValid;
 
   return (
     <div className="center-container-login">
-      <div className="error-messages-login">
-        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      </div>
+      <ToastContainer limit={5} />
+      {isLoading && (
+        <div className="loading-animation">
+          <p>Aguarde...</p>
+        </div>
+      )}
       <h2 className="h1">📝 Cadastro ✨</h2>
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Usuário"
           value={username}
-          onChange={handleNameChange}
+          minLength={5}
+          maxLength={20}
+          onChange={handleNameChange(setUsername)}
+          onBlur={handleNameBlur(setUsername)}
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={handleEmailChange}
-          onBlur={handleEmailBlur}
+          minLength={5}
+          maxLength={50}
+          onChange={handleEmailChange(setEmail)}
+          onBlur={handleEmailBlur()}
         />
         <input
           type="password"
           placeholder="Senha"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          minLength={8}
+          maxLength={60}
+          onChange={handlePasswordChange(setPassword)}
         />
         <button
           className="button-login"
@@ -131,11 +122,6 @@ const Signup = () => {
         >
           Cadastrar
         </button>
-        {isLoading && (
-          <div className="loading-animation">
-            <p>Cadastrando...</p>
-          </div>
-        )}
       </form>
     </div>
   );
