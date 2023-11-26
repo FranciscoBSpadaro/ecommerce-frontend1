@@ -178,12 +178,13 @@ p {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 40vh;
+  max-width: 500px; /* Limita a largura do formulário */
+  margin: 0 auto; /* Centraliza o formulário na página */
+  padding: 48px;
   background: linear-gradient(to right, #2ca9bc, #007BFF);
-  padding: 140px;
   border: 1px solid #ddd;
-  border-radius: 5%;
-  margin: 40px;
+  border-radius: 5px; /* Bordas mais suaves */
+  box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Sombra sutil para dar profundidade */
 }
 
 .center-container-edit {

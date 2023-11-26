@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import api from '../../api';
 import { toast, ToastContainer } from 'react-toastify';
+import Lottie from 'lottie-react';
+import animationData from '../../Assets/Animation-login.json';
 import {
   handleIdentifierChange as handleIdentifierChangeImported,
   handlePasswordChange as handlePasswordChangeImported,
@@ -68,6 +70,7 @@ const Login = () => {
         </div>
       )}
       <h1>🛒 Entrar 🛒</h1>
+      <Lottie animationData={animationData} style={{ height: 400, width: 400 }} />
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
