@@ -43,7 +43,7 @@ const Login = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-  
+
     try {
       // Limpar a mensagem de erro antes de tentar autenticar
       setErrorMessage(null);
@@ -70,7 +70,10 @@ const Login = () => {
         </div>
       )}
       <h1>🛒 Entrar 🛒</h1>
-      <Lottie animationData={animationData} style={{ height: 400, width: 400 }} />
+      <Lottie
+        animationData={animationData}
+        style={{ height: 400, width: 400 }}
+      />
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
@@ -91,20 +94,33 @@ const Login = () => {
         <button
           className="button-login"
           type="submit"
-          disabled={identifier.length < 5 || password.length < 8 || errorMessage}
+          disabled={
+            identifier.length < 5 || password.length < 8 || errorMessage
+          }
         >
           Login
         </button>
       </form>
-      <p style={{ textAlign: 'center' }}>
-        <a href="/signup">Não possui Cadastro?</a>.
-      </p>
-      <p style={{ textAlign: 'center' }}>
-        <a href="/forgotpassword">Esqueceu sua Senha?</a>
-      </p>
-      <p style={{ textAlign: 'center' }}>
-        <a href="/forgotusername">Esqueceu seu Usuário?</a>
-      </p>
+      <div style={{ textAlign: 'center' }}>
+        <button
+          className="button-login-a"
+          onClick={() => (window.location.href = '/signup')}
+        >
+          Não possui Cadastro?
+        </button>
+        <button
+          className="button-login-a"
+          onClick={() => (window.location.href = '/forgotpassword')}
+        >
+          Esqueceu sua Senha?
+        </button>
+        <button
+          className="button-login-a"
+          onClick={() => (window.location.href = '/forgotusername')}
+        >
+          Esqueceu seu Usuário?
+        </button>
+      </div>
     </div>
   );
 };

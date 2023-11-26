@@ -180,11 +180,12 @@ p {
   align-items: center;
   max-width: 500px; /* Limita a largura do formulário */
   margin: 0 auto; /* Centraliza o formulário na página */
-  padding: 48px;
+  padding: 40px;
   background: linear-gradient(to right, #2ca9bc, #007BFF);
   border: 1px solid #ddd;
-  border-radius: 5px; /* Bordas mais suaves */
+  border-radius: 15px; /* Bordas mais suaves */
   box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Sombra sutil para dar profundidade */
+  min-height: 85vh; /* Faz com que o formulário se expanda até o rodapé da página */
 }
 
 .center-container-edit {
@@ -305,6 +306,29 @@ p {
 }
 
 .button-login:not(:disabled):hover {
+  /* seletor :not para desabilitar o hover quando o status do button = disable*/
+  background-color: #0056b3;
+  color: chartreuse;
+}
+
+.button-login-a {
+  margin: 15px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007BFF;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-login-a:disabled {
+  /* estilo de botao desabilitado */
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.button-login-a:not(:disabled):hover {
   /* seletor :not para desabilitar o hover quando o status do button = disable*/
   background-color: #0056b3;
   color: chartreuse;
