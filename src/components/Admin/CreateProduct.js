@@ -178,7 +178,7 @@ const CreateProductContent = () => {
       <ToastContainer limit={5} />
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <h1>Cadastrar Produto</h1>
+          <h1 className='h1-a'>Cadastrar Produto</h1>
           <label htmlFor="productName">Nome do Produto</label>
           <input
             type="text"

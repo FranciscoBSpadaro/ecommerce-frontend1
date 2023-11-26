@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import api from '../../api';
 import '../../App.css';
+import Lottie from 'lottie-react';
+import animationData from '../../Assets/Animation - 1700968364553.json';
 import {
   handleNameChange,
   handleNameBlur,
@@ -87,7 +89,8 @@ const Signup = () => {
           <p>Aguarde...</p>
         </div>
       )}
-      <h2 className="h1">📝 Cadastro ✨</h2>
+      <h1>📝 Cadastro ✨</h1>
+      <Lottie animationData={animationData} style={{ height: 400, width: 400 }} />
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"

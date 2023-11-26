@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
   return (
     <div className='form-group'>
-      <h1 className="center-title">Admin Dashboard</h1>
+      <h1 className="h1-a">Admin Dashboard</h1>
       <section className="center-container-adm">
         <Link to="/admin/editUsers" className="button">
           Listar Usuários

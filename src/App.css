@@ -49,10 +49,13 @@ nav a:hover {
 
 h1 {
   font-family: 'Bungee Spice', sans-serif;
+}
+
+.h1-a {
+  font-family: 'Bungee Spice', sans-serif;
   background-color: #007BFF;
   border-radius: 15%;
 }
-
 
 h2 {
   font-family: 'Roboto Slab', sans-serif;
@@ -176,7 +179,7 @@ p {
   justify-content: center;
   align-items: center;
   height: 40vh;
-  background-color: #fff;
+  background: linear-gradient(to right, #2ca9bc, #007BFF);
   padding: 140px;
   border: 1px solid #ddd;
   border-radius: 5%;

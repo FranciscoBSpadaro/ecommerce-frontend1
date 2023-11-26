@@ -67,7 +67,7 @@ const Login = () => {
           <p> Entrando na loja 🛒</p>
         </div>
       )}
-      <h2>🛒Acessar🤩</h2>
+      <h1>🛒 Entrar 🛒</h1>
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"

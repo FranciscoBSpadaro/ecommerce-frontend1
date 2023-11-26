@@ -221,7 +221,7 @@ const EditProductContent = ({ productId }) => {
     <>
       <div className="container-edit-products">
         <div className="form-group">
-          <h1>Editar Produto</h1>
+          <h1 className='h1-a'>Editar Produto</h1>
         </div>
         <Carousel
           responsive={responsiveSettings}
