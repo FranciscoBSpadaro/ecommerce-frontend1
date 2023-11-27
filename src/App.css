@@ -480,7 +480,7 @@ ul>li>button {
 /* Animações */
 
 .loading-animation {
-  color: green;
+  color: white;
   position: absolute;
   top: 0;
   left: 0;
@@ -495,7 +495,7 @@ ul>li>button {
 .loading-animation:before,
 .loader {
   content: '';
-  border: 3px solid #007BFF;
+  border: 3px solid whitesmoke;
   border-top: 3px solid yellowgreen;
   border-radius: 50%;
   width: 30px;

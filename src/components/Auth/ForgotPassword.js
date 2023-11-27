@@ -1,110 +1,132 @@
 import React, { useState } from 'react';
 import api from '../../api';
+import { toast, ToastContainer } from 'react-toastify';
+import Lottie from 'lottie-react';
+import animationData from '../../Assets/Forgot-Password.json';
 
-const ForgotPassword = () => {
+const Password = () => {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [isCodeValid, setIsCodeValid] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [requestSent, setRequestSent] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showNewPasswordField, setShowNewPasswordField] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  const requestVerification = async () => {
+  const handleRequesVerification = async () => {
+    setIsLoading(true);
+    setIsButtonDisabled(true);
     try {
-      if (email) {
-        const response = await api.post('/email/code', { email });
-
-        if (response.status === 200) {
-          setShowSuccessMessage(true);
-          setRequestSent(true);
-        }
-      } else {
-        setErrorMessage('O e-mail é obrigatório.');
-        setShowErrorMessage(true);
-        setTimeout(() => setShowErrorMessage(false), 5000);
-      }
+      await api.post('/email/code', { email });
+      toast.success('Código de verificação enviado para o e-mail.');
     } catch (error) {
-      setErrorMessage('E-mail inválido ou não cadastrado');
-      setShowErrorMessage(true);
-      setTimeout(() => setShowErrorMessage(false), 5000);
+      if (error.response) {
+        toast.error(error.response.data.message);
+      } else if (error.request) {
+        toast.error('Erro na requisição.');
+      } else {
+        toast.error('Erro interno.');
+      }
     }
+    setTimeout(() => setIsLoading(false), 5000);
+    setTimeout(() => setIsButtonDisabled(false), 150000); // 150000 = 2.5 minutos
   };
 
   const verifyCode = async () => {
     try {
       if (verificationCode) {
-        const response = await api.post('/email/verifyEmail', { verificationCode, email });
-
+        const response = await api.post('/checkcode', {
+          verificationCode,
+          email,
+        });
         if (response.status === 200) {
-          setIsCodeValid(true);
-
-          const newPasswordResponse = await api.post('/email/requestNewPassword', {
-            verificationCode,
-            email,
-          });
-
-          if (newPasswordResponse.status === 200) {
-            setShowSuccessMessage(true);
-            setTimeout(() => setShowSuccessMessage(false), 5000);
-            setTimeout(() => window.location.replace('/login'), 5000);
-          }
+          toast.success('Código Válido digite sua nova senha');
+          setShowNewPasswordField(true);
         }
-      } else {
-        setErrorMessage('O código de verificação é obrigatório.');
-        setShowErrorMessage(true);
-        setTimeout(() => setShowErrorMessage(false), 5000);
       }
     } catch (error) {
-      setErrorMessage('Código de verificação inválido.');
-      setShowErrorMessage(true);
-      setTimeout(() => setShowErrorMessage(false), 5000);
+      if (error.response) {
+        toast.error(error.response.data.message);
+      } else if (error.request) {
+        toast.error('Erro na requisição.');
+      } else {
+        toast.error('Erro interno.');
+      }
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    try {
+      if (
+        password.length < 8 ||
+        !/[A-Z]/.test(password) ||
+        !/[a-z]/.test(password) ||
+        !/[0-9]/.test(password)
+      ) {
+        toast.error(
+          'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas e números.',
+        );
+        return;
+      }
+      await api.put('/forgotpassword', { email, verificationCode, password });
+      toast.success('Senha alterada com sucesso.');
+      // Limpar todos os campos do formulário
+      setEmail('');
+      setVerificationCode('');
+      setPassword('');
+      setShowNewPasswordField(false);
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message);
+      } else if (error.request) {
+        toast.error('Erro na requisição.');
+      } else {
+        toast.error('Erro interno.');
+      }
     }
   };
 
   return (
-    <div className="forgot-password-form">
-      <h2 className="h1">Recuperar Senha</h2>
-      {!isCodeValid ? (
+    <div className="center-container-login">
+      <ToastContainer limit={5} />
+      <h1>Alterar Senha</h1>
+      <Lottie
+        animationData={animationData}
+        style={{ height: 400, width: 400 }}
+      />
+      <input
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Email de cadastro"
+      />
+      {isLoading && (
+        <div className="loading-animation">
+          <p> Verificando Seu E-mail... </p>
+        </div>
+      )}
+      <button onClick={handleRequesVerification} disabled={isButtonDisabled}>
+        Solicitar código de verificação
+      </button>
+      <input
+        type="text"
+        value={verificationCode}
+        onChange={e => setVerificationCode(e.target.value)}
+        placeholder="Código de verificação"
+      />
+      <button onClick={verifyCode}>Validar código</button>
+      {showNewPasswordField && (
         <>
-          {!requestSent ? (
-            <>
-              <input
-                type="email"
-                placeholder="E-mail de Cadastro"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button onClick={requestVerification}>
-                Solicitar Código de Verificação
-              </button>
-            </>
-          ) : (
-            <>
-              <input
-                type="text"
-                placeholder="Digite o Código de Validação"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-              />
-              <button onClick={verifyCode}>Validar</button>
-            </>
-          )}
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Nova senha"
+          />
+          <button onClick={handlePasswordChange}>Salvar</button>
         </>
-      ) : null}
-      {showSuccessMessage && !isCodeValid && (
-        <p style={{ color: 'green' }}>
-          Foi enviado um código de verificação para o seu e-mail, digite o código e receba sua nova senha.
-        </p>
       )}
-      {showSuccessMessage && isCodeValid && (
-        <p style={{ color: 'green' }}>
-          Foi enviado uma senha temporária para seu e-mail. Redirecionando para o login em 5 segundos...
-        </p>
-      )}
-      {showErrorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
 };
 
-export default ForgotPassword;
+export default Password;
