@@ -24,14 +24,21 @@ const Password = () => {
         }
       }
     } catch (error) {
+      setIsButtonDisabled(true);
+      setTimeout(() => setIsButtonDisabled(false), 5000);
       if (error.response) {
-        toast.error(error.response.data.message);
+        if (!toast.isActive('errorToast')) {
+          toast.error(error.response.data.message, { toastId: 'errorToast' });
+        }
       } else if (error.request) {
-        toast.error('Erro na requisição.');
+        if (!toast.isActive('requestErrorToast')) {
+          toast.error('Erro na requisição.', { toastId: 'requestErrorToast' });
+        }
       } else {
-        toast.error('Erro interno.');
+        if (!toast.isActive('internalErrorToast')) {
+          toast.error('Erro interno.', { toastId: 'internalErrorToast' });
+        }
       }
-      setIsButtonDisabled(false);
     }
   };
 
@@ -45,9 +52,12 @@ const Password = () => {
         !/[a-z]/.test(newPassword) ||
         !/[0-9]/.test(newPassword)
       ) {
-        toast.error(
-          'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas e números.',
-        );
+        if (!toast.isActive('passwordErrorToast')) {
+          toast.error(
+            'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas e números.',
+            { toastId: 'passwordErrorToast' },
+          );
+        }
         return;
       }
       await api.put('/password', { password: newPassword });
@@ -58,11 +68,17 @@ const Password = () => {
       }, 5000);
     } catch (error) {
       if (error.response) {
-        toast.error(error.response.data.message);
+        if (!toast.isActive('errorToast')) {
+          toast.error(error.response.data.message, { toastId: 'errorToast' });
+        }
       } else if (error.request) {
-        toast.error('Erro na requisição.');
+        if (!toast.isActive('requestErrorToast')) {
+          toast.error('Erro na requisição.', { toastId: 'requestErrorToast' });
+        }
       } else {
-        toast.error('Erro interno.');
+        if (!toast.isActive('internalErrorToast')) {
+          toast.error('Erro interno.', { toastId: 'internalErrorToast' });
+        }
       }
     }
   };
@@ -84,7 +100,7 @@ const Password = () => {
       <button
         className="button-login-a"
         onClick={verifyCurrentPassword}
-        disabled={isButtonDisabled}
+        disabled={isButtonDisabled || currentPassword.length < 8}
       >
         Verificar Senha Atual
       </button>
