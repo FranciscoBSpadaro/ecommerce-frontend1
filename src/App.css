@@ -307,15 +307,15 @@ p {
 
 .button-login:not(:disabled):hover {
   /* seletor :not para desabilitar o hover quando o status do button = disable*/
-  background-color: #0056b3;
-  color: chartreuse;
+  border-color: greenyellow;
+  color: greenyellow;
 }
 
 .button-login-a {
   margin: 15px;
   font-size: 16px;
   color: #fff;
-  background-color: #007BFF;
+  background-color: #e7613c;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -330,8 +330,7 @@ p {
 
 .button-login-a:not(:disabled):hover {
   /* seletor :not para desabilitar o hover quando o status do button = disable*/
-  background-color: #0056b3;
-  color: chartreuse;
+  border-color: greenyellow;
 }
 
 
