@@ -13,6 +13,7 @@ const Password = () => {
     try {
       const response = await api.post('/password/verify', { password: currentPassword });
       if (response.status === 200) {
+        toast.success(response.data.message)
         setShowNewPasswordField(true);
       }
     } catch (error) {
