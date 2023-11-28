@@ -333,6 +333,30 @@ p {
   border-color: greenyellow;
 }
 
+.button-edit-user {
+  float: right;
+  margin: 15px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #e7613c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-edit-user:disabled {
+  /* estilo de botao desabilitado */
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.button-edit-user:not(:disabled):hover {
+  /* seletor :not para desabilitar o hover quando o status do button = disable*/
+  border-color: greenyellow;
+}
+
+
 
 form button {
   margin-top: 10px;

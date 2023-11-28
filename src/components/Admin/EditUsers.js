@@ -1,49 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import api from '../../api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const EditUser = () => {
   const [user, setUser] = useState(null);
-  const [searchError, setSearchError] = useState('');
-  const [serverSuccess, setServerSuccess] = useState('');
   const [editMode, setEditMode] = useState(false);
 
-  const handleSearch = async (event) => {
+  const handleSearch = async event => {
     event.preventDefault();
     const searchQuery = event.target.elements.searchQuery.value.trim();
-    const searchField = event.target.elements.searchField.value.trim();
+    // Determinar se a consulta de pesquisa é um email ou um username
+    const searchField = searchQuery.includes('@') ? 'email' : 'username';
 
-    if (searchQuery && searchField) {
+    if (searchQuery) {
       try {
         const result = await api.get(`/admin/users/edit`, {
           params: {
-            [searchField]: searchQuery
-          }
+            [searchField]: searchQuery,
+          },
         });
 
         if (result.data) {
           setUser(result.data);
-          setSearchError('');
-          setServerSuccess('');
+          toast.dismiss();
           setEditMode(false);
-        } else {
-          setUser(null);
-          setSearchError('Usuário não encontrado.');
-          setServerSuccess('');
         }
       } catch (error) {
-        console.error("Erro na busca:", error);
-        setSearchError('Ocorreu um erro na busca. Tente novamente.');
-        setServerSuccess('');
+        toast.error(error.response.data.message);
         setUser(null);
-
-        setTimeout(() => {
-          setSearchError('');
-        }, 5000);
       }
     }
   };
 
-  const handleEdit = async (event) => {
+  const handleEdit = async event => {
     event.preventDefault();
     const isAdmin = event.target.elements.isAdmin.checked;
     const isMod = event.target.elements.isMod.checked;
@@ -52,37 +44,56 @@ const EditUser = () => {
       const updateResult = await api.put(`/admin/users/roles`, {
         isAdmin,
         isMod,
-        username: user.username
+        id: user.id,
       });
 
-      setServerSuccess('Alterações salvas com sucesso!');
-      setSearchError('');
+      toast.success('Alterações salvas com sucesso!');
       setEditMode(false);
       setUser(null);
 
-      setTimeout(() => {
-        setServerSuccess('');
-        const emailInput = document.querySelector(`input[name="email"]`);
-        const usernameInput = document.querySelector(`input[name="username"]`);
-        const isAdminInput = document.querySelector(`input[name="isAdmin"]`);
-        const isModInput = document.querySelector(`input[name="isMod"]`);
-
-        emailInput && (emailInput.value = '');
-        usernameInput && (usernameInput.value = '');
-        isAdminInput && (isAdminInput.checked = false);
-        isModInput && (isModInput.checked = false);
-      }, 5000);
-
       console.log(updateResult.data);
     } catch (error) {
-      console.error("Erro na edição do usuário:", error);
-      setSearchError('Erro ao salvar as alterações.');
-      setServerSuccess('');
-
-      setTimeout(() => {
-        setSearchError('');
-      }, 5000);
+      console.error('Erro na edição do usuário:', error);
+      toast.error('Erro ao salvar as alterações.');
     }
+  };
+
+  const handleResetPassword = async () => {
+    confirmAlert({
+      title: 'Redefinição de Senha',
+      message:
+        'Essa ação ira enviar um e-mail com uma nova senha para o Usuário, Deseja Continuar ?',
+      buttons: [
+        {
+          label: 'Sim',
+          onClick: async () => {
+            try {
+              const resetResult = await api.post(
+                `/admin/email/requestNewPassword`,
+                {
+                  id: user.id,
+                },
+              );
+              if (resetResult.status === 200) {
+                if (!toast.isActive('successToast')) {
+                  toast.success(resetResult.data.message, {
+                    toastId: 'successToast',
+                  });
+                }
+                console.log(resetResult.data);
+              }
+            } catch (error) {
+              toast.error(error.response.data.message);
+              console.error('Erro ao redefinir a senha:', error);
+            }
+          },
+        },
+        {
+          label: 'Não',
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const handleEditMode = () => {
@@ -91,68 +102,114 @@ const EditUser = () => {
 
   useEffect(() => {
     if (user) {
-      document.querySelector(`input[name="email"]`).value = user.email ?? '';
-      document.querySelector(`input[name="username"]`).value = user.username ?? '';
-      document.querySelector(`input[name="isAdmin"]`).checked = user.isAdmin ?? false;
-      document.querySelector(`input[name="isMod"]`).checked = user.isMod ?? false;
+      const emailInput = document.querySelector(`input[name="email"]`);
+      const usernameInput = document.querySelector(`input[name="username"]`);
+      const isAdminInput = document.querySelector(`input[name="isAdmin"]`);
+      const isModInput = document.querySelector(`input[name="isMod"]`);
+      const isEmailValidatedInput = document.querySelector(
+        `input[name="isEmailValidated"]`,
+      );
+      const verificationCodeInput = document.querySelector(
+        `input[name="verificationCode"]`,
+      );
+
+      emailInput && (emailInput.value = user.email ?? '');
+      usernameInput && (usernameInput.value = user.username ?? '');
+      isAdminInput && (isAdminInput.checked = user.userDetail.isAdmin ?? false);
+      isModInput && (isModInput.checked = user.userDetail.isMod ?? false);
+      isEmailValidatedInput &&
+        (isEmailValidatedInput.checked =
+          user.userDetail.isEmailValidated ?? false);
+      verificationCodeInput &&
+        (verificationCodeInput.value = user.userDetail.verificationCode ?? '');
     }
   }, [user]);
 
   return (
     <>
-    <div className="center-container-edit">
-      <h2>Editar Usuários</h2>
-      <form onSubmit={handleSearch}>
-        <input type="text" name="searchQuery" placeholder="Buscar por Username ou E-mail" />
-        <select name="searchField">
-          <option value="email">E-mail</option>
-          <option value="username">Username</option>
-        </select>
-        <button className="button" type="submit">Buscar</button>
-      </form>
-      </div>
-
-      {searchError && <p style={{ color: 'red' }}>{searchError}</p>}
-      {serverSuccess && <p style={{ color: 'green' }}>{serverSuccess}</p>}
-
-      {user && (
-        <form onSubmit={handleEdit} className="center-container-edit">
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input type="email" name="email" defaultValue={user.email ?? ''} readOnly disabled />
-          </div>
-          <div>
-            <label htmlFor="username">Username:</label>
-            <input type="text" name="username" defaultValue={user.username ?? ''} readOnly disabled />
-          </div>
-          <div>
-            <label htmlFor="isAdmin">Admin:</label>
-            <input
-              type="checkbox"
-              name="isAdmin"
-              defaultChecked={user.isAdmin ?? false}
-              disabled={!editMode}
-            />
-          </div>
-          <div>
-            <label htmlFor="isMod">Moderador:</label>
-            <input
-              type="checkbox"
-              name="isMod"
-              defaultChecked={user.isMod ?? false}
-              disabled={!editMode}
-            />
-          </div>
-          <button className="button" type="button" onClick={handleEditMode} disabled={!!serverSuccess}>
-            Editar
+      <div className="center-container-login">
+        <ToastContainer />
+        <h1>Editar Usuários</h1>
+        <form onSubmit={handleSearch}>
+          <input
+            type="text"
+            name="searchQuery"
+            placeholder="Buscar por Username ou E-mail"
+          />
+          <button className="button-edit-user" type="submit">
+            Buscar
           </button>
-          {editMode && (
-            <button className="button" type="submit" disabled={!!serverSuccess}>
-              Salvar
-            </button>
-          )}
         </form>
-      )}
+
+        {user && (
+          <form onSubmit={handleEdit}>
+            <div>
+              <label htmlFor="email">Email:</label>
+              <input type="email" name="email" readOnly disabled />
+            </div>
+            <div>
+              <label htmlFor="isEmailValid">Status E-mail</label>
+              <input
+                type="text"
+                name="isEmailValid"
+                disabled={true}
+                value={
+                  user.userDetail.isEmailValidated
+                    ? 'Verificado ✔'
+                    : 'Não-Verificado ❌'
+                }
+              />
+            </div>
+            <div>
+              <label htmlFor="username">Username:</label>
+              <input type="text" name="username" readOnly disabled />
+            </div>
+            <div>
+              <label htmlFor="verificationCode">Código de Verificação:</label>
+              <input type="text" name="verificationCode" disabled={true} />
+            </div>
+            <div>
+              <label htmlFor="isCodeValid">Status do Código:</label>
+              <input
+                type="text"
+                name="isCodeValid"
+                disabled={true}
+                value={user.userDetail.isCodeValid ? 'Ativado' : 'Desativado'}
+              />
+            </div>
+            <div>
+              <label htmlFor="isAdmin">Admin:</label>
+              <input type="checkbox" name="isAdmin" disabled={!editMode} />
+            </div>
+            <div>
+              <label htmlFor="isMod">Moderador:</label>
+              <input type="checkbox" name="isMod" disabled={!editMode} />
+            </div>
+            <button
+              className="button-edit-user"
+              type="button"
+              onClick={handleEditMode}
+              style={{ display: editMode ? 'none' : 'block' }}
+            >
+              Editar
+            </button>
+            {editMode && (
+              <>
+                <button className="button-edit-user" type="submit">
+                  Salvar
+                </button>
+                <button
+                  className="button-edit-user"
+                  type="button"
+                  onClick={handleResetPassword}
+                >
+                  Redefinir Senha
+                </button>
+              </>
+            )}
+          </form>
+        )}
+      </div>
     </>
   );
 };
