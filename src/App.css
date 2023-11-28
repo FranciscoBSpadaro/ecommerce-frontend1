@@ -213,20 +213,6 @@ p {
 }
 
 
-.side-menu,
-.main-content,
-.right-menu {
-  width: 30%;
-  /* Ajuste o valor conforme necessário */
-}
-
-.side-menu,
-.right-menu {
-  background-color: #f8f8f8;
-  padding: 20px;
-  border: 1px solid #ddd;
-}
-
 .main-content {
   background-color: #fff;
   padding: 20px;
@@ -333,6 +319,27 @@ p {
   border-color: greenyellow;
 }
 
+.button-navbar {
+  font-size: 15px;
+  color: #fff;
+  background-color: #e7613c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-navbar:disabled {
+  /* estilo de botao desabilitado */
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.button-navbar:not(:disabled):hover {
+  /* seletor :not para desabilitar o hover quando o status do button = disable*/
+  border-color: greenyellow;
+}
+
 .button-edit-user {
   float: right;
   margin: 15px;
@@ -416,36 +423,78 @@ ul>li>button {
   margin-right: 10px;
 }
 
-.submenu {
-  position: relative;
-  display: inline-block;
-}
-
-.submenu-content {
-  display: none;
-  position: absolute;
-  background-color: #ac2727;
-  min-width: 160px;
-  z-index: 1;
-  list-style: none;
-  padding: 0;
-}
-
-.submenu-content li {
-  border-bottom: 1px solid #0c0c0c;
-}
-
-.submenu-content li:last-child {
-  border-bottom: none;
-}
-
-.submenu:hover .submenu-content {
-  display: block;
-}
-
 .center-menu {
   display: flex;
   justify-content: center;
+}
+
+.left-menu {
+  display: flex;
+  justify-content: flex-start;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.right-menu {
+  display: flex;
+  justify-content: flex-end;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-toggle {
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu {
+  margin: 5px;
+  display: grid;
+  background-color: #f8f9fa;
+  border-radius: 0;
+  border: none;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.dropdown-item {
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #343a40;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  color: orangered;
+}
+
+.avatar-elem {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e7613c;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.avatar-elem:hover {
+  border-color: greenyellow;
 }
 
 .error-messages,
@@ -477,6 +526,10 @@ ul>li>button {
 
 }
 
+.logo img {
+  height: 50px;
+  width: 71px;
+}
 
 .image-list {
   display: grid;

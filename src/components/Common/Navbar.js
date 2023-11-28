@@ -1,37 +1,112 @@
-import React from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Dropdown } from 'react-bootstrap';
+import UserContext from './UserContext';
+import logo from '../../Assets/ecommercelogo.png';
 import '../../App.css';
 
 const Navbar = ({ isAuthenticated, isAdmin }) => {
+  const location = useLocation();
+  const { username } = useContext(UserContext);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const handleToggle = (isOpen, event) => {
+    if (dropdownRef.current && dropdownRef.current.contains(event.target)) {
+      setDropdownOpen(!dropdownOpen);
+    } else {
+      setDropdownOpen(isOpen);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <nav className="navbar">
-      <ul className="left-menu">
-        <li><a href="/">Home</a></li>
-      </ul>
-      {isAuthenticated && (
-        <ul className="center-menu">
-          <li><a href="/cart">🛒</a></li>
-          <li><a href="/order">Compras</a></li>
+      <div className="logo">
+        <img src={logo} alt="Logo do Ecommerce" />
+      </div>
+      {location.pathname !== '/' && (
+        <ul className="left-menu">
+          <li>
+            <button
+              className="button-login-a"
+              onClick={() => (window.location.href = '/')}
+            >
+              Home
+            </button>
+          </li>
         </ul>
       )}
-      <ul className="right-menu-navbar">
+      {isAuthenticated && (
+        <ul className="center-menu">
+          <li>
+            <button
+              className="button-login-a"
+              onClick={() => (window.location.href = '/cart')}
+            >
+              🛒
+            </button>
+          </li>
+          <li>
+            <button
+              className="button-login-a"
+              onClick={() => (window.location.href = '/order')}
+            >
+              Compras
+            </button>
+          </li>
+        </ul>
+      )}
+      <ul className="right-menu">
         {isAuthenticated ? (
           <>
             {isAdmin && (
-              <li className="center-menu">
-                <a href="/admin">Administrador</a>
+              <li>
+                <button
+                  className="button-login-a"
+                  onClick={() => (window.location.href = '/admin')}
+                >
+                  Administrador
+                </button>
               </li>
             )}
-            <li className="submenu">
-              <h4>Configurações</h4>
-              <ul className="submenu-content">
-                <li><a href="/profile">Perfil</a></li>
-                <li><a href="/password">Alterar Senha</a></li>
-                <li><a href="/logoff">Sair</a></li>
-              </ul>
+            <li ref={dropdownRef}>
+              <Dropdown show={dropdownOpen} onToggle={handleToggle}>
+                <Dropdown.Toggle as="div">
+                  <abbr className="avatar-elem">
+                    {username && username[0].toUpperCase()}
+                  </abbr>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item href="/profile">Perfil</Dropdown.Item>
+                  <Dropdown.Item href="/password">Alterar Senha</Dropdown.Item>
+                  <Dropdown.Item href="/logoff">Sair</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </li>
           </>
         ) : (
-          <li><a href="/login">Entrar</a></li>
+          <li>
+            <button
+              className="button-login-a"
+              onClick={() => (window.location.href = '/login')}
+            >
+              Entrar
+            </button>
+          </li>
         )}
       </ul>
     </nav>

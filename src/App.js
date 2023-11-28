@@ -5,9 +5,10 @@ import Navbar from './components/Common/Navbar';
 import AppRoutes from './Routes';
 import './App.css';
 import { jwtDecode } from 'jwt-decode';
+import UserContext from '../src/components/Common/UserContext';
 
 function App() {
-  const [user, setUser] = useState({ isAuthenticated: false, isAdmin: false });
+  const [user, setUser] = useState({ isAuthenticated: false, isAdmin: false, username: '' });
 
   useEffect(() => {
     checkToken();
@@ -20,19 +21,22 @@ function App() {
       setUser({
         isAuthenticated: true,
         isAdmin: decodedToken.isAdmin || false,
+        username: decodedToken.username || '',
       });
     }
   };
 
   return (
     <Router>
-      <div>
-        <Navbar
-          isAuthenticated={user.isAuthenticated}
-          isAdmin={user.isAuthenticated && user.isAdmin}
-        />
-        <AppRoutes isAdmin={user.isAuthenticated && user.isAdmin} />
-      </div>
+      <UserContext.Provider value={{ username: user.username, setUsername: setUser }}>
+        <div>
+          <Navbar
+            isAuthenticated={user.isAuthenticated}
+            isAdmin={user.isAuthenticated && user.isAdmin}
+          />
+          <AppRoutes isAdmin={user.isAuthenticated && user.isAdmin} />
+        </div>
+      </UserContext.Provider>
     </Router>
   );
 }
