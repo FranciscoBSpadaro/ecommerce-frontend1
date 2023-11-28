@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 import UserContext from './UserContext';
 import logo from '../../Assets/ecommercelogo.png';
@@ -91,9 +91,15 @@ const Navbar = ({ isAuthenticated, isAdmin }) => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item href="/profile">Perfil</Dropdown.Item>
-                  <Dropdown.Item href="/password">Alterar Senha</Dropdown.Item>
-                  <Dropdown.Item href="/logoff">Sair</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/profile">
+                    Perfil
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/password">
+                    Alterar Senha
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/logoff">
+                    Sair
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </li>
