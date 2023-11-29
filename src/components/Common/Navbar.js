@@ -105,14 +105,16 @@ const Navbar = ({ isAuthenticated, isAdmin }) => {
             </li>
           </>
         ) : (
-          <li>
-            <button
-              className="button-login-a"
-              onClick={() => (window.location.href = '/login')}
-            >
-              Entrar
-            </button>
-          </li>
+          location.pathname !== '/login' && (
+            <li>
+              <button
+                className="button-login-a"
+                onClick={() => (window.location.href = '/login')}
+              >
+                Entrar
+              </button>
+            </li>
+          )
         )}
       </ul>
     </nav>
