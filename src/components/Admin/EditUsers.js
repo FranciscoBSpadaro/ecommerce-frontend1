@@ -38,6 +38,10 @@ const EditUser = () => {
     }
   };
 
+  const handleEditMode = () => {
+    setEditMode(true);
+  };
+
   const handleEdit = async event => {
     event.preventDefault();
 
@@ -112,8 +116,36 @@ const EditUser = () => {
     });
   };
 
-  const handleEditMode = () => {
-    setEditMode(true);
+  const handleDelete = async () => {
+    confirmAlert({
+      title: 'Exclusão de usuário',
+      message: `Deseja excluir o usuário ${user.username}?`,
+      buttons: [
+        {
+          label: 'Sim',
+          onClick: async () => {
+            try {
+              const deleteResult = await api.delete(`/admin/users/delete`, {
+                data: { username: user.username },
+              });
+
+              toast.success('Usuário excluído com sucesso!');
+              setEditMode(false);
+              setUser(null);
+
+              console.log(deleteResult.data);
+            } catch (error) {
+              console.error('Erro na exclusão do usuário:', error);
+              toast.error('Não é possível excluir um usuário se houver um perfil Associado a ele ou se for Administrador.');
+            }
+          },
+        },
+        {
+          label: 'Não',
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   useEffect(() => {
@@ -137,7 +169,7 @@ const EditUser = () => {
       verificationCodeInput &&
         (verificationCodeInput.value = user.userDetail.verificationCode ?? '');
 
-        const userRole = user.userDetail.isAdmin
+      const userRole = user.userDetail.isAdmin
         ? 'Administrador'
         : user.userDetail.isMod
         ? 'Moderador'
@@ -230,15 +262,26 @@ const EditUser = () => {
             </button>
             {editMode && (
               <>
-              <button className="button-edit-user" type="submit" disabled={isSaveDisabled}>
-                Salvar
-              </button>
+                <button
+                  className="button-edit-user"
+                  type="submit"
+                  disabled={isSaveDisabled}
+                >
+                  Salvar
+                </button>
                 <button
                   className="button-edit-user"
                   type="button"
                   onClick={handleResetPassword}
                 >
                   Redefinir Senha
+                </button>
+                <button
+                  className="button-remove-produdct"
+                  type="button"
+                  onClick={handleDelete}
+                >
+                  Excluir
                 </button>
               </>
             )}
