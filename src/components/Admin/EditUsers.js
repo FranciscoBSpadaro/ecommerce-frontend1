@@ -9,6 +9,8 @@ const EditUser = () => {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [role, setRole] = useState('Cliente'); // Inicializar o estado role como 'Cliente'
+  const [initialRole, setInitialRole] = useState('Cliente'); // Inicializar o estado initialRole como 'Cliente'
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true); // Inicializar o estado isSaveDisabled como true
 
   const handleSearch = async event => {
     event.preventDefault();
@@ -127,22 +129,32 @@ const EditUser = () => {
 
       emailInput && (emailInput.value = user.email ?? '');
       usernameInput && (usernameInput.value = user.username ?? '');
+
       isEmailValidatedInput &&
         (isEmailValidatedInput.checked =
           user.userDetail.isEmailValidated ?? false);
+
       verificationCodeInput &&
         (verificationCodeInput.value = user.userDetail.verificationCode ?? '');
-      setRole(// Definir o valor inicial para o papel do usuário
-        user.userDetail.isAdmin
-          ? 'Administrador'
-          : user.userDetail.isMod
-          ? 'Moderador'
-          : !user.userDetail.isAdmin && !user.userDetail.isMod
-          ? 'Cliente'
-          : '',
-      );
+
+        const userRole = user.userDetail.isAdmin
+        ? 'Administrador'
+        : user.userDetail.isMod
+        ? 'Moderador'
+        : !user.userDetail.isAdmin && !user.userDetail.isMod
+        ? 'Cliente'
+        : '';
+
+      setRole(userRole);
+      setInitialRole(userRole); // Atualizar o estado initialRole com o papel do usuário
     }
   }, [user]);
+
+  useEffect(() => {
+    // Atualizar o estado isSaveDisabled com base na comparação entre o papel atual e o papel inicial
+    setIsSaveDisabled(role === initialRole);
+  }, [role, initialRole]);
+
   return (
     <>
       <div className="center-container-login">
@@ -218,9 +230,9 @@ const EditUser = () => {
             </button>
             {editMode && (
               <>
-                <button className="button-edit-user" type="submit">
-                  Salvar
-                </button>
+              <button className="button-edit-user" type="submit" disabled={isSaveDisabled}>
+                Salvar
+              </button>
                 <button
                   className="button-edit-user"
                   type="button"
