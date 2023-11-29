@@ -8,6 +8,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 const EditUser = () => {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [role, setRole] = useState('Cliente'); // Inicializar o estado role como 'Cliente'
 
   const handleSearch = async event => {
     event.preventDefault();
@@ -37,25 +38,38 @@ const EditUser = () => {
 
   const handleEdit = async event => {
     event.preventDefault();
-    const isAdmin = event.target.elements.isAdmin.checked;
-    const isMod = event.target.elements.isMod.checked;
 
-    try {
-      const updateResult = await api.put(`/admin/users/roles`, {
-        isAdmin,
-        isMod,
-        id: user.id,
-      });
+    confirmAlert({
+      title: 'Alteração de usuário',
+      message: `Deseja alterar o papel de ${user.username} para ${role}?`,
+      buttons: [
+        {
+          label: 'Sim',
+          onClick: async () => {
+            try {
+              const updateResult = await api.put(`/admin/users/roles`, {
+                isAdmin: role === 'Administrador',
+                isMod: role === 'Moderador',
+                id: user.id,
+              });
 
-      toast.success('Alterações salvas com sucesso!');
-      setEditMode(false);
-      setUser(null);
+              toast.success('Alterações salvas com sucesso!');
+              setEditMode(false);
+              setUser(null);
 
-      console.log(updateResult.data);
-    } catch (error) {
-      console.error('Erro na edição do usuário:', error);
-      toast.error('Erro ao salvar as alterações.');
-    }
+              console.log(updateResult.data);
+            } catch (error) {
+              console.error('Erro na edição do usuário:', error);
+              toast.error('Erro ao salvar as alterações.');
+            }
+          },
+        },
+        {
+          label: 'Não',
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const handleResetPassword = async () => {
@@ -104,8 +118,6 @@ const EditUser = () => {
     if (user) {
       const emailInput = document.querySelector(`input[name="email"]`);
       const usernameInput = document.querySelector(`input[name="username"]`);
-      const isAdminInput = document.querySelector(`input[name="isAdmin"]`);
-      const isModInput = document.querySelector(`input[name="isMod"]`);
       const isEmailValidatedInput = document.querySelector(
         `input[name="isEmailValidated"]`,
       );
@@ -115,16 +127,22 @@ const EditUser = () => {
 
       emailInput && (emailInput.value = user.email ?? '');
       usernameInput && (usernameInput.value = user.username ?? '');
-      isAdminInput && (isAdminInput.checked = user.userDetail.isAdmin ?? false);
-      isModInput && (isModInput.checked = user.userDetail.isMod ?? false);
       isEmailValidatedInput &&
         (isEmailValidatedInput.checked =
           user.userDetail.isEmailValidated ?? false);
       verificationCodeInput &&
         (verificationCodeInput.value = user.userDetail.verificationCode ?? '');
+      setRole(// Definir o valor inicial para o papel do usuário
+        user.userDetail.isAdmin
+          ? 'Administrador'
+          : user.userDetail.isMod
+          ? 'Moderador'
+          : !user.userDetail.isAdmin && !user.userDetail.isMod
+          ? 'Cliente'
+          : '',
+      );
     }
   }, [user]);
-
   return (
     <>
       <div className="center-container-login">
@@ -178,12 +196,17 @@ const EditUser = () => {
               />
             </div>
             <div>
-              <label htmlFor="isAdmin">Admin:</label>
-              <input type="checkbox" name="isAdmin" disabled={!editMode} />
-            </div>
-            <div>
-              <label htmlFor="isMod">Moderador:</label>
-              <input type="checkbox" name="isMod" disabled={!editMode} />
+              <label htmlFor="role">Papel:</label>
+              <select
+                name="role"
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                disabled={!editMode}
+              >
+                <option value="Cliente">Cliente</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Moderador">Moderador</option>
+              </select>
             </div>
             <button
               className="button-edit-user"
