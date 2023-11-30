@@ -8,7 +8,6 @@ import {
   handleNameChange,
   handleNameBlur,
   handleEmailChange,
-  handleEmailBlur,
   handlePasswordChange,
 } from './handleChangesSignup';
 
@@ -18,6 +17,7 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [passwordIsValid, setPasswordIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
@@ -34,32 +34,52 @@ const Signup = () => {
   }, [password]);
 
   const registerUser = async (username, email, password, setIsLoading) => {
-    const response = await api.post('/users/signup', {
-      username,
-      email,
-      password,
-    });
-    if (response.data.message) {
-      setIsLoading(true);
-      toast.success(response.data.message);
-      setUsername('');
-      setEmail('');
-      setPassword('');
-      setTimeout(() => {
-        window.location.replace('/login');
-        setIsLoading(false);
-      }, 5000);
+    try {
+      const response = await api.post('/users/signup', {
+        username,
+        email,
+        password,
+      });
+      if (response.data.message) {
+        setIsLoading(true);
+        toast.success(response.data.message);
+        setUsername('');
+        setEmail('');
+        setPassword('');
+        setTimeout(() => {
+          window.location.replace('/login');
+          setIsLoading(false);
+        }, 5000);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        setIsSubmitting(true);
+        toast.error(
+          'Muitas solicitações, Por favor, tente novamente em 5 minutos ou verifique se você ja recebeu seu e-mail de cadastro e faça o login.',
+        );
+        setTimeout(() => {
+          window.location.replace('/login');
+          setIsLoading(false);
+        }, 5500);
+      } else {
+        setIsSubmitting(false);
+        const errorMessage = error.response.data.message;
+        if (!toast.isActive(errorMessage)) {
+          toast.error(errorMessage);
+        }
+      }
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-
+    setIsSubmitting(true);
     try {
       toast.success('Cadastrando...');
       if (username && email && password && passwordIsValid) {
         await registerUser(username, email, password, setIsLoading);
       } else {
+        setIsSubmitting(false);
         const errorMessage =
           'Por favor, preencha todos os campos corretamente.';
         if (!toast.isActive(errorMessage)) {
@@ -67,6 +87,7 @@ const Signup = () => {
         }
       }
     } catch (error) {
+      setIsSubmitting(false);
       const errorMessage = error.response.data.message;
       if (!toast.isActive(errorMessage)) {
         toast.error(errorMessage);
@@ -79,7 +100,8 @@ const Signup = () => {
     username.length < 5 ||
     email.length < 5 ||
     password.length < 8 ||
-    !passwordIsValid;
+    !passwordIsValid ||
+    isSubmitting;
 
   return (
     <div className="center-container-login">
@@ -90,7 +112,10 @@ const Signup = () => {
         </div>
       )}
       <h1>Cadastro</h1>
-      <Lottie animationData={animationData} style={{ height: 400, width: 400 }} />
+      <Lottie
+        animationData={animationData}
+        style={{ height: 400, width: 400 }}
+      />
       <form className="form-group" onSubmit={handleSubmit}>
         <input
           type="text"
@@ -108,7 +133,6 @@ const Signup = () => {
           minLength={5}
           maxLength={50}
           onChange={handleEmailChange(setEmail)}
-          onBlur={handleEmailBlur()}
         />
         <input
           type="password"
