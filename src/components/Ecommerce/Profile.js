@@ -18,7 +18,7 @@ const Profile = () => {
     const token = sessionStorage.getItem('token');
     const fetchProfile = async () => {
       try {
-        const response = await api.get('/profiles', {
+        const response = await api.get('/profiles/token', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

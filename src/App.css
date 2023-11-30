@@ -188,6 +188,15 @@ p {
   min-height: 85vh; /* Faz com que o formulário se expanda até o rodapé da página */
 }
 
+.profile-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30%; /* Ajuste a largura conforme necessário */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .center-container-edit {
   display: grid;
   height: 25vh;

@@ -11,11 +11,11 @@ const EditUser = () => {
   const [role, setRole] = useState('Cliente'); // Inicializar o estado role como 'Cliente'
   const [initialRole, setInitialRole] = useState('Cliente'); // Inicializar o estado initialRole como 'Cliente'
   const [isSaveDisabled, setIsSaveDisabled] = useState(true); // Inicializar o estado isSaveDisabled como true
+  const [profile, setProfile] = useState(null); // Adicionar novo estado para o perfil
 
   const handleSearch = async event => {
     event.preventDefault();
     const searchQuery = event.target.elements.searchQuery.value.trim();
-    // Determinar se a consulta de pesquisa é um email ou um username
     const searchField = searchQuery.includes('@') ? 'email' : 'username';
 
     if (searchQuery) {
@@ -31,9 +31,32 @@ const EditUser = () => {
           toast.dismiss();
           setEditMode(false);
         }
+
+        if (result.data && result.data.id) {
+          try {
+            const profileResult = await api.get(`/profiles/query`, {
+              params: {
+                userId: result.data.id,
+              },
+            });
+
+            if (profileResult.data) {
+              setProfile(profileResult.data);
+            } else {
+              setProfile(null);
+            }
+          } catch (error) {
+            if (error.response && error.response.status === 404) {
+              toast.error('Usuário sem Perfil Associado.')
+              setProfile(null);
+            } else {
+              toast.error(error.response.data.message);
+            }
+          }
+        }
       } catch (error) {
+        console.error('Erro na busca do usuário:', error);
         toast.error(error.response.data.message);
-        setUser(null);
       }
     }
   };
@@ -47,7 +70,7 @@ const EditUser = () => {
 
     confirmAlert({
       title: 'Alteração de usuário',
-      message: `Deseja alterar o papel de ${user.username} para ${role}?`,
+      message: `Deseja alterar o Função de ${user.username} para ${role}?`,
       buttons: [
         {
           label: 'Sim',
@@ -116,6 +139,37 @@ const EditUser = () => {
     });
   };
 
+  const handleDeleteProfile = async () => {
+    confirmAlert({
+      title: 'Exclusão de perfil',
+      message: `Deseja excluir o perfil de ${user.username}?`,
+      buttons: [
+        {
+          label: 'Sim',
+          onClick: async () => {
+            try {
+              const deleteResult = await api.delete(
+                `/admin/profiles/${user.id}`,
+              );
+
+              toast.success('Perfil excluído com sucesso!');
+              setProfile(null);
+
+              console.log(deleteResult.data);
+            } catch (error) {
+              console.error('Erro na exclusão do perfil:', error);
+              toast.error('Erro ao excluir o perfil.');
+            }
+          },
+        },
+        {
+          label: 'Não',
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+
   const handleDelete = async () => {
     confirmAlert({
       title: 'Exclusão de usuário',
@@ -136,7 +190,9 @@ const EditUser = () => {
               console.log(deleteResult.data);
             } catch (error) {
               console.error('Erro na exclusão do usuário:', error);
-              toast.error('Não é possível excluir um usuário se houver um perfil Associado a ele ou se for Administrador.');
+              toast.error(
+                error.response.data.message ,
+              );
             }
           },
         },
@@ -178,12 +234,12 @@ const EditUser = () => {
         : '';
 
       setRole(userRole);
-      setInitialRole(userRole); // Atualizar o estado initialRole com o papel do usuário
+      setInitialRole(userRole); // Atualizar o estado initialRole com o Função do usuário
     }
   }, [user]);
 
   useEffect(() => {
-    // Atualizar o estado isSaveDisabled com base na comparação entre o papel atual e o papel inicial
+    // Atualizar o estado isSaveDisabled com base na comparação entre o Função atual e o Função inicial
     setIsSaveDisabled(role === initialRole);
   }, [role, initialRole]);
 
@@ -236,11 +292,11 @@ const EditUser = () => {
                 type="text"
                 name="isCodeValid"
                 disabled={true}
-                value={user.userDetail.isCodeValid ? 'Ativado' : 'Desativado'}
+                value={user.userDetail.isCodeValid ? 'Ativo' : 'Inativo'}
               />
             </div>
             <div>
-              <label htmlFor="role">Papel:</label>
+              <label htmlFor="role">Função:</label>
               <select
                 name="role"
                 value={role}
@@ -288,6 +344,24 @@ const EditUser = () => {
           </form>
         )}
       </div>
+      {profile && (
+        <div className="profile-container">
+          <h2>Perfil</h2>
+          <p>
+            Nome completo:{' '}
+            {`${profile.nome} ${profile.nomeMeio} ${profile.ultimoNome}`}
+          </p>
+          <p>Telefone: {profile.telefone}</p>
+          <p>Celular: {profile.celular}</p>
+          <button
+            className="button-edit-user"
+            type="button"
+            onClick={handleDeleteProfile}
+          >
+            Excluir Perfil
+          </button>
+        </div>
+      )}
     </>
   );
 };
