@@ -18,9 +18,11 @@ function App() {
     const token = sessionStorage.getItem('token');
     if (token) {
       const decodedToken = jwtDecode(token);
+      const isAdmin = decodedToken.isAdmin || false;
+      sessionStorage.setItem('isAdmin', isAdmin); // Armazene isAdmin no sessionStorage
       setUser({
         isAuthenticated: true,
-        isAdmin: decodedToken.isAdmin || false,
+        isAdmin: isAdmin,
         username: decodedToken.username || '',
       });
     }

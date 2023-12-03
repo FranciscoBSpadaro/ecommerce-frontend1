@@ -3,6 +3,7 @@ import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { CarouselContext } from '../Admin/CarouselProvider';
 import { Card } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import Footer from '../../components/Common/Footer';
 
 const Home = () => {
@@ -39,6 +40,7 @@ const Home = () => {
 
             return (
               <div style={{ margin: '0 25px' }} key={index}>
+                <Link to={`/productdetails/${product.productId}`} style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
                 <Card style={{ width: '18rem' }}>
                   <Card.Img
                     variant="top"
@@ -77,6 +79,7 @@ const Home = () => {
                     </Card.Text>
                   </Card.Body>
                 </Card>
+                </Link>
               </div>
             );
           })}
@@ -96,6 +99,7 @@ const Home = () => {
           .filter(product => !product.isOffer) // Filtrar produtos com isOffer = false
           .map((product, index) => (
             <div style={{ margin: '0 25px' }} key={index}>
+              <Link to={`/productdetails/${product.productId}`} style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}>
               <Card style={{ width: '18rem' }}>
                 <Card.Img
                   variant="top"
@@ -120,6 +124,7 @@ const Home = () => {
                   </Card.Text>
                 </Card.Body>
               </Card>
+              </Link>
             </div>
           ))}
       </Carousel>

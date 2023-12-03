@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import Home from './components/Ecommerce/Home';
+import ProductDetails from './components/Ecommerce/ProductDetails';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import VerifyEmail from './components/Auth/VerifyEmail';
@@ -16,6 +17,9 @@ import EditUsers from './components/Admin/EditUsers';
 import Password from './components/Auth/Password';
 import Profile from './components/Ecommerce/Profile';
 import Address from './components/Ecommerce/Address';
+import CartContainer from './components/Ecommerce/Cart';
+import Order from './components/Ecommerce/Order';
+import CheckoutForm from './components/Ecommerce/CheckOut';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import { CarouselProvider } from './components/Admin/CarouselProvider';
 
@@ -27,6 +31,7 @@ function AppRoutes({ isAdmin }) {
           <Home />
         </CarouselProvider>
       } />
+      <Route path="/productdetails/:productId" element={<ProductDetails />} />
       {isAdmin && (
         <Route path="/admin/editProducts" element={
           <CarouselProvider>
@@ -41,6 +46,9 @@ function AppRoutes({ isAdmin }) {
       <Route path="/password" element={<Password />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/address" element={<Address />} />
+      <Route path="/cart" element={<CartContainer />} />
+      <Route path="/checkout" element={<CheckoutForm />} />
+      <Route path="/order" element={<Order />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
       {isAdmin ? (
         <>

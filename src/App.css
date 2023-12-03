@@ -125,6 +125,25 @@ p {
   display: flex;
 }
 
+.center-container-productdetails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-images-productdetails {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.product-images-productdetails img {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+}
+
 .ReactModal__Overlay.ReactModal__Overlay--after-open {
   z-index: 3;
   position: fixed;
