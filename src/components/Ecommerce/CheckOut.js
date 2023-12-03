@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-const CheckoutForm = ({ orderId }) => {
-  const mercadoPagoPublicKey = process.env.REACT_APP_MERCADO_PAGO_PUBLIC_KEY;
+const CheckoutForm = ({ orderId, res }) => {
+  const mercadoPagoPublicKey = res.data.mercadoPagoPublicKey;
 
   const cardForm = useRef(null);
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import api from '../../api';
 
 const ProductDetails = ({ user }) => {
+  const navigate = useNavigate();
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
@@ -59,17 +61,24 @@ const ProductDetails = ({ user }) => {
 
   const handleAddToCart = async () => {
     try {
-      await api.post(`/orders/${user.orderId}/addProduct`, {
-        productId,
-        quantity: 1,
-      });
+      const userId = jwtDecode(sessionStorage.getItem('token')).id;
+      const response = await api.get(`/orders/user/${userId}`);
+
+      if (response.data.length > 0 && response.data[0].orderId) {
+        const orderId = response.data[0].orderId;
+        await api.post(`/orders/addProduct/${orderId}`, {
+          productId,
+          quantity: 1,
+        });
+        navigate('/cart'); // Redireciona para a página do carrinho após adicionar o produto
+      }
     } catch (error) {
       console.error('Erro ao adicionar produto ao carrinho:', error);
     }
   };
 
   if (!product) {
-    return <div>Carregando...</div>;
+    return <div>Carregando...</div>; // mudar para isloading
   }
 
   return (
@@ -78,7 +87,9 @@ const ProductDetails = ({ user }) => {
       <p>Preço: {product.price}</p>
       <p>Descrição: {product.description}</p>
       <p>Quantidade em Estoque: {product.quantity}</p>
-      <button className='button' onClick={handleAddToCart}>Comprar</button>
+      <button className="button" onClick={handleAddToCart}>
+        Comprar
+      </button>
       <div className="product-images-productdetails">
         {product.image_keys.map((imageKey, index) => (
           <img
