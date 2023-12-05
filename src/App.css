@@ -203,6 +203,14 @@ p {
   height: 50vh;
   /* Centraliza verticalmente na tela */
 }
+.center-container-cart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* Centraliza verticalmente na tela */
+}
 
 .center-container-login {
   position: relative;

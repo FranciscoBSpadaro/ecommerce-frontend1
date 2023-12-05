@@ -2,11 +2,17 @@ import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { jwtDecode } from 'jwt-decode';
 import { toast, ToastContainer } from 'react-toastify';
+import Lottie from 'lottie-react';
+import createCartAnimation from '../../Assets/create-cart.json';
+import cartCreatedAnimation from '../../Assets/cart-created.json';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import Modal from 'react-modal';
 import { CardPayment, initMercadoPago } from '@mercadopago/sdk-react';
 
 const CartContainer = () => {
   const [order, setOrder] = useState(null);
+  const [animationData, setAnimationData] = useState(createCartAnimation);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,7 +35,9 @@ const CartContainer = () => {
         const response = await api.get(`/orders/user/${userId}`);
         if (response.data.length > 0) {
           // Verifique se o status do pedido não é 'confirmado' antes de definir o estado
-          const pendingOrder = response.data.find(order => order.status !== 'Confirmado');
+          const pendingOrder = response.data.find(
+            order => order.status !== 'Confirmado',
+          );
           if (pendingOrder) {
             setOrder(pendingOrder);
             // Inicialize productQuantities e totalValue
@@ -54,15 +62,40 @@ const CartContainer = () => {
 
   useEffect(() => {
     const fetchAddresses = async () => {
-      const response = await api.get(`/addresses/user/${userId}`);
-      setAddresses(response.data);
+      try {
+        const response = await api.get(`/addresses/user/${userId}`);
+        setAddresses(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar endereços', error);
+      }
     };
     fetchAddresses();
   }, [userId]);
 
+  const handleAnimationClick = () => {
+    setAnimationData(cartCreatedAnimation);
+    setTimeout(() => {
+      setSelectedAddressId(addresses[0]?.addressId);
+    }, 2000); // delay para visualizar a animação
+  };
+
   useEffect(() => {
     const createOrder = async () => {
-      if (!selectedAddressId) return;
+      if (!selectedAddressId) {
+        if (addresses.length === 0) {
+          confirmAlert({
+            title: 'Cadastre seu Endereço',
+            message: 'Você ainda não cadastrou um endereço, cadastre e começe a comprar.',
+            buttons: [
+              {
+                label: 'Ok',
+                onClick: () => window.location.href = '/address'
+              }
+            ]
+          });
+        }
+        return;
+      }
 
       try {
         const response = await api.post('/orders/create', {
@@ -80,7 +113,7 @@ const CartContainer = () => {
     if (!order) {
       createOrder();
     }
-  }, [selectedAddressId, order, userId]);
+  }, [selectedAddressId, order, userId, addresses]);
 
   const handleQuantityChange = (productId, orderQuantity) => {
     setProductQuantities(prevQuantities => ({
@@ -157,7 +190,9 @@ const CartContainer = () => {
               body: JSON.stringify({
                 ...formData,
                 orderId: order.orderId,
-                description: `Descrição do produto: ${order.products.map(product => product.description).join(', ')}`,
+                description: `Descrição do produto: ${order.products
+                  .map(product => product.description)
+                  .join(', ')}`,
               }),
             },
           );
@@ -210,11 +245,14 @@ const CartContainer = () => {
     return (
       <div>
         <ToastContainer limit={5} />
-        <div className="center-container">
+        <div className="center-container-cart">
           <h2>Você ainda não possui um Carrinho...</h2>
-          <button onClick={() => setSelectedAddressId(addresses[0]?.addressId)}>
-            🛒 Clique aqui para criar 🛒
-          </button>
+          <Lottie
+            animationData={animationData}
+            style={{ height: 400, width: 400 }}
+            onClick={handleAnimationClick}
+          />
+          <h3>Clique no carrinho para criar </h3>
         </div>
       </div>
     );
