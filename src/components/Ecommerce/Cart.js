@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import Modal from 'react-modal';
+import { CardPayment, initMercadoPago } from '@mercadopago/sdk-react';
 
 const CartContainer = () => {
   const [order, setOrder] = useState(null);
@@ -12,9 +12,16 @@ const CartContainer = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productQuantities, setProductQuantities] = useState({});
   const [totalValue, setTotalValue] = useState(0);
-  const navigate = useNavigate();
+  const [showCardPayment, setShowCardPayment] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const userId = jwtDecode(sessionStorage.getItem('token')).id;
+
+  initMercadoPago(`${process.env.REACT_APP_MERCADO_PAGO_PUBLIC_KEY}`);
+
+  const initialization = {
+    amount: totalValue,
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -89,23 +96,88 @@ const CartContainer = () => {
     }
   }, [productQuantities, order]);
 
-  const checkoutOrder = async () => {
+  const handleRemoveProduct = async productId => {
     try {
-      // Atualizar a quantidade de cada produto no pedido antes do checkout
-      for (const [productId, quantity] of Object.entries(productQuantities)) {
-        await api.put(`/orders/updatequantity/${order.orderId}`, {
+      const response = await api.post(
+        `/orders/removeproduct/${order.orderId}`,
+        {
           productId,
-          orderQuantity: quantity,
-        });
-      }
-      const response = await api.get(`/orders/checkout/${order.orderId}`);
+        },
+      );
 
       if (response.status === 200) {
-        navigate(`/checkout/${order.orderId}`);
+        toast.success('Produto removido com sucesso do pedido');
+        // Atualize o estado do pedido para refletir a remoção do produto
+        setOrder(prevOrder => ({
+          ...prevOrder,
+          products: prevOrder.products.filter(
+            product => product.productId !== productId,
+          ),
+        }));
       }
     } catch (error) {
-      console.error('Erro ao fazer checkout do pedido', error);
+      console.error('Erro ao remover produto do pedido', error);
     }
+  };
+
+  const onSubmit = async formData => {
+    setIsLoading(true);
+    return new Promise(async (resolve, reject) => {
+      try {
+        setShowCardPayment(true);
+        // Atualizar a quantidade de cada produto no pedido antes do checkout
+        const productUpdates = Object.entries(productQuantities).map(
+          ([productId, quantity]) => ({
+            productId,
+            orderQuantity: quantity,
+          }),
+        );
+
+        await api.put(
+          `/orders/updatequantity/${order.orderId}`,
+          productUpdates,
+        );
+
+        const response = await api.get(`/orders/checkout/${order.orderId}`);
+
+        if (response.status === 200) {
+          // Prossiga com o processamento do pagamento
+          const paymentResponse = await fetch(
+            'http://localhost:3000/orders/process_payment',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+              },
+              body: JSON.stringify({
+                ...formData,
+                orderId: order.orderId,
+                description: `Descrição do produto: ${order.products.map(product => product.description).join(', ')}`,
+              }),
+            },
+          );
+
+          if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json();
+            console.log(paymentData);
+            toast.success('Pagamento bem-sucedido');
+            resolve();
+          } else {
+            toast.error('Ocorreu um erro, tente novamente');
+            reject();
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao fazer checkout do pedido', error);
+        toast.error('Ocorreu um erro, tente novamente');
+        reject();
+      }
+    });
+  };
+
+  const onError = async error => {
+    console.log(error);
   };
 
   const openModal = () => {
@@ -132,6 +204,7 @@ const CartContainer = () => {
   if (!order) {
     return (
       <div>
+        <ToastContainer limit={5} />
         <div className="center-container">
           <h2>Você ainda não possui um Carrinho...</h2>
           <button onClick={() => setSelectedAddressId(addresses[0]?.addressId)}>
@@ -144,40 +217,55 @@ const CartContainer = () => {
 
   return (
     <div>
-      <div className="center-container">
-        <h2>
+      <ToastContainer limit={5} />
+      <div>
+        <h2 className="center-title">
           {hasProducts
             ? 'Carrinho de Compras'
             : 'Seu carrinho de compras está vazio 🛒'}
         </h2>
-        {hasProducts &&
-          order.products.map((product, index) => (
-            <div key={index}>
-              <img src={product.image} alt={product.name} />
-              <p>{product.name}</p>
-              <div>
-                <label htmlFor={`quantity-${product.productId}`}>
-                  Quantidade:
-                </label>
-                <input
-                  type="number"
-                  id={`quantity-${product.productId}`} // use productId instead of id
-                  value={productQuantities[product.productId]} // valor inicial definido para 1
-                  min="1"
-                  max={product.quantity}
-                  onChange={event => {
-                    const newQuantity = Number(event.target.value);
-                    setProductQuantities(prevQuantities => ({
-                      ...prevQuantities,
-                      [product.productId]: newQuantity, // use productId instead of id
-                    }));
-                    handleQuantityChange(product.productId, newQuantity); // use productId instead of id
-                  }}
-                  className="form-control"
-                />
+        {hasProducts && (
+          <div className="product-container">
+            {order.products.map((product, index) => (
+              <div key={index} className="product-item">
+                <div>
+                  <img
+                    src={`${process.env.REACT_APP_AWS_S3_URL}${product.image_keys[0]}`}
+                    alt={product.productName}
+                    className="product-image"
+                  />
+                  <p>{product.productName}</p>
+                  <p>{product.description}</p>
+                  <div>
+                    <label htmlFor={`quantity-${product.productId}`}>
+                      Quantidade:
+                    </label>
+                    <input
+                      type="number"
+                      id={`quantity-${product.productId}`} // use productId instead of id
+                      value={productQuantities[product.productId]} // valor inicial definido para 1
+                      min="1"
+                      max={product.quantity}
+                      onChange={event => {
+                        const newQuantity = Number(event.target.value);
+                        setProductQuantities(prevQuantities => ({
+                          ...prevQuantities,
+                          [product.productId]: newQuantity, // use productId instead of id
+                        }));
+                        handleQuantityChange(product.productId, newQuantity); // use productId instead of id
+                      }}
+                    />
+                    <button
+                      onClick={() => handleRemoveProduct(product.productId)}
+                    >
+                      Remover produto
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
         <p>Status: {order.status}</p>
         <p>Valor total: {totalValue}</p>
         <p>
@@ -204,12 +292,26 @@ const CartContainer = () => {
             Fechar
           </button>
         </Modal>
-        <button
-          onClick={checkoutOrder}
-          disabled={!selectedAddress || !hasProducts}
-        >
+        <button onClick={onSubmit} disabled={!selectedAddress || !hasProducts}>
           Confirmar compra
         </button>
+        {showCardPayment && (
+          <Modal
+            isOpen={showCardPayment}
+            onRequestClose={() => setShowCardPayment(false)}
+          >
+            <button onClick={() => setShowCardPayment(false)}>Fechar</button>
+            {isLoading && (
+              <div className="loading-animation">Carregando...</div>
+            )}
+            <CardPayment
+              initialization={initialization}
+              onSubmit={onSubmit}
+              onReady={() => setIsLoading(false)}
+              onError={onError}
+            />
+          </Modal>
+        )}
       </div>
     </div>
   );

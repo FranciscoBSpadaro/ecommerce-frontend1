@@ -5,8 +5,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 
 
-
-
 body {
   font-family: Arial, sans-serif, 'Roboto', 'Roboto Slab', 'Bungee Spice', 'Cairo Play', 'Montserrat';
   margin: 0;
@@ -91,6 +89,7 @@ p {
   justify-content: space-evenly;
 }
 
+
 .container-create-products {
   display: grid;
   justify-content: space-evenly;
@@ -130,6 +129,11 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.product-image {
+  width: 250px; /* ou qualquer outro valor que você deseja */
+  height: 220px;
 }
 
 .product-images-productdetails {
@@ -180,6 +184,15 @@ p {
   height: 100px;
   object-fit: cover;
   margin-inline: 10px;
+}
+
+.product-container {
+  display: flex;
+  justify-content: center;
+}
+
+.product-item {
+  margin: 1%; /* Ajuste o valor de acordo com suas necessidades */
 }
 
 .center-container {
