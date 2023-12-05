@@ -28,16 +28,20 @@ const CartContainer = () => {
       try {
         const response = await api.get(`/orders/user/${userId}`);
         if (response.data.length > 0) {
-          setOrder(response.data[0]);
-          // Inicialize productQuantities e totalValue
-          let initialQuantities = {};
-          let initialTotalValue = 0;
-          response.data[0].products.forEach(product => {
-            initialQuantities[product.productId] = 1;
-            initialTotalValue += product.price;
-          });
-          setProductQuantities(initialQuantities);
-          setTotalValue(initialTotalValue);
+          // Verifique se o status do pedido não é 'confirmado' antes de definir o estado
+          const pendingOrder = response.data.find(order => order.status !== 'Confirmado');
+          if (pendingOrder) {
+            setOrder(pendingOrder);
+            // Inicialize productQuantities e totalValue
+            let initialQuantities = {};
+            let initialTotalValue = 0;
+            pendingOrder.products.forEach(product => {
+              initialQuantities[product.productId] = 1; // corrigir isso aqui
+              initialTotalValue += product.price;
+            });
+            setProductQuantities(initialQuantities);
+            setTotalValue(initialTotalValue);
+          }
         }
       } catch (error) {
         if (error.response && error.response.status !== 404) {
@@ -162,6 +166,7 @@ const CartContainer = () => {
             const paymentData = await paymentResponse.json();
             console.log(paymentData);
             toast.success('Pagamento bem-sucedido');
+            window.location.replace('/order');
             resolve();
           } else {
             toast.error('Ocorreu um erro, tente novamente');
