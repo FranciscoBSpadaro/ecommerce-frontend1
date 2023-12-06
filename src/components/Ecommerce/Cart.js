@@ -5,8 +5,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import Lottie from 'lottie-react';
 import createCartAnimation from '../../Assets/create-cart.json';
 import cartCreatedAnimation from '../../Assets/cart-created.json';
-import { confirmAlert } from 'react-confirm-alert'; // Import
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'; 
 import Modal from 'react-modal';
 import { CardPayment, initMercadoPago } from '@mercadopago/sdk-react';
 
@@ -67,6 +67,18 @@ const CartContainer = () => {
         setAddresses(response.data);
       } catch (error) {
         console.error('Erro ao buscar endereços', error);
+        if (error.response && error.response.status === 404) {
+          confirmAlert({
+            title: 'Cadastre seu Endereço',
+            message: 'Você ainda não cadastrou um endereço, cadastre e começe a comprar.',
+            buttons: [
+              {
+                label: 'Ok',
+                onClick: () => window.location.href = '/address'
+              }
+            ]
+          });
+        }
       }
     };
     fetchAddresses();
@@ -82,21 +94,8 @@ const CartContainer = () => {
   useEffect(() => {
     const createOrder = async () => {
       if (!selectedAddressId) {
-        if (addresses.length === 0) {
-          confirmAlert({
-            title: 'Cadastre seu Endereço',
-            message: 'Você ainda não cadastrou um endereço, cadastre e começe a comprar.',
-            buttons: [
-              {
-                label: 'Ok',
-                onClick: () => window.location.href = '/address'
-              }
-            ]
-          });
-        }
         return;
       }
-
       try {
         const response = await api.post('/orders/create', {
           shipping_address: selectedAddressId,
@@ -113,7 +112,7 @@ const CartContainer = () => {
     if (!order) {
       createOrder();
     }
-  }, [selectedAddressId, order, userId, addresses]);
+  }, [selectedAddressId, order, userId]);
 
   const handleQuantityChange = (productId, orderQuantity) => {
     setProductQuantities(prevQuantities => ({
