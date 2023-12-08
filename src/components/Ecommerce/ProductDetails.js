@@ -63,14 +63,20 @@ const ProductDetails = ({ user }) => {
     try {
       const userId = jwtDecode(sessionStorage.getItem('token')).id;
       const response = await api.get(`/orders/user/${userId}`);
-
-      if (response.data.length > 0 && response.data[0].orderId) {
-        const orderId = response.data[0].orderId;
-        await api.post(`/orders/addProduct/${orderId}`, {
-          productId,
-          quantity: 1,
-        });
-        navigate('/cart'); // Redireciona para a página do carrinho após adicionar o produto
+  
+      if (response.data.length > 0) {
+        // Ordena os pedidos por data em ordem decrescente
+        const sortedOrders = response.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Seleciona o pedido mais recente que não está confirmado
+        const pendingOrder = sortedOrders.find(order => order.status !== 'Confirmado');
+        if (pendingOrder) {
+          const orderId = pendingOrder.orderId;
+          await api.post(`/orders/addProduct/${orderId}`, {
+            productId,
+            quantity: 1,
+          });
+          navigate('/cart'); // Redireciona para a página do carrinho após adicionar o produto
+        }
       }
     } catch (error) {
       console.error('Erro ao adicionar produto ao carrinho:', error);

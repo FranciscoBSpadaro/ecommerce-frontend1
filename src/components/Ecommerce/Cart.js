@@ -44,8 +44,8 @@ const CartContainer = () => {
             let initialQuantities = {};
             let initialTotalValue = 0;
             pendingOrder.products.forEach(product => {
-              initialQuantities[product.productId] = 1; // corrigir isso aqui
-              initialTotalValue += product.price;
+              initialQuantities[product.productId] = product.orderQuantity; // Use a quantidade real do pedido
+              initialTotalValue += product.price * product.orderQuantity; // Multiplique o preço pelo quantidade do pedido
             });
             setProductQuantities(initialQuantities);
             setTotalValue(initialTotalValue);
