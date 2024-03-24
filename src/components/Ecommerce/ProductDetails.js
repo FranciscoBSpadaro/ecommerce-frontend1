@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import api from '../../api';
+import { toast, ToastContainer } from 'react-toastify';
+
 
 const ProductDetails = ({ user }) => {
   const navigate = useNavigate();
@@ -75,11 +77,15 @@ const ProductDetails = ({ user }) => {
             productId,
             quantity: 1,
           });
-          navigate('/cart'); // Redireciona para a página do carrinho após adicionar o produto
         }
       }
     } catch (error) {
       console.error('Erro ao adicionar produto ao carrinho:', error);
+      toast.error('Você ainda não possui um carrinho de compras.');
+    } finally {
+      setTimeout(() => {
+        navigate('/cart'); // Redireciona para a página do carrinho após um pequeno atraso
+      }, 2000); // Ajuste o atraso conforme necessário
     }
   };
 
@@ -87,7 +93,10 @@ const ProductDetails = ({ user }) => {
     return <div>Carregando...</div>; // mudar para isloading
   }
 
+
   return (
+    <div>
+      <ToastContainer limit={5} />
     <div className="center-container-productdetails">
       <h1>{product.productName}</h1>
       <p>Preço: {product.price}</p>
@@ -129,6 +138,7 @@ const ProductDetails = ({ user }) => {
           <button onClick={handleAddOrEditDetails}>Salvar</button>
         </div>
       )}
+    </div>
     </div>
   );
 };

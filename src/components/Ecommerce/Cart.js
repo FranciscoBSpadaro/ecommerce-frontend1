@@ -125,8 +125,8 @@ const CartContainer = () => {
     if (order && order.products) {
       let newTotalValue = 0;
       order.products.forEach(product => {
-        newTotalValue +=
-          product.price * (productQuantities[product.productId] || 0);
+        const quantity = productQuantities[product.productId] || 1; // Use 1 como valor padrão se a quantidade for undefined
+        newTotalValue += product.price * quantity;
       });
       setTotalValue(newTotalValue);
     }
@@ -165,7 +165,7 @@ const CartContainer = () => {
         const productUpdates = Object.entries(productQuantities).map(
           ([productId, quantity]) => ({
             productId,
-            orderQuantity: quantity,
+            orderQuantity: quantity || 1, // Use 1 como valor padrão se a quantidade for undefined
           }),
         );
 
@@ -195,7 +195,7 @@ const CartContainer = () => {
               }),
             },
           );
-
+  
           if (paymentResponse.ok) {
             const paymentData = await paymentResponse.json();
             console.log(paymentData);
@@ -285,7 +285,7 @@ const CartContainer = () => {
                     <input
                       type="number"
                       id={`quantity-${product.productId}`} // use productId instead of id
-                      value={productQuantities[product.productId]} // valor inicial definido para 1
+                      value={productQuantities[product.productId] || '1'} // valor inicial definido para 1
                       min="1"
                       max={product.quantity}
                       onChange={event => {
@@ -297,7 +297,7 @@ const CartContainer = () => {
                         handleQuantityChange(product.productId, newQuantity); // use productId instead of id
                       }}
                     />
-                    <button
+                    <button className='button-remove-produdct'
                       onClick={() => handleRemoveProduct(product.productId)}
                     >
                       Remover produto
