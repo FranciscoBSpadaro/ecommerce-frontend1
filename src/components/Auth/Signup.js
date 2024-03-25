@@ -20,11 +20,11 @@ const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%&*!])[A-Za-z\d@#$%&*!]{8,}$/;
     if (password && !passwordRegex.test(password)) {
       setPasswordIsValid(false);
       const errorMessage =
-        'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas e números.';
+        'A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas , números e caracteres especiais por exemplo : @, #, $, %, &, *, ! ';
       if (!toast.isActive(errorMessage)) {
         toast.error(errorMessage, { toastId: errorMessage, autoClose: 10000 });
       }
